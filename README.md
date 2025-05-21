@@ -1,0 +1,2 @@
+# noumi
+AI Money Coach
