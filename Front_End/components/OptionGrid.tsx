@@ -34,10 +34,11 @@ export default function OptionGrid({ options, selectedOptionId, onSelectOption, 
 
 const styles = StyleSheet.create({
   grid: {
+    // TO DO: make dynamic to screen size of iPhone
     paddingLeft: 2,
+    columnGap: 16,
     flexDirection: 'row',
     flexWrap: 'wrap',
     rowGap: 12,
-    columnGap: 16,
   },
 });
