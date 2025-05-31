@@ -24,17 +24,14 @@ export default function RootLayout() {
   });
 
   if (!fontsLoaded) {
-    return null; // or a loading spinner
+    return null;
   }
 
   const theme = colorScheme === 'dark' ? CustomDarkTheme : CustomLightTheme;
 
   return (
     <ThemeProvider value={theme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="+not-found" />
-      </Stack>
+      <Stack />
       <StatusBar style="auto" />
     </ThemeProvider>
   );

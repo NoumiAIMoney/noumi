@@ -16,8 +16,8 @@ interface Props {
 
 export default function OptionCarousel({ options, selectedOptionId, onSelectOption }: Props) {
   const scrollViewRef = useRef<ScrollView>(null);
-  const cardWidth = (Dimensions.get('window').width - 86) / 3;
-  const gap = 12;
+  const cardWidth = (Dimensions.get('window').width - 80) / 3;
+  const gap = 10;
 
   useEffect(() => {
     if (selectedOptionId && scrollViewRef.current) {
