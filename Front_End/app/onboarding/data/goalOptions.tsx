@@ -1,5 +1,11 @@
 import CardsIcon from '../../../assets/icons/cards.svg';
 import AirplaneIcon from '../../../assets/icons/airplane.svg';
+import CarIcon from '../../../assets/icons/car.svg';
+import DollarIcon from '../../../assets/icons/dollar.svg';
+import StudentIcon from '../../../assets/icons/student.svg';
+import InvestIcon from '../../../assets/icons/invest.svg';
+import CustomIcon from '../../../assets/icons/custom.svg';
+import HouseIcon from '../../../assets/icons/house.svg';
 import { colors } from '@/src/theme';
 
 export const goalOptions = [
@@ -35,7 +41,7 @@ export const goalOptions = [
     id: 'house',
     label: 'Buy a House',
     icon: (
-      <AirplaneIcon
+      <HouseIcon
         width={24}
         height={24}
         fill="none"
@@ -49,7 +55,7 @@ export const goalOptions = [
     id: 'car',
     label: 'Buy a Car',
     icon: (
-      <AirplaneIcon
+      <CarIcon
         width={24}
         height={24}
         fill="none"
@@ -63,7 +69,7 @@ export const goalOptions = [
     id: 'emergency',
     label: 'Build Emergency Fund',
     icon: (
-      <AirplaneIcon
+      <DollarIcon
         width={24}
         height={24}
         fill="none"
@@ -77,7 +83,7 @@ export const goalOptions = [
     id: 'student',
     label: 'Pay Off Student Loan',
     icon: (
-      <AirplaneIcon
+      <StudentIcon
         width={24}
         height={24}
         fill="none"
@@ -91,7 +97,7 @@ export const goalOptions = [
     id: 'investing',
     label: 'Investing Fund',
     icon: (
-      <AirplaneIcon
+      <InvestIcon
         width={24}
         height={24}
         fill="none"
@@ -105,7 +111,7 @@ export const goalOptions = [
     id: 'custom',
     label: 'Custom Goal',
     icon: (
-      <AirplaneIcon
+      <CustomIcon
         width={24}
         height={24}
         fill="none"
