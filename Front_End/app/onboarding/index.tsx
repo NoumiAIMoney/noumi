@@ -52,7 +52,8 @@ export default function QuizScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingVertical: 24,
+    paddingTop: 80,
+    paddingBottom: 40,
     paddingHorizontal: 12,
     justifyContent: 'space-between',
     alignItems: 'center'
