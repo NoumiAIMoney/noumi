@@ -34,9 +34,10 @@ export default function OptionGrid({ options, selectedOptionId, onSelectOption, 
 
 const styles = StyleSheet.create({
   grid: {
+    paddingLeft: 2,
     flexDirection: 'row',
     flexWrap: 'wrap',
     rowGap: 12,
-    columnGap: 12,
+    columnGap: 16,
   },
 });
