@@ -7,7 +7,7 @@ node_modules/
 venv
 
 # Vscode
-.vscode
+.vscode/
 
 # Expo
 .expo/
