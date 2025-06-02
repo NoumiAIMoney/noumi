@@ -24,11 +24,13 @@ export const typography = {
     medium: 'Inter_500Medium',
     semiBold: 'Inter_600SemiBold',
     bold: 'Inter_700Bold',
+    madimi: 'MadimiOne_400Regular',
   },
   fontSize: {
     small: 14,
     body: 16,
     large: 20,
+    extraLarge: 36
   },
   lineHeight: {
     small: 18,
