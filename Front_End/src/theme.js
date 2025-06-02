@@ -30,7 +30,9 @@ export const typography = {
     small: 14,
     body: 16,
     large: 20,
-    extraLarge: 36
+    XLarge: 24,
+    XXLarge: 32,
+    XXXLarge: 36
   },
   lineHeight: {
     small: 18,
@@ -52,4 +54,5 @@ export const colors = {
   black: '#000000',
   gray: '#555555',
   lightGray: '#F8F7FA',
+  logo: '#593F90'
 };

@@ -11,11 +11,9 @@ import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import 'react-native-reanimated';
 
-import { useColorScheme } from '@/hooks/useColorScheme';
 import { CustomLightTheme, CustomDarkTheme } from '../src/theme';
 
 export default function RootLayout() {
-  const colorScheme = useColorScheme();
 
   const [mainFontsLoaded] = useFonts({
     Inter_400Regular,

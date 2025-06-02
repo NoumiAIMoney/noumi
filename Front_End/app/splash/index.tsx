@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
-import { typography, colors } from '@/src/theme'; // adjust if needed
+import { typography } from '@/src/theme';
 
 export default function SplashScreen() {
   const router = useRouter();
@@ -30,6 +30,6 @@ const styles = StyleSheet.create({
   logo: {
     fontFamily: typography.fontFamily.madimi,
     color: '#fff',
-    fontSize: typography.fontSize.extraLarge,
+    fontSize: typography.fontSize.XXXLarge,
   },
 });
