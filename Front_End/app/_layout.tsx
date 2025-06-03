@@ -1,6 +1,7 @@
 import React from 'react';
 import { ThemeProvider } from '@react-navigation/native';
-import { useFonts, 
+import { useFonts,
+  Inter_300Light,
   Inter_400Regular, 
   Inter_500Medium, 
   Inter_600SemiBold, 
@@ -16,6 +17,7 @@ import { CustomLightTheme, CustomDarkTheme } from '../src/theme';
 export default function RootLayout() {
 
   const [mainFontsLoaded] = useFonts({
+    Inter_300Light,
     Inter_400Regular,
     Inter_500Medium,
     Inter_600SemiBold,

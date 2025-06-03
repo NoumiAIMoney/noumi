@@ -70,7 +70,6 @@ export default function AuthSelectionScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.white,
     alignItems: 'center',
     paddingHorizontal: 20,
   },

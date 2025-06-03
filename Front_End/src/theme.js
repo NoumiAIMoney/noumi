@@ -20,6 +20,7 @@ export const CustomDarkTheme = {
 
 export const typography = {
   fontFamily: {
+    fine: 'Inter_300Light',
     regular: 'Inter_400Regular',
     medium: 'Inter_500Medium',
     semiBold: 'Inter_600SemiBold',
@@ -27,6 +28,7 @@ export const typography = {
     madimi: 'MadimiOne_400Regular',
   },
   fontSize: {
+    mini: 12,
     small: 14,
     body: 16,
     large: 20,
