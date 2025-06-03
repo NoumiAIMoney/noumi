@@ -34,7 +34,7 @@ export default function AuthSelectionScreen() {
       <Text style={styles.or}>or</Text>
 
       <TouchableOpacity
-        style={styles.btn}
+        style={[styles.btn, styles.secondaryBtn]}
         onPress={() => {
           // TODO: Handle Apple auth
         }}
@@ -44,7 +44,7 @@ export default function AuthSelectionScreen() {
       </TouchableOpacity>
 
       <TouchableOpacity
-        style={styles.btn}
+        style={[styles.btn, styles.secondaryBtn]}
         onPress={() => {
           // TODO: Handle Google auth
         }}
@@ -109,13 +109,16 @@ const styles = StyleSheet.create({
     height: 50,
     borderRadius: 25,
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: colors.black,
     marginVertical: 8,
     alignSelf: 'center',
   },
   primaryBtn: {
     backgroundColor: colors.primaryPurple,
     borderWidth: 0,
+  },
+  secondaryBtn: {
+    backgroundColor: colors.white,
   },
   btnText: {
     fontFamily: typography.fontFamily.medium,
