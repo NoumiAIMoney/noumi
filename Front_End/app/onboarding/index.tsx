@@ -12,6 +12,10 @@ export default function OnboardingScreen() {
     router.replace('/auth-selection');
   };
 
+  const navigateToLogin = () => {
+    router.replace('/login');
+  };
+
   return (
     <View style={styles.container}>
       <View>
@@ -26,7 +30,7 @@ export default function OnboardingScreen() {
         <TouchableOpacity style={styles.primaryBtn} onPress={navigateToAuth}>
           <Text style={styles.primaryText}>Get Started</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.secondaryBtn} onPress={navigateToAuth}>
+        <TouchableOpacity style={styles.secondaryBtn} onPress={navigateToLogin}>
           <Text style={styles.link}>Log In</Text>
         </TouchableOpacity>
       </View>
