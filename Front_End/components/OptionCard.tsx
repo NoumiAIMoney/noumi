@@ -1,5 +1,5 @@
 import React, { ReactElement } from 'react';
-import { Text, StyleSheet, TouchableOpacity, Image, GestureResponderEvent } from 'react-native';
+import { Text, StyleSheet, TouchableOpacity, GestureResponderEvent } from 'react-native';
 import { colors, typography } from '../src/theme';
 
 interface OptionCardProps {

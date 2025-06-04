@@ -13,9 +13,9 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import { colors, typography } from '@/src/theme';
 import OptionCarousel from '@/components/OptionCarousel';
 import Input from '@/components/Input';
-import CalendarIcon from '../../../assets/icons/calendar.svg';
-import DollarIcon from '../../../assets/icons/dollar.svg';
-import { goalOptions } from '../../../lib/goalOptions';
+import CalendarIcon from '../../../../assets/icons/calendar.svg';
+import DollarIcon from '../../../../assets/icons/dollar.svg';
+import { goalOptions } from '../../../../lib/goalOptions';
 
 interface StepTwoProps {
   selectedOptionId: string | null;

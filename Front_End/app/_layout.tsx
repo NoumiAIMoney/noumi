@@ -1,33 +1,37 @@
 import React from 'react';
 import { ThemeProvider } from '@react-navigation/native';
-import { useFonts, 
+import { useFonts,
+  Inter_300Light,
   Inter_400Regular, 
   Inter_500Medium, 
   Inter_600SemiBold, 
   Inter_700Bold 
 } from '@expo-google-fonts/inter';
+import { useFonts as useMadimiOne, MadimiOne_400Regular } from '@expo-google-fonts/madimi-one';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import 'react-native-reanimated';
 
-import { useColorScheme } from '@/hooks/useColorScheme';
 import { CustomLightTheme, CustomDarkTheme } from '../src/theme';
 
 export default function RootLayout() {
-  const colorScheme = useColorScheme();
 
-  const [fontsLoaded] = useFonts({
+  const [mainFontsLoaded] = useFonts({
+    Inter_300Light,
     Inter_400Regular,
     Inter_500Medium,
     Inter_600SemiBold,
     Inter_700Bold,
   });
 
-  if (!fontsLoaded) {
+  const [fontsMadimiLoaded] = useMadimiOne({ MadimiOne_400Regular });
+  if (!mainFontsLoaded && !fontsMadimiLoaded) {
     return null;
   }
 
-  const theme = colorScheme === 'dark' ? CustomDarkTheme : CustomLightTheme;
+  // WHEN DARK MODE NEEDS TO BE IMPLEMENTED
+  // const theme = colorScheme === 'dark' ? CustomDarkTheme : CustomLightTheme;
+  const theme = CustomLightTheme;
 
   return (
     <ThemeProvider value={theme}>
