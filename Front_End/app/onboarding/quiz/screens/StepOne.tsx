@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { goalOptions } from '../../../lib/goalOptions';
+import { goalOptions } from '../../../../lib/goalOptions';
 import { colors, typography } from '@/src/theme';
 import OptionGrid from '@/components/OptionGrid';
 

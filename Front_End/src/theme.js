@@ -20,15 +20,21 @@ export const CustomDarkTheme = {
 
 export const typography = {
   fontFamily: {
+    fine: 'Inter_300Light',
     regular: 'Inter_400Regular',
     medium: 'Inter_500Medium',
     semiBold: 'Inter_600SemiBold',
     bold: 'Inter_700Bold',
+    madimi: 'MadimiOne_400Regular',
   },
   fontSize: {
+    mini: 12,
     small: 14,
     body: 16,
     large: 20,
+    XLarge: 24,
+    XXLarge: 32,
+    XXXLarge: 36
   },
   lineHeight: {
     small: 18,
@@ -50,4 +56,5 @@ export const colors = {
   black: '#000000',
   gray: '#555555',
   lightGray: '#F8F7FA',
+  logo: '#593F90'
 };

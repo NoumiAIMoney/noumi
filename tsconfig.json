@@ -8,7 +8,15 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["Front_End/*"]
-    }
+    },
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "noEmit": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "skipLibCheck": true
   },
   "include": ["Front_End/**/*"],
   "exclude": ["node_modules"]
