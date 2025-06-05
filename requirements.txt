@@ -1,1 +1,11 @@
 # Add libraries/packages installed for Python files
+pandas
+numpy
+matplotlib
+seaborn
+scikit-learn
+jupyter
+boto3
+sagemaker
+sqlalchemy
+psycopg2-binary
