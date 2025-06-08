@@ -1,264 +1,263 @@
 import React, { useState } from 'react';
 import {
-  Keyboard,
-  TouchableWithoutFeedback,
   View,
   Text,
   StyleSheet,
   TextInput,
   TouchableOpacity,
   SafeAreaView,
+  TextStyle,
+  ViewStyle,
+  NativeSyntheticEvent,
+  TextInputChangeEventData,
 } from 'react-native';
 import Checkbox from 'expo-checkbox';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { RouteProp } from '@react-navigation/native';
-import { colors, typography } from '@/src/theme';
-import EyeIcon from '../../assets/icons/eye.svg';
-import SmsIcon from '../../assets/icons/sms.svg';
-import ProfileIcon from '../../assets/icons/profile.svg';
-import { useRouter } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
+// Define navigation prop type
 type RootStackParamList = {
-  SignUp: undefined;
   Login: undefined;
+  SignUp: undefined;
 };
-
-type SignUpScreenNavigationProp = NativeStackNavigationProp<
-  RootStackParamList,
-  'SignUp'
->;
 
 type SignUpScreenProps = {
-  navigation: SignUpScreenNavigationProp;
-  route: RouteProp<RootStackParamList, 'SignUp'>;
+  navigation: NativeStackNavigationProp<RootStackParamList, 'SignUp'>;
 };
 
-export default function SignUpScreen({ navigation }: SignUpScreenProps) {
+const SignUpScreen: React.FC<SignUpScreenProps> = ({ navigation }) => {
   const [name, setName] = useState<string>('');
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const [agree, setAgree] = useState<boolean>(false);
+  const [showPassword, setShowPassword] = useState<boolean>(false);
 
-  const router = useRouter();
+  const isValid = name.length > 0 && email.length > 0 && password.length > 0 && agree;
 
-  const isValid = name && email && password && agree;
   return (
-    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-      <SafeAreaView style={styles.container}>
-        <Text style={styles.logo}>Noumi</Text>
+    <SafeAreaView style={styles.container}>
+      <Text style={styles.logo}>Noumi</Text>
 
-        <Text style={styles.heading}>Let’s get started</Text>
-        <Text style={styles.sub}>
-          Your journey to smarter finances begins now.
+      <Text style={styles.heading}>Let’s get started</Text>
+      <Text style={styles.sub}>
+        Your journey to smarter finances begins now.
+      </Text>
+
+      {/* Full Name Input */}
+      <View style={styles.inputGroup}>
+        <TextInput
+          placeholder="Full Name"
+          style={styles.input}
+          value={name}
+          onChangeText={setName}
+          placeholderTextColor="#888"
+        />
+        <Ionicons name="person-outline" size={20} color="#888" />
+      </View>
+
+      {/* Email Input */}
+      <View style={styles.inputGroup}>
+        <TextInput
+          placeholder="Email"
+          style={styles.input}
+          keyboardType="email-address"
+          autoCapitalize="none"
+          value={email}
+          onChangeText={setEmail}
+          placeholderTextColor="#888"
+        />
+        <Ionicons name="mail-outline" size={20} color="#888" />
+      </View>
+
+      {/* Password Input */}
+      <View style={styles.inputGroup}>
+        <TextInput
+          placeholder="Password"
+          style={styles.input}
+          secureTextEntry={!showPassword}
+          value={password}
+          onChangeText={setPassword}
+          placeholderTextColor="#888"
+        />
+        <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+          <Ionicons
+            name={showPassword ? 'eye-off-outline' : 'eye-outline'}
+            size={20}
+            color="#888"
+          />
+        </TouchableOpacity>
+      </View>
+
+      {/* Checkbox */}
+      <View style={styles.checkboxRow}>
+        <Checkbox
+          value={agree}
+          onValueChange={setAgree}
+          style={styles.checkbox}
+          color={agree ? '#503984' : undefined}
+        />
+        <Text style={styles.checkboxText}>
+          By checking this box, I agree that I have read, understood, and consent
+          to Noumi’s <Text style={styles.termsLink}>Terms of Use.</Text>
         </Text>
+      </View>
 
-        <View style={styles.inputGroup}>
-          <TextInput
-            placeholder="Full Name"
-            style={styles.input}
-            placeholderTextColor={colors.lightGrayFont}
-            value={name}
-            onChangeText={setName}
-          />
-          <ProfileIcon
-            width={20}
-            height={20}
-            fill="none"
-            stroke={colors.lightGrayFont}
-            strokeWidth={1.5}
-          />
-        </View>
+      <TouchableOpacity
+        style={[
+          styles.primaryBtn,
+          isValid ? styles.enabledBtn : styles.disabledBtn
+        ]}
+        disabled={!isValid}
+      >
+        <Text style={styles.primaryText}>Get Started</Text>
+      </TouchableOpacity>
 
-        <View style={styles.inputGroup}>
-          <TextInput
-            placeholder="Email"
-            style={styles.input}
-            keyboardType="email-address"
-            placeholderTextColor={colors.lightGrayFont}
-            autoCapitalize="none"
-            value={email}
-            onChangeText={setEmail}
-          />
-          <SmsIcon
-            width={20}
-            height={20}
-            fill="none"
-            stroke={colors.lightGrayFont}
-            strokeWidth={1.5}
-          />
-        </View>
-
-        <View style={styles.inputGroup}>
-          <TextInput
-            placeholder="Password"
-            style={styles.input}
-            secureTextEntry
-            value={password}
-            placeholderTextColor={colors.lightGrayFont}
-            onChangeText={setPassword}
-          />
-          <EyeIcon
-            width={20}
-            height={20}
-            fill="none"
-            stroke={colors.lightGrayFont}
-            strokeWidth={1.5}
-          />
-        </View>
-
-        <View style={styles.checkboxRow}>
-          <Checkbox
-            value={agree}
-            onValueChange={setAgree}
-            style={styles.customCheckbox}
-            color={agree ? '#6F1DF4' : undefined}
-          />
-          <Text style={styles.checkboxText}>
-            By checking this box, I agree that I have read, understood, and consent to Noumi’s{' '}
-            <Text style={styles.termsLink}>Terms of Use.</Text>
-          </Text>
-        </View>
-
-        <TouchableOpacity
-          style={[
-            styles.primaryBtn,
-            isValid ? styles.enabledBtn : styles.disabledBtn
-          ]}
-          disabled={!isValid}
-          onPress={() => router.push('/onboarding/quiz')}
-        >
-          <Text style={styles.primaryText}>Get Started</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={styles.loginContainer}
-          onPress={() => router.push('/login')}
-        >
-          <Text style={styles.loginText}>
-            Already have an account? <Text style={styles.loginLink}>Log In</Text>
-          </Text>
-        </TouchableOpacity>
-      </SafeAreaView>
-    </TouchableWithoutFeedback>
+      <TouchableOpacity
+        style={styles.loginContainer}
+        onPress={() => navigation.navigate('Login')}
+      >
+        <Text style={styles.loginText}>
+          Already have an account? <Text style={styles.loginLink}>Log In</Text>
+        </Text>
+      </TouchableOpacity>
+    </SafeAreaView>
   );
-}
+};
 
-const styles = StyleSheet.create({
+export default SignUpScreen;
+
+type Styles = {
+  [key: string]: ViewStyle | TextStyle;
+};
+
+const styles = StyleSheet.create<Styles>({
   container: {
     flex: 1,
-    alignItems: 'center',
-    paddingHorizontal: 20,
+    padding: 20,
+    backgroundColor: '#F5F5F8'
   },
   logo: {
-    fontFamily: typography.fontFamily.madimi,
-    fontSize: typography.fontSize.XXXLarge,
-    color: colors.primaryPurple,
-    marginTop: 50,
+    fontFamily: 'MadimiOne',
+    fontSize: 36,
+    color: '#503984',
+    marginTop: 60,
+    marginBottom: 20,
+    textAlign: 'center',
+    width: 102,
+    height: 48,
+    alignSelf: 'center',
   },
   heading: {
-    fontSize: typography.fontSize.XLarge,
-    fontFamily: typography.fontFamily.semiBold,
-    marginTop: 40,
-    textAlign: 'left',
-    color: colors.black,
-    width: '100%',
-    maxWidth: 350,
-    marginBottom: 10,
+    fontSize: 24,
+    fontWeight: '600',
+    fontFamily: 'Inter',
+    height: 22,
+    marginTop: 22,
+    width: 353,
+    lineHeight: 22,
+    letterSpacing: 0,
+    marginLeft: 20,
+    marginBottom: 16,
+    color: '#191919'
   },
   sub: {
-    fontFamily: typography.fontFamily.regular,
-    fontSize: typography.fontSize.body,
-    color: colors.black,
-    marginBottom: 40,
-    textAlign: 'left',
-    width: '100%',
-    maxWidth: 370,
-    paddingHorizontal: 10,
+    fontSize: 16,
+    color: '#191919',
+    fontFamily: 'Inter',
+    height: 22,
+    marginLeft: 20,
+    marginBottom: 50,
+    width: 353,
+    lineHeight: 22,
+    letterSpacing: 0
   },
   inputGroup: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colors.white,
-    paddingHorizontal: 20,
-    paddingVertical: 12,
+    backgroundColor: '#FFFFFF',
+    height: 56,
+    gap: 16,
     borderRadius: 16,
+    marginLeft: 20,
+    marginRight: 20,
+    paddingHorizontal: 16,
     marginBottom: 12,
-    marginHorizontal: 20,
-    elevation: 2,
-    height: 56
+    shadowColor: '#000',
+    shadowOpacity: 0.05,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 4,
+    elevation: 2
   },
   input: {
     flex: 1,
-    fontSize: typography.fontSize.body,
-    fontFamily: typography.fontFamily.regular,
-    color: colors.black,
+    fontSize: 16,
+    color: '#424242',
     marginRight: 12
   },
   checkboxRow: {
     flexDirection: 'row',
-    alignItems: 'flex-start',
-    marginVertical: 16,
-    marginHorizontal: 10,
-    borderRadius: 40,
-    paddingHorizontal: 12,
-    paddingBottom: 32
+    alignItems: 'center',
+    marginTop: 16,
+    marginLeft: 20,
+    marginRight: 20,
+    gap: 10,
   },
-  customCheckbox: {
+  checkbox: {
     width: 16,
     height: 16,
     borderRadius: 4,
-    padding: 3,
     borderWidth: 2,
     borderColor: '#8E8E93',
-    marginTop: 6
+    padding: 3,
   },
   checkboxText: {
     flex: 1,
-    marginLeft: 8,
-    marginRight: 24,
-    fontFamily: typography.fontFamily.fine,
-    fontSize: typography.fontSize.mini,
-    color: colors.black,
+    fontSize: 12,
+    color: '#000000',
+    fontFamily: 'Inter',
+    fontWeight: '300',
+    lineHeight: 15,
   },
   termsLink: {
-    fontFamily: typography.fontFamily.medium,
-    fontSize: typography.fontSize.mini,
-    color: '#593F90'
+    color: '#503984',
+    fontWeight: '600'
   },
   primaryBtn: {
-    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    width: '80%',
-    maxWidth: 312,
     height: 56,
     borderRadius: 25,
+    marginTop: 60,
     marginVertical: 8,
-    alignSelf: 'center'
+    marginBottom: 0,
+    alignSelf: 'center',
+    width: '80%',
+    maxWidth: 312,
+    borderWidth: 1,
   },
   enabledBtn: {
     backgroundColor: '#593F90',
+    borderColor: '#593F90'
   },
   disabledBtn: {
-    backgroundColor: colors.disabled,
+    backgroundColor: '#999',
+    borderColor: '#ccc'
   },
   primaryText: {
-    color: '#FFF',
+    color: '#FFFFFF',
     fontSize: 16,
     fontWeight: '600'
   },
   loginContainer: {
-    marginTop: 10,
+    marginTop: 20,
     alignSelf: 'center'
   },
   loginText: {
-    fontFamily: typography.fontFamily.regular,
-    fontSize: typography.fontSize.body,
-    color: colors.black,
+    fontSize: 16,
+    color: '#24201E'
   },
   loginLink: {
-    fontFamily: typography.fontFamily.semiBold,
-    fontSize: typography.fontSize.body,
-    color: colors.black,
-  },
+    color: '#24201E',
+    fontWeight: '600'
+  }
 });
