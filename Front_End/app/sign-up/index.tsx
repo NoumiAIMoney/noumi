@@ -38,7 +38,7 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ navigation }) => {
     <SafeAreaView style={styles.container}>
       <Text style={styles.logo}>Noumi</Text>
 
-      <Text style={styles.heading}>Let’s get started</Text>
+      <Text style={styles.heading}>Let's get started</Text>
       <Text style={styles.sub}>
         Your journey to smarter finances begins now.
       </Text>
