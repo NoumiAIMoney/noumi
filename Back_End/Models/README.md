@@ -1,0 +1,1 @@
+# Both LSTM and isolation forest models are stored inside an encrypted folder.
