@@ -6,6 +6,9 @@ node_modules/
 # Virtual Environment
 venv
 
+# Pickled files
+*.pkl
+
 # Vscode
 .vscode/
 
