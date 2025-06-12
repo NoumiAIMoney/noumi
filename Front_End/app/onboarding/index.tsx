@@ -1,12 +1,14 @@
-import React, { useState } from 'react';
-import { View, StyleSheet, TouchableOpacity, Text, Dimensions, Alert } from 'react-native';
-import { useRouter } from 'expo-router';
 import ImageSlider from '@/components/ImageSlider';
-import onboardingSlides from '@/lib/onboardingSlides';
-import { colors, typography } from '@/src/theme';
-import { api } from '@/services/api';
-import StepOne from './quiz/screens/StepOne';
+import PrimaryButton from '@/components/PrimaryButton';
 import QuizProgressBar from '@/components/ProgressBar';
+import onboardingSlides from '@/lib/onboardingSlides';
+import { api } from '@/services/api';
+import { colors, typography } from '@/src/theme';
+import { useRouter } from 'expo-router';
+import React, { useState } from 'react';
+import { Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import StepOne from './quiz/screens/StepOne';
+import StepTwo from './quiz/screens/StepTwo';
 
 export default function OnboardingScreen() {
   const router = useRouter();
@@ -64,7 +66,8 @@ export default function OnboardingScreen() {
         title="Continue"
         onPress={handleContinue}
         disabled={step === 1 ? !selectionId : !stepTwoCompleted || isLoading}
-        loading={isLoading}
+        // TO DO: ADD LOADING WHEN NEEDED
+        // loading={isLoading}
       />
       <View>
         <View style={styles.text}>
