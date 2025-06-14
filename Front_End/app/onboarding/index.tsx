@@ -1,43 +1,15 @@
-import React, { useState } from 'react';
-import { View, StyleSheet, TouchableOpacity, Text, Dimensions, Alert } from 'react-native';
-import { useRouter } from 'expo-router';
 import ImageSlider from '@/components/ImageSlider';
 import onboardingSlides from '@/lib/onboardingSlides';
 import { colors, typography } from '@/src/theme';
-import { api } from '@/services/api';
-import StepOne from './quiz/screens/StepOne';
-import QuizProgressBar from '@/components/ProgressBar';
+import { useRouter } from 'expo-router';
+import React, { useState } from 'react';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 export default function OnboardingScreen() {
   const router = useRouter();
   const [step, setStep] = useState(1);
   const [stepTwoCompleted, setStepTwoCompleted] = useState(false);
   const [selectionId, setSelectionId] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-
-  const handleContinue = async () => {
-    if (step === 1) {
-      setStep(2);
-      setStepTwoCompleted(false);
-    } else if (step === 2 && stepTwoCompleted) {
-      try {
-        setIsLoading(true);
-        // Submit quiz data
-        await api.submitQuiz({
-          user_id: 'temp-user-id', // Replace with actual user ID from auth
-          answers: {
-            stepOne: selectionId,
-            stepTwo: stepTwoCompleted
-          }
-        });
-        router.push('/plaid-connection');
-      } catch (error) {
-        Alert.alert('Error', 'Failed to submit quiz. Please try again.');
-      } finally {
-        setIsLoading(false);
-      }
-    }
-  };
 
   const navigateToAuth = () => {
     router.replace('/auth-selection');
@@ -49,23 +21,6 @@ export default function OnboardingScreen() {
 
   return (
     <View style={styles.container}>
-      <QuizProgressBar currentStep={step} totalSteps={2} />
-
-      {step === 1 ? (
-        <StepOne selectedOptionId={selectionId} onSelectOption={setSelectionId} />
-      ) : (
-        <StepTwo
-          selectedOptionId={selectionId}
-          onStepCompleted={setStepTwoCompleted}
-        />
-      )}
-
-      <PrimaryButton
-        title="Continue"
-        onPress={handleContinue}
-        disabled={step === 1 ? !selectionId : !stepTwoCompleted || isLoading}
-        loading={isLoading}
-      />
       <View>
         <View style={styles.text}>
           <Text style={styles.logo}>Noumi</Text>
@@ -78,14 +33,12 @@ export default function OnboardingScreen() {
         <TouchableOpacity 
           style={styles.primaryBtn} 
           onPress={navigateToAuth}
-          disabled={isLoading}
         >
           <Text style={styles.primaryText}>Get Started</Text>
         </TouchableOpacity>
         <TouchableOpacity 
           style={styles.secondaryBtn} 
           onPress={navigateToLogin}
-          disabled={isLoading}
         >
           <Text style={styles.link}>Log In</Text>
         </TouchableOpacity>

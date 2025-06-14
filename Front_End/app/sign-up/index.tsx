@@ -1,36 +1,29 @@
+import { colors, shadows, typography } from '@/src/theme';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import Checkbox from 'expo-checkbox';
+import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import {
   Keyboard,
-  TouchableWithoutFeedback,
-  View,
-  Text,
+  SafeAreaView,
   StyleSheet,
+  Text,
   TextInput,
   TouchableOpacity,
-  SafeAreaView,
+  TouchableWithoutFeedback,
+  View,
 } from 'react-native';
-import Checkbox from 'expo-checkbox';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { RouteProp } from '@react-navigation/native';
-import { colors, typography } from '@/src/theme';
 import EyeIcon from '../../assets/icons/eye.svg';
-import SmsIcon from '../../assets/icons/sms.svg';
 import ProfileIcon from '../../assets/icons/profile.svg';
-import { useRouter } from 'expo-router';
+import SmsIcon from '../../assets/icons/sms.svg';
 
 type RootStackParamList = {
   SignUp: undefined;
   Login: undefined;
 };
 
-type SignUpScreenNavigationProp = NativeStackNavigationProp<
-  RootStackParamList,
-  'SignUp'
->;
-
 type SignUpScreenProps = {
-  navigation: SignUpScreenNavigationProp;
-  route: RouteProp<RootStackParamList, 'SignUp'>;
+  navigation: NativeStackNavigationProp<RootStackParamList, 'SignUp'>;
 };
 
 export default function SignUpScreen({ navigation }: SignUpScreenProps) {
@@ -38,10 +31,11 @@ export default function SignUpScreen({ navigation }: SignUpScreenProps) {
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const [agree, setAgree] = useState<boolean>(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const router = useRouter();
 
-  const isValid = name && email && password && agree;
+  const isValid = name.length > 0 && email.length > 0 && password.length > 0 && agree;
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <SafeAreaView style={styles.container}>
@@ -56,7 +50,7 @@ export default function SignUpScreen({ navigation }: SignUpScreenProps) {
           <TextInput
             placeholder="Full Name"
             style={styles.input}
-            placeholderTextColor={colors.lightGrayFont}
+            placeholderTextColor={colors.muted}
             value={name}
             onChangeText={setName}
           />
@@ -74,7 +68,7 @@ export default function SignUpScreen({ navigation }: SignUpScreenProps) {
             placeholder="Email"
             style={styles.input}
             keyboardType="email-address"
-            placeholderTextColor={colors.lightGrayFont}
+            placeholderTextColor={colors.muted}
             autoCapitalize="none"
             value={email}
             onChangeText={setEmail}
@@ -92,18 +86,20 @@ export default function SignUpScreen({ navigation }: SignUpScreenProps) {
           <TextInput
             placeholder="Password"
             style={styles.input}
-            secureTextEntry
+            secureTextEntry={!showPassword}
             value={password}
-            placeholderTextColor={colors.lightGrayFont}
+            placeholderTextColor={colors.muted}
             onChangeText={setPassword}
           />
-          <EyeIcon
-            width={20}
-            height={20}
-            fill="none"
-            stroke={colors.lightGrayFont}
-            strokeWidth={1.5}
-          />
+          <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+            <EyeIcon
+              width={20}
+              height={20}
+              fill="none"
+              stroke={colors.lightGrayFont}
+              strokeWidth={1.5}
+            />
+          </TouchableOpacity>
         </View>
 
         <View style={styles.checkboxRow}>
@@ -111,7 +107,7 @@ export default function SignUpScreen({ navigation }: SignUpScreenProps) {
             value={agree}
             onValueChange={setAgree}
             style={styles.customCheckbox}
-            color={agree ? '#6F1DF4' : undefined}
+            color={agree ? colors.logo : undefined}
           />
           <Text style={styles.checkboxText}>
             By checking this box, I agree that I have read, understood, and consent to Noumi’s{' '}
@@ -148,6 +144,7 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     paddingHorizontal: 20,
+    backgroundColor: colors.lightGrayBackground,
   },
   logo: {
     fontFamily: typography.fontFamily.madimi,
@@ -184,8 +181,9 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     marginBottom: 12,
     marginHorizontal: 20,
-    elevation: 2,
-    height: 56
+    ...shadows.input,
+    height: 56,
+    borderColor: colors.logo,
   },
   input: {
     flex: 1,
@@ -223,7 +221,7 @@ const styles = StyleSheet.create({
   termsLink: {
     fontFamily: typography.fontFamily.medium,
     fontSize: typography.fontSize.mini,
-    color: '#593F90'
+    color: colors.logo
   },
   primaryBtn: {
     flexDirection: 'row',
@@ -237,7 +235,7 @@ const styles = StyleSheet.create({
     alignSelf: 'center'
   },
   enabledBtn: {
-    backgroundColor: '#593F90',
+    backgroundColor: colors.logo,
   },
   disabledBtn: {
     backgroundColor: colors.disabled,

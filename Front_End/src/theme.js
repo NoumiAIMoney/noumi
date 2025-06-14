@@ -56,5 +56,17 @@ export const colors = {
   black: '#000000',
   gray: '#555555',
   lightGray: '#F8F7FA',
-  logo: '#593F90'
+  logo: '#593F90',
+  lightGrayBackground: "#F5F5F8",
+  muted: '#888888',
+};
+
+export const shadows = {
+  input: {
+    shadowColor: '#000',
+    shadowOpacity: 0.05,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 4,
+    elevation: 1,
+  },
 };
