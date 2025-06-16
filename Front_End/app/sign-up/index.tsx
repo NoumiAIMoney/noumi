@@ -32,6 +32,7 @@ export default function SignUpScreen({ navigation }: SignUpScreenProps) {
   const [password, setPassword] = useState<string>('');
   const [agree, setAgree] = useState<boolean>(false);
   const [showPassword, setShowPassword] = useState(false);
+  // TO DO: FIX KEYBOARD GLITCH
   const [focusedField, setFocusedField] = useState<'name' | 'email' | 'password' | null>(null);
 
   const router = useRouter();
