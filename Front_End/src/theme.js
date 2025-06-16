@@ -49,15 +49,16 @@ export const typography = {
 export const colors = {
   lightGrayFont: '#6D6D6D',
   darkFont: '#3A2960',
-  primaryPurple: '#503984',
+  // primaryPurple: '#503984',
+  primaryGreen: '#316E72',
   lightPurple: '#DED8EC',
   disabled: '#9EA1A8',
   white: '#FFFFFF',
   black: '#000000',
   gray: '#555555',
   lightGray: '#F8F7FA',
-  logo: '#593F90',
-  lightGrayBackground: "#F5F5F8",
+  // logo: '#593F90',
+  lightBackground: '#F3F5F5',
   muted: '#888888',
 };
 

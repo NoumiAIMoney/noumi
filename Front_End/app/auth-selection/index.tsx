@@ -1,15 +1,15 @@
+import { colors, typography } from '@/src/theme';
+import { AntDesign } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 import React from 'react';
 import {
   SafeAreaView,
-  View,
-  Text,
   StyleSheet,
+  Text,
   TouchableOpacity,
+  View,
 } from 'react-native';
 import GoogleIcon from '../../assets/icons/google.svg';
-import { AntDesign } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
-import { colors, typography } from '@/src/theme';
 
 export default function AuthSelectionScreen() {
   const router = useRouter();
@@ -71,12 +71,12 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     alignItems: 'center',
-    paddingHorizontal: 20,
+    backgroundColor: colors.lightBackground,
   },
   logo: {
     fontFamily: typography.fontFamily.madimi,
     fontSize: typography.fontSize.XXXLarge,
-    color: colors.primaryPurple,
+    color: colors.primaryGreen,
     marginTop: 50,
   },
   heading: {
@@ -103,7 +103,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    width: '80%',
+    width: '76%',
     maxWidth: 350,
     height: 50,
     borderRadius: 25,
@@ -113,7 +113,7 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
   },
   primaryBtn: {
-    backgroundColor: colors.primaryPurple,
+    backgroundColor: colors.primaryGreen,
     borderWidth: 0,
   },
   secondaryBtn: {
@@ -148,6 +148,6 @@ const styles = StyleSheet.create({
   loginText: {
     fontFamily: typography.fontFamily.semiBold,
     fontSize: typography.fontSize.body,
-    color: colors.black,
+    color: colors.primaryGreen,
   },
 });
