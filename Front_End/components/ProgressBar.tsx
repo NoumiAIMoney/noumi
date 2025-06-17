@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, StyleSheet } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
 import { colors } from '../src/theme';
 
@@ -22,14 +22,14 @@ const styles = StyleSheet.create({
   wrapper: {
     height: 8,
     width: '80%',
-    backgroundColor: colors.lightPurple,
+    backgroundColor: colors.progressBarOrangeLight,
     borderRadius: 6,
     overflow: 'hidden',
     marginBottom: 24,
   },
   filler: {
     height: '100%',
-    backgroundColor: colors.primaryPurple,
+    backgroundColor: colors.progressBarOrange,
     borderRadius: 6,
   },
 });

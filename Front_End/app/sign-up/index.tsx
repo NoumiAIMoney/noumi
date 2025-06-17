@@ -1,4 +1,4 @@
-import { colors, shadows, typography } from '@/src/theme';
+import { colors, typography } from '@/src/theme';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Checkbox from 'expo-checkbox';
 import { useRouter } from 'expo-router';
@@ -11,7 +11,7 @@ import {
   TextInput,
   TouchableOpacity,
   TouchableWithoutFeedback,
-  View,
+  View
 } from 'react-native';
 import EyeIcon from '../../assets/icons/eye.svg';
 import ProfileIcon from '../../assets/icons/profile.svg';
@@ -32,12 +32,19 @@ export default function SignUpScreen({ navigation }: SignUpScreenProps) {
   const [password, setPassword] = useState<string>('');
   const [agree, setAgree] = useState<boolean>(false);
   const [showPassword, setShowPassword] = useState(false);
+  // TO DO: FIX KEYBOARD GLITCH
+  const [focusedField, setFocusedField] = useState<'name' | 'email' | 'password' | null>(null);
 
   const router = useRouter();
 
   const isValid = name.length > 0 && email.length > 0 && password.length > 0 && agree;
   return (
-    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+    <TouchableWithoutFeedback
+      onPress={() => {
+        Keyboard.dismiss();
+        setFocusedField(null);
+      }}
+    >
       <SafeAreaView style={styles.container}>
         <Text style={styles.logo}>Noumi</Text>
 
@@ -46,13 +53,19 @@ export default function SignUpScreen({ navigation }: SignUpScreenProps) {
           Your journey to smarter finances begins now.
         </Text>
 
-        <View style={styles.inputGroup}>
+        <View
+          style={[
+            styles.inputGroup,
+            focusedField === 'name' && styles.inputFocused
+          ]}
+        >
           <TextInput
             placeholder="Full Name"
             style={styles.input}
             placeholderTextColor={colors.muted}
             value={name}
             onChangeText={setName}
+            onFocus={() => setFocusedField('name')}
           />
           <ProfileIcon
             width={20}
@@ -63,7 +76,12 @@ export default function SignUpScreen({ navigation }: SignUpScreenProps) {
           />
         </View>
 
-        <View style={styles.inputGroup}>
+        <View
+          style={[
+            styles.inputGroup,
+            focusedField === 'email' && styles.inputFocused
+          ]}
+        >
           <TextInput
             placeholder="Email"
             style={styles.input}
@@ -72,6 +90,7 @@ export default function SignUpScreen({ navigation }: SignUpScreenProps) {
             autoCapitalize="none"
             value={email}
             onChangeText={setEmail}
+            onFocus={() => setFocusedField('email')}
           />
           <SmsIcon
             width={20}
@@ -82,7 +101,12 @@ export default function SignUpScreen({ navigation }: SignUpScreenProps) {
           />
         </View>
 
-        <View style={styles.inputGroup}>
+        <View
+          style={[
+            styles.inputGroup,
+            focusedField === 'password' && styles.inputFocused
+          ]}
+        >
           <TextInput
             placeholder="Password"
             style={styles.input}
@@ -90,6 +114,7 @@ export default function SignUpScreen({ navigation }: SignUpScreenProps) {
             value={password}
             placeholderTextColor={colors.muted}
             onChangeText={setPassword}
+            onFocus={() => setFocusedField('password')}
           />
           <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
             <EyeIcon
@@ -107,7 +132,7 @@ export default function SignUpScreen({ navigation }: SignUpScreenProps) {
             value={agree}
             onValueChange={setAgree}
             style={styles.customCheckbox}
-            color={agree ? colors.logo : undefined}
+            color={agree ? colors.primaryGreen : undefined}
           />
           <Text style={styles.checkboxText}>
             By checking this box, I agree that I have read, understood, and consent to Noumi’s{' '}
@@ -144,12 +169,12 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     paddingHorizontal: 20,
-    backgroundColor: colors.lightGrayBackground,
+    backgroundColor: colors.lightBackground,
   },
   logo: {
     fontFamily: typography.fontFamily.madimi,
     fontSize: typography.fontSize.XXXLarge,
-    color: colors.primaryPurple,
+    color: colors.primaryGreen,
     marginTop: 50,
   },
   heading: {
@@ -181,9 +206,18 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     marginBottom: 12,
     marginHorizontal: 20,
-    ...shadows.input,
     height: 56,
-    borderColor: colors.logo,
+    borderColor: colors.primaryGreen,
+    borderWidth: 0,
+    shadowColor: 'transparent',
+  },
+  inputFocused: {
+    borderColor: '#316E72',
+    borderWidth: 1,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
   },
   input: {
     flex: 1,
@@ -221,7 +255,7 @@ const styles = StyleSheet.create({
   termsLink: {
     fontFamily: typography.fontFamily.medium,
     fontSize: typography.fontSize.mini,
-    color: colors.logo
+    color: colors.primaryGreen
   },
   primaryBtn: {
     flexDirection: 'row',
@@ -235,7 +269,7 @@ const styles = StyleSheet.create({
     alignSelf: 'center'
   },
   enabledBtn: {
-    backgroundColor: colors.logo,
+    backgroundColor: colors.primaryGreen,
   },
   disabledBtn: {
     backgroundColor: colors.disabled,
@@ -257,6 +291,6 @@ const styles = StyleSheet.create({
   loginLink: {
     fontFamily: typography.fontFamily.semiBold,
     fontSize: typography.fontSize.body,
-    color: colors.black,
+    color: colors.primaryGreen,
   },
 });

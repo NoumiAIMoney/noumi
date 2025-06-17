@@ -1,12 +1,12 @@
-import CardsIcon from '../assets/icons/cards.svg';
+import { colors } from '@/src/theme';
 import AirplaneIcon from '../assets/icons/airplane.svg';
 import CarIcon from '../assets/icons/car.svg';
-import DollarIcon from '../assets/icons/dollar.svg';
-import StudentIcon from '../assets/icons/student.svg';
-import InvestIcon from '../assets/icons/invest.svg';
+import CardsIcon from '../assets/icons/cards.svg';
 import CustomIcon from '../assets/icons/custom.svg';
+import DollarIcon from '../assets/icons/dollar.svg';
 import HouseIcon from '../assets/icons/house.svg';
-import { colors } from '@/src/theme';
+import InvestIcon from '../assets/icons/invest.svg';
+import StudentIcon from '../assets/icons/student.svg';
 
 export interface GoalOption {
   id: string;
@@ -23,7 +23,7 @@ export const goalOptions: GoalOption[] = [
         width={24}
         height={24}
         fill="none"
-        stroke={colors.primaryPurple}
+        stroke={colors.darkFont}
         strokeWidth={1.5}
         color={colors.darkFont}
       />
@@ -37,7 +37,7 @@ export const goalOptions: GoalOption[] = [
         width={24}
         height={24}
         fill="none"
-        stroke={colors.primaryPurple}
+        stroke={colors.darkFont}
         strokeWidth={1.5}
         color={colors.darkFont}
       />
@@ -51,7 +51,7 @@ export const goalOptions: GoalOption[] = [
         width={24}
         height={24}
         fill="none"
-        stroke={colors.primaryPurple}
+        stroke={colors.darkFont}
         strokeWidth={1.5}
         color={colors.darkFont}
       />
@@ -65,7 +65,7 @@ export const goalOptions: GoalOption[] = [
         width={24}
         height={24}
         fill="none"
-        stroke={colors.primaryPurple}
+        stroke={colors.darkFont}
         strokeWidth={1.5}
         color={colors.darkFont}
       />
@@ -79,7 +79,7 @@ export const goalOptions: GoalOption[] = [
         width={24}
         height={24}
         fill="none"
-        stroke={colors.primaryPurple}
+        stroke={colors.darkFont}
         strokeWidth={1.5}
         color={colors.darkFont}
       />
@@ -93,7 +93,7 @@ export const goalOptions: GoalOption[] = [
         width={24}
         height={24}
         fill="none"
-        stroke={colors.primaryPurple}
+        stroke={colors.darkFont}
         strokeWidth={1.5}
         color={colors.darkFont}
       />
@@ -107,7 +107,7 @@ export const goalOptions: GoalOption[] = [
         width={24}
         height={24}
         fill="none"
-        stroke={colors.primaryPurple}
+        stroke={colors.darkFont}
         strokeWidth={1.5}
         color={colors.darkFont}
       />
@@ -121,7 +121,7 @@ export const goalOptions: GoalOption[] = [
         width={24}
         height={24}
         fill="none"
-        stroke={colors.primaryPurple}
+        stroke={colors.darkFont}
         strokeWidth={1.5}
         color={colors.darkFont}
       />

@@ -1,7 +1,7 @@
-import React, { useEffect } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { colors, typography } from '@/src/theme';
 import { useRouter } from 'expo-router';
-import { typography } from '@/src/theme';
+import React, { useEffect } from 'react';
+import { StyleSheet, Text, View } from 'react-native';
 
 export default function SplashScreen() {
   const router = useRouter();
@@ -23,13 +23,13 @@ export default function SplashScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#593F90',
+    backgroundColor: colors.white,
     justifyContent: 'center',
     alignItems: 'center',
   },
   logo: {
     fontFamily: typography.fontFamily.madimi,
-    color: '#fff',
+    color: colors.primaryGreen,
     fontSize: typography.fontSize.XXXLarge,
   },
 });

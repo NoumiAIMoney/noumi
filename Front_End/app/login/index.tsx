@@ -1,22 +1,20 @@
+import { colors, typography } from '@/src/theme';
+import { RouteProp } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import {
   Keyboard,
-  TouchableWithoutFeedback,
-  View,
-  Text,
+  SafeAreaView,
   StyleSheet,
+  Text,
   TextInput,
   TouchableOpacity,
-  SafeAreaView,
+  TouchableWithoutFeedback,
+  View,
 } from 'react-native';
-import Checkbox from 'expo-checkbox';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { RouteProp } from '@react-navigation/native';
-import { colors, typography } from '@/src/theme';
 import EyeIcon from '../../assets/icons/eye.svg';
 import SmsIcon from '../../assets/icons/sms.svg';
-import ProfileIcon from '../../assets/icons/profile.svg';
-import { useRouter } from 'expo-router';
 
 type RootStackParamList = {
   SignUp: undefined;
@@ -52,6 +50,7 @@ export default function SignUpScreen({ navigation }: SignUpScreenProps) {
           Your journey to smarter finances begins now.
         </Text>
         <View style={[styles.inputGroup, emailFocused && styles.inputFocused]}>
+          {/* TO DO: ADD INPUT ON FOCUS */}
           <TextInput
             placeholder="Email"
             style={styles.input}
@@ -132,7 +131,7 @@ const styles = StyleSheet.create({
   logo: {
     fontFamily: typography.fontFamily.madimi,
     fontSize: typography.fontSize.XXXLarge,
-    color: colors.primaryPurple,
+    color: colors.primaryGreen,
     marginTop: 50,
   },
   heading: {
@@ -185,7 +184,7 @@ const styles = StyleSheet.create({
     fontFamily: typography.fontFamily.medium,
     fontSize: typography.fontSize.small,
     paddingLeft: 20,
-    color: colors.black,
+    color: colors.primaryGreen,
     paddingTop: 10,
   },
   primaryBtn: {
@@ -201,7 +200,7 @@ const styles = StyleSheet.create({
     marginTop: 120
   },
   enabledBtn: {
-    backgroundColor: '#593F90',
+    backgroundColor: colors.primaryGreen,
   },
   disabledBtn: {
     backgroundColor: colors.disabled,
@@ -223,6 +222,6 @@ const styles = StyleSheet.create({
   signUpLink: {
     fontFamily: typography.fontFamily.semiBold,
     fontSize: typography.fontSize.body,
-    color: colors.black,
+    color: colors.primaryGreen,
   },
 });

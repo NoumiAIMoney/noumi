@@ -4,7 +4,7 @@ export const CustomLightTheme = {
   ...NavigationDefaultTheme,
   colors: {
     ...NavigationDefaultTheme.colors,
-    background: '#F8F7FA',
+    background: '#F3F5F5',
     primary: '#4B0082',
   },
 };
@@ -48,16 +48,17 @@ export const typography = {
 
 export const colors = {
   lightGrayFont: '#6D6D6D',
-  darkFont: '#3A2960',
-  primaryPurple: '#503984',
+  darkFont: '#191919',
+  primaryGreen: '#316E72',
   lightPurple: '#DED8EC',
   disabled: '#9EA1A8',
   white: '#FFFFFF',
   black: '#000000',
   gray: '#555555',
   lightGray: '#F8F7FA',
-  logo: '#593F90',
-  lightGrayBackground: "#F5F5F8",
+  progressBarOrange: '#D05F4E',
+  progressBarOrangeLight: '#EDDEDD',
+  lightBackground: '#F3F5F5',
   muted: '#888888',
 };
 

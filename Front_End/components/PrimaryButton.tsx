@@ -34,7 +34,7 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   enabledButton: {
-    backgroundColor: colors.primaryPurple,
+    backgroundColor: colors.primaryGreen,
   },
   disabledButton: {
     backgroundColor: colors.disabled,

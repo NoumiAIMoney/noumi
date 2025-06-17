@@ -1,5 +1,5 @@
 import React, { ReactElement } from 'react';
-import { Text, StyleSheet, TouchableOpacity, GestureResponderEvent } from 'react-native';
+import { GestureResponderEvent, StyleSheet, Text, TouchableOpacity } from 'react-native';
 import { colors, typography } from '../src/theme';
 
 interface OptionCardProps {
@@ -31,7 +31,7 @@ const styles = StyleSheet.create({
   },
   selectedCard: {
     borderWidth: 2,
-    borderColor: '#6244A7',
+    borderColor: colors.primaryGreen,
   },
   label: {
     textAlign: 'center',

@@ -50,7 +50,7 @@ export default function OnboardingScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F5F5F8',
+    backgroundColor: colors.lightBackground,
     paddingTop: 112,
     paddingBottom: 40,
     paddingHorizontal: 20,
@@ -61,7 +61,7 @@ const styles = StyleSheet.create({
   logo: {
     fontFamily: typography.fontFamily.madimi,
     fontSize: typography.fontSize.XLarge,
-    color: colors.logo,
+    color: colors.primaryGreen,
   },
   title: {
     fontFamily: typography.fontFamily.semiBold,
@@ -89,7 +89,7 @@ const styles = StyleSheet.create({
   primaryBtn: {
     width: '80%',
     alignSelf: 'center',
-    backgroundColor: colors.logo,
+    backgroundColor: colors.primaryGreen,
     paddingVertical: 16,
     paddingHorizontal: 24,
     borderRadius: 25,
