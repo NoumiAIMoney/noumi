@@ -1,5 +1,6 @@
 import PrimaryButton from '@/components/PrimaryButton';
 import { colors, shadows, typography } from '@/src/theme';
+import { router } from 'expo-router';
 import React from 'react';
 import { Image, StyleSheet, Text, View } from 'react-native';
 import LightningIcon from '../../assets/icons/lightning.svg';
@@ -59,7 +60,7 @@ export default function QuizScreen() {
       </Text>
       <PrimaryButton
         title="Continue"
-        onPress={() => {}}
+        onPress={() => router.push('/forecast')}
       />
     </View>
   );
