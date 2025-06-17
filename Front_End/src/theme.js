@@ -38,8 +38,10 @@ export const typography = {
   },
   lineHeight: {
     small: 18,
+    medium: 20,
     body: 22,
     large: 26,
+    xLarge: 28
   },
   letterSpacing: {
     normal: 0,
@@ -56,6 +58,7 @@ export const colors = {
   black: '#000000',
   gray: '#555555',
   lightGray: '#F8F7FA',
+  borderLightGray: '#E7E8E7',
   progressBarOrange: '#D05F4E',
   progressBarOrangeLight: '#EDDEDD',
   lightBackground: '#F3F5F5',
@@ -68,6 +71,5 @@ export const shadows = {
     shadowOpacity: 0.05,
     shadowOffset: { width: 0, height: 2 },
     shadowRadius: 4,
-    elevation: 1,
   },
 };
