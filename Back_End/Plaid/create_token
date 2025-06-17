@@ -1,0 +1,38 @@
+import os
+import plaid
+from plaid.api import plaid_api
+from plaid.model.link_token_create_request import LinkTokenCreateRequest
+from plaid.model.products import Products
+from plaid.model.country_code import CountryCode
+from plaid.model.link_token_create_request_user import LinkTokenCreateRequestUser
+
+configuration = plaid.Configuration(
+    host=plaid.Environment.Sandbox,
+    api_key={
+        'clientId': os.environ['6834c6b6d8112e00216e1d79'],
+        'secret': os.environ['54162fce5febae8aea5f60cd772cf6'],
+    } 
+)
+
+api_client = plaid.ApiClient(configuration)
+Plaid.client = plaid_api.PlaidApi(api_client)
+
+def create_link_token():
+    try: 
+        request = LinkTokenCreateRequest(
+            products=[Products('transactions')],
+            client_name="client_name",
+            country_codes=[CountryCode('US')],
+            language='en',
+            link_customization_name='default',
+            user=LinkTokenCreateRequestUser(
+                client_user_id='client_user_id'
+            ),
+        )
+        # create link token
+        response = Plaid.client.link_token_create(request)
+        link_token = response['link_token']
+        return link_token
+    except Exception as err:
+        print(f"Unexpected {err=}, {type(err)=}, {str(err)}")
+        raise
