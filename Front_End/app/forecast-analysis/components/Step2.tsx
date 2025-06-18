@@ -1,16 +1,9 @@
+import SparkleIcon from '@/assets/icons/sparkle.svg';
 import { colors, typography } from '@/src/theme';
-import { router } from 'expo-router';
-import React, { useEffect } from 'react';
+import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import SparkleIcon from '../../assets/icons/sparkle.svg';
 
-export default function Forecast() {
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      router.replace('/forecast-analysis');
-    }, 5000);
-    return () => clearTimeout(timer);
-  }, []);
+export default function Step2() {
   return (
     <View style={styles.container}>
       <SparkleIcon
@@ -20,7 +13,7 @@ export default function Forecast() {
         fill={colors.primaryGreen}
         strokeWidth={1}
       />
-      <Text style={styles.text}>Generating your plan...</Text>
+      <Text style={styles.text}>Step 2</Text>
     </View>
   );
 }

@@ -34,14 +34,16 @@ export const typography = {
     large: 20,
     XLarge: 24,
     XXLarge: 32,
-    XXXLarge: 36
+    XXXLarge: 36,
+    XXXXLarge: 40
   },
   lineHeight: {
     small: 18,
     medium: 20,
     body: 22,
     large: 26,
-    xLarge: 28
+    xLarge: 28,
+    XXLarge: 40
   },
   letterSpacing: {
     normal: 0,
@@ -62,7 +64,9 @@ export const colors = {
   progressBarOrange: '#D05F4E',
   progressBarOrangeLight: '#EDDEDD',
   lightBackground: '#F3F5F5',
+  greenBackground: '#D6E8E3',
   muted: '#888888',
+  lighterFont: 'rgba(25, 25, 25, 0.698)',
 };
 
 export const shadows = {
