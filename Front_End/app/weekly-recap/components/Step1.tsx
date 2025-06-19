@@ -6,7 +6,8 @@ export default function Step1() {
   return (
     <View style={styles.container}>
       <View style={styles.textGroup}>
-        <Text style={styles.titleWeekly}>Spending Analysis</Text>
+        <Text style={styles.date}>05/26 - 05/31</Text>
+        <Text style={styles.titleWeekly}>Weekly Recap</Text>
       </View>
       <View style={styles.cardWrapper}>
         <View style={styles.avatar}><Text style={styles.initial}>M</Text></ View>
@@ -34,6 +35,12 @@ const styles = StyleSheet.create({
   },
   textGroup: {
     alignItems: 'flex-end'
+  },
+  date: {
+    fontFamily: typography.fontFamily.semiBold,
+    fontSize: typography.fontSize.body,
+    color: colors.lighterFont,
+    lineHeight: typography.lineHeight.body
   },
   titleWeekly: {
     fontFamily: typography.fontFamily.bold,
