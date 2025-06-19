@@ -1,20 +1,20 @@
-import React, { useState, useEffect } from 'react';
+import DateTimePicker from '@react-native-community/datetimepicker';
+import React, { useEffect, useState } from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
   Keyboard,
-  TouchableWithoutFeedback,
   KeyboardAvoidingView,
   Platform,
+  StyleSheet,
+  Text,
+  TouchableWithoutFeedback,
+  View,
 } from 'react-native';
-import DateTimePicker from '@react-native-community/datetimepicker';
 
-import { colors, typography } from '@/src/theme';
-import OptionCarousel from '@/components/OptionCarousel';
 import Input from '@/components/Input';
+import OptionCarousel from '@/components/OptionCarousel';
+import { colors, typography } from '@/src/theme';
 import CalendarIcon from '../../../../assets/icons/calendar.svg';
-import DollarIcon from '../../../../assets/icons/dollar.svg';
+import DollarIcon from '../../../../assets/icons/currency.svg';
 import { goalOptions } from '../../../../lib/goalOptions';
 
 interface StepTwoProps {
@@ -82,7 +82,7 @@ export default function StepTwo({ selectedOptionId, onStepCompleted }: StepTwoPr
             label="Set the amount"
             keyboardType="numeric"
             mode="number"
-            iconLeft={<DollarIcon width={30} height={30} stroke="#000" />}
+            iconLeft={<DollarIcon width={24} height={24} stroke="#000" strokeWidth={0.5} />}
             value={amount}
             onChangeText={setAmount}
           />
