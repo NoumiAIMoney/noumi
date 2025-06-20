@@ -41,7 +41,7 @@ def generate_accounts_data():
     for i in range(NUM_ACCOUNTS):
         account_id = f'ACC{i+1:03d}'
         monthly_income = round(random.uniform(3000, 15000), 2)
-        suggested_savings = round(monthly_income * 0.2, 2)
+        suggested_savings_amount = round(monthly_income * 0.2, 2)
         # Simulate multiple balance snapshots per account
         for _ in range(50):  # ~50 snapshots per account to reach ~5,000 rows
             current = round(random.uniform(5000, 20000), 2)  # Vary balance

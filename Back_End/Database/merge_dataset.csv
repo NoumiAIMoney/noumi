@@ -1,4 +1,4 @@
-transaction_id,account_id,amount,date,merchant_name,merchant_category,mcc,balance_at_txn_time,is_anomaly,monthly_income,suggested_savings,available,days_since_txn,is_income,total_spent_30d,total_income_30d,txn_count_30d,avg_txn_amt_30d,std_txn_amt_30d,net_cash_flow_30d,savings_delta
+transaction_id,account_id,amount,date,merchant_name,merchant_category,mcc,balance_at_txn_time,is_anomaly,monthly_income,suggested_savings_amount,available,days_since_txn,is_income,total_spent_30d,total_income_30d,txn_count_30d,avg_txn_amt_30d,std_txn_amt_30d,net_cash_flow_30d,savings_delta
 TXN004592,ACC001,2707.16,2024-06-04,Employer,Income,6012,38950.34,0,4748.03,949.61,11823.91,391,1,0.0,0.0,0,0.0,0.0,0.0,38000.729999999996
 TXN003396,ACC001,2964.66,2024-06-09,Employer,Income,6012,28765.12,0,4748.03,949.61,11823.91,386,1,0.0,2707.16,1,2707.16,0.0,2707.16,27815.51
 TXN003384,ACC001,-100.83,2024-06-13,Greene-Munoz,Food and Drink,5812,25800.46,0,4748.03,949.61,11823.91,382,0,0.0,5671.82,2,2835.91,182.07999615553598,5671.82,24850.85
