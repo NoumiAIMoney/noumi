@@ -11,6 +11,10 @@ Back_End/Database/processed_dataset_50000_for_lstm.csv
 Back_End/Database/synthetic_transactions_5001.csv
 Back_End/Database/synthetic_transactions_50001.csv
 
+# LSTM files
+Back_End/Scripts/lstm_train.py
+Back_End/Scripts/train.py
+
 # dependencies
 node_modules/
 
