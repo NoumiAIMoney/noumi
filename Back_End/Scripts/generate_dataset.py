@@ -51,7 +51,7 @@ def generate_accounts_data():
                 'available': available,
                 'current': current,
                 'monthly_income': monthly_income,
-                'suggested_savings': suggested_savings,
+                'suggested_savings': suggested_savings_amount,
                 'date': generate_date()  # For merging with transactions
             })
     return pd.DataFrame(accounts)
