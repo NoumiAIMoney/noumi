@@ -1,0 +1,28 @@
+{
+  "savings_goal": "Emergency fund",
+  "monthly_income": 4500.0,
+  "current_savings": "$5,000 - $15,000",
+  "savings_timeframe": "6-12 months",
+  "spending_categories": [
+    "Food & Dining",
+    "Entertainment", 
+    "Shopping",
+    "Transportation",
+    "Healthcare",
+    "Bills & Utilities"
+  ],
+  "financial_stress": 7,
+  "saving_difficulty": "Impulse purchases and dining out",
+  "spending_tracking": "Mobile banking app with occasional spreadsheet updates",
+  "risk_tolerance": "Moderate - I'm comfortable with some risk for better returns",
+  "motivation_style": "Reaching specific financial milestones and celebrating progress",
+  "primary_concern": "Building emergency fund while maintaining current lifestyle",
+  "preferred_savings_frequency": "Weekly automatic transfers",
+  "budget_experience": "I've tried budgeting before with mixed success",
+  "financial_knowledge": "Intermediate - I understand basics but want to learn more",
+  "spending_personality": "Planner with occasional impulse spending",
+  "debt_situation": "Some credit card debt, paying minimum + extra when possible",
+  "retirement_planning": "Contributing to 401k with company match",
+  "family_status": "Single, no dependents",
+  "housing_situation": "Renting apartment, considering buying in 2-3 years"
+} 

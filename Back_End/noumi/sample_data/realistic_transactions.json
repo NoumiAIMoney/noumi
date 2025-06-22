@@ -1,0 +1,137 @@
+[
+  {
+    "transaction_id": "txn_grocery_001",
+    "amount": -127.89,
+    "description": "WHOLE FOODS MARKET #10253",
+    "merchant_name": "Whole Foods Market",
+    "category": ["Food and Drink"],
+    "date": "2024-06-01",
+    "account_id": "acc_checking_001"
+  },
+  {
+    "transaction_id": "txn_gas_001", 
+    "amount": -58.42,
+    "description": "SHELL OIL 375291847",
+    "merchant_name": "Shell",
+    "category": ["Transportation"],
+    "date": "2024-06-01",
+    "account_id": "acc_checking_001"
+  },
+  {
+    "transaction_id": "txn_coffee_001",
+    "amount": -5.75,
+    "description": "STARBUCKS STORE #15829",
+    "merchant_name": "Starbucks",
+    "category": ["Food and Drink"],
+    "date": "2024-06-02",
+    "account_id": "acc_checking_001"
+  },
+  {
+    "transaction_id": "txn_subscription_001",
+    "amount": -16.99,
+    "description": "NETFLIX.COM NETFLIX.COM CA",
+    "merchant_name": "Netflix",
+    "category": ["Entertainment"],
+    "date": "2024-06-02",
+    "account_id": "acc_checking_001"
+  },
+  {
+    "transaction_id": "txn_lunch_001",
+    "amount": -14.50,
+    "description": "CHIPOTLE 2953",
+    "merchant_name": "Chipotle Mexican Grill",
+    "category": ["Food and Drink"],
+    "date": "2024-06-03",
+    "account_id": "acc_checking_001"
+  },
+  {
+    "transaction_id": "txn_pharmacy_001",
+    "amount": -23.67,
+    "description": "CVS PHARMACY #09847",
+    "merchant_name": "CVS Pharmacy",
+    "category": ["Healthcare"],
+    "date": "2024-06-03",
+    "account_id": "acc_checking_001"
+  },
+  {
+    "transaction_id": "txn_shopping_001",
+    "amount": -89.99,
+    "description": "AMAZON.COM*MZ74X9QR5",
+    "merchant_name": "Amazon",
+    "category": ["Shopping"],
+    "date": "2024-06-04",
+    "account_id": "acc_checking_001"
+  },
+  {
+    "transaction_id": "txn_restaurant_001",
+    "amount": -67.43,
+    "description": "OLIVE GARDEN #1047",
+    "merchant_name": "Olive Garden",
+    "category": ["Food and Drink"],
+    "date": "2024-06-05",
+    "account_id": "acc_checking_001"
+  },
+  {
+    "transaction_id": "txn_rideshare_001",
+    "amount": -22.80,
+    "description": "UBER TRIP 06/05",
+    "merchant_name": "Uber",
+    "category": ["Transportation"],
+    "date": "2024-06-05",
+    "account_id": "acc_checking_001"
+  },
+  {
+    "transaction_id": "txn_gym_001",
+    "amount": -49.99,
+    "description": "LA FITNESS #0234",
+    "merchant_name": "LA Fitness",
+    "category": ["Health & Fitness"],
+    "date": "2024-06-06",
+    "account_id": "acc_checking_001"
+  },
+  {
+    "transaction_id": "txn_coffee_002",
+    "amount": -4.25,
+    "description": "DUNKIN #347162",
+    "merchant_name": "Dunkin'",
+    "category": ["Food and Drink"],
+    "date": "2024-06-06",
+    "account_id": "acc_checking_001"
+  },
+  {
+    "transaction_id": "txn_grocery_002",
+    "amount": -98.76,
+    "description": "SAFEWAY STORE 1847",
+    "merchant_name": "Safeway",
+    "category": ["Food and Drink"],
+    "date": "2024-06-07",
+    "account_id": "acc_checking_001"
+  },
+  {
+    "transaction_id": "txn_movie_001",
+    "amount": -27.50,
+    "description": "AMC THEATRES METREON",
+    "merchant_name": "AMC Theatres",
+    "category": ["Entertainment"],
+    "date": "2024-06-07",
+    "account_id": "acc_checking_001"
+  },
+  {
+    "transaction_id": "txn_utilities_001",
+    "amount": -145.67,
+    "description": "PG&E UTIL PAY ONLINE",
+    "merchant_name": "Pacific Gas & Electric",
+    "category": ["Bills & Utilities"],
+    "date": "2024-06-08",
+    "account_id": "acc_checking_001"
+  },
+  {
+    "transaction_id": "txn_salary_001",
+    "amount": 3500.00,
+    "description": "PAYROLL DEPOSIT ACME CORP",
+    "merchant_name": "ACME Corporation",
+    "category": ["Payroll"],
+    "date": "2024-06-01",
+    "account_id": "acc_checking_001"
+  }
+] 

@@ -1,0 +1,545 @@
+{
+  "demo_metadata": {
+    "demo_type": "comprehensive_agent_flow",
+    "demo_timestamp": "2025-06-20T08:48:40.207263",
+    "agents_tested": [
+      "quiz_agent",
+      "plaid_agent",
+      "chain_of_guidance_planner",
+      "recap_agent"
+    ]
+  },
+  "agent_results": {
+    "quiz_agent": {
+      "user_preferences": {
+        "risk_tolerance": "unknown",
+        "savings_goals": {
+          "primary_goal": "Emergency fund",
+          "timeframe_months": 9,
+          "current_savings_level": "$5,000 - $15,000",
+          "urgency": "medium"
+        },
+        "spending_priorities": [
+          "Food & Dining",
+          "Entertainment",
+          "Shopping",
+          "Transportation",
+          "Healthcare",
+          "Bills & Utilities"
+        ],
+        "financial_knowledge": "high",
+        "motivation_factors": {
+          "style": "Reaching specific financial milestones and celebrating progress",
+          "stress_level": 7,
+          "urgency": "high",
+          "needs_encouragement": true
+        },
+        "preferred_saving_methods": [],
+        "ai_insights": {
+          "personality_type": "The Pragmatic Achiever: This individual balances a desire for financial security with a tendency towards occasional indulgence. They possess intermediate financial knowledge and actively seek ways to improve their financial situation. Their commitment to contributing to their 401k and paying down credit card debt shows responsibility, but impulse spending and dining out can hinder progress.",
+          "behavioral_patterns": [
+            "Goal-oriented with a focus on building an emergency fund.",
+            "Moderate risk tolerance suggesting a balanced approach to investing.",
+            "Spends on a variety of categories, including both necessities and discretionary items.",
+            "Utilizes technology (mobile banking app) for tracking expenses but needs more consistent monitoring.",
+            "Motivated by achieving financial milestones and celebrating success.",
+            "Experiences financial stress, indicating a need for improved financial control.",
+            "Struggles with impulse purchases, a common behavioral finance pitfall."
+          ],
+          "obstacles": [
+            "Impulse spending and dining out habits undermine savings efforts.",
+            "Credit card debt can accumulate due to inconsistent spending control.",
+            "Lack of a detailed budget makes it difficult to track and manage expenses effectively.",
+            "Maintaining current lifestyle while building an emergency fund presents a challenge.",
+            "Potential for delaying savings goals due to competing financial priorities (e.g., future home purchase)."
+          ],
+          "strategies": [
+            "Implement a detailed monthly budget, categorizing expenses and setting spending limits for each category. Consider using budgeting apps like YNAB or Mint.",
+            "Establish a '30-day rule' for non-essential purchases to curb impulse spending.",
+            "Automate weekly transfers to a high-yield savings account dedicated to the emergency fund.",
+            "Consolidate credit card debt through a balance transfer or personal loan with a lower interest rate.",
+            "Create a visual representation of savings goals (e.g., a progress bar) to maintain motivation.",
+            "Allocate a specific 'fun money' budget for discretionary spending to avoid complete deprivation and reduce the urge for impulse buys.",
+            "Explore options for reducing spending on dining out, such as meal prepping or cooking at home more often.",
+            "Schedule regular financial check-ins (e.g., weekly or bi-weekly) to review spending and track progress towards savings goals."
+          ],
+          "communication_style": "Data-driven and milestone-focused. This individual responds well to clear, actionable advice with quantifiable results. Progress tracking and visual aids will be particularly effective. Communication should be regular and encouraging, highlighting achievements and addressing challenges constructively. Provide resources for further financial education, focusing on budgeting techniques and debt management strategies. Digital communication via email or text messages with links to relevant articles and tools would be preferred. Consider a gamified approach to saving, using apps or spreadsheets to track progress and earn rewards for reaching milestones."
+        }
+      },
+      "profile_completion": true
+    },
+    "plaid_agent": {
+      "spending_patterns": {
+        "monthly_analysis": {
+          "monthly_breakdown": {
+            "2024-06": {
+              "total": 4253.61,
+              "count": 15
+            }
+          },
+          "average_monthly_spending": 4253.61,
+          "spending_trend": "insufficient_data"
+        },
+        "category_analysis": {
+          "Food and Drink": {
+            "total_amount": 318.58,
+            "transaction_count": 6,
+            "percentage_of_total": 7.489638213188328,
+            "average_transaction_amount": 53.096666666666664
+          },
+          "Transportation": {
+            "total_amount": 81.22,
+            "transaction_count": 2,
+            "percentage_of_total": 1.9094369253410632,
+            "average_transaction_amount": 40.61
+          },
+          "Entertainment": {
+            "total_amount": 44.489999999999995,
+            "transaction_count": 2,
+            "percentage_of_total": 1.0459350998328478,
+            "average_transaction_amount": 22.244999999999997
+          },
+          "Healthcare": {
+            "total_amount": 23.67,
+            "transaction_count": 1,
+            "percentage_of_total": 0.5564685055752644,
+            "average_transaction_amount": 23.67
+          },
+          "Shopping": {
+            "total_amount": 89.99,
+            "transaction_count": 1,
+            "percentage_of_total": 2.115614736658979,
+            "average_transaction_amount": 89.99
+          },
+          "Health & Fitness": {
+            "total_amount": 49.99,
+            "transaction_count": 1,
+            "percentage_of_total": 1.175237033954688,
+            "average_transaction_amount": 49.99
+          },
+          "Bills & Utilities": {
+            "total_amount": 145.67,
+            "transaction_count": 1,
+            "percentage_of_total": 3.4246204988233524,
+            "average_transaction_amount": 145.67
+          },
+          "Payroll": {
+            "total_amount": 3500.0,
+            "transaction_count": 1,
+            "percentage_of_total": 82.28304898662549,
+            "average_transaction_amount": 3500.0
+          }
+        },
+        "merchant_analysis": {
+          "top_merchants": [
+            [
+              "ACME Corporation",
+              {
+                "total": 3500.0,
+                "count": 1
+              }
+            ],
+            [
+              "Pacific Gas & Electric",
+              {
+                "total": 145.67,
+                "count": 1
+              }
+            ],
+            [
+              "Whole Foods Market",
+              {
+                "total": 127.89,
+                "count": 1
+              }
+            ],
+            [
+              "Safeway",
+              {
+                "total": 98.76,
+                "count": 1
+              }
+            ],
+            [
+              "Amazon",
+              {
+                "total": 89.99,
+                "count": 1
+              }
+            ],
+            [
+              "Olive Garden",
+              {
+                "total": 67.43,
+                "count": 1
+              }
+            ],
+            [
+              "Shell",
+              {
+                "total": 58.42,
+                "count": 1
+              }
+            ],
+            [
+              "LA Fitness",
+              {
+                "total": 49.99,
+                "count": 1
+              }
+            ],
+            [
+              "AMC Theatres",
+              {
+                "total": 27.5,
+                "count": 1
+              }
+            ],
+            [
+              "CVS Pharmacy",
+              {
+                "total": 23.67,
+                "count": 1
+              }
+            ]
+          ],
+          "total_merchants": 15
+        },
+        "timing_analysis": {
+          "weekday_patterns": {
+            "Saturday": {
+              "total": 3831.98,
+              "count": 4
+            },
+            "Sunday": {
+              "total": 22.74,
+              "count": 2
+            },
+            "Monday": {
+              "total": 38.17,
+              "count": 2
+            },
+            "Tuesday": {
+              "total": 89.99,
+              "count": 1
+            },
+            "Wednesday": {
+              "total": 90.23,
+              "count": 2
+            },
+            "Thursday": {
+              "total": 54.24,
+              "count": 2
+            },
+            "Friday": {
+              "total": 126.26,
+              "count": 2
+            }
+          },
+          "hourly_patterns": {}
+        },
+        "frequency_analysis": {
+          "recurring_transactions": 0,
+          "recurring_details": {}
+        },
+        "ai_insights": {
+          "spending_patterns": [
+            "Frequent spending on food and drink, including groceries, restaurants, and coffee.",
+            "Regular expenses on transportation, including gas and rideshares.",
+            "Recurring subscription and entertainment costs."
+          ],
+          "top_categories": [
+            "Food and Drink",
+            "Transportation",
+            "Shopping"
+          ],
+          "savings_opportunities": [
+            "Reduce spending on coffee by brewing at home.",
+            "Explore cheaper grocery options or reduce food waste to lower grocery bills.",
+            "Consider alternatives to rideshares, such as public transportation or carpooling.",
+            "Evaluate the need for all current subscriptions and cancel unused ones."
+          ],
+          "recommendations": [
+            "Track your daily coffee spending and set a weekly budget.",
+            "Plan your meals in advance to minimize impulse grocery purchases.",
+            "Compare the cost of rideshares to other transportation methods for regular routes.",
+            "Review all subscription services and cancel any that are not frequently used."
+          ]
+        }
+      },
+      "analysis_available": true
+    },
+    "planning_agent": {
+      "weekly_plan": {
+        "week_start_date": "2025-06-23",
+        "ml_features": {
+          "suggested_savings_amount": 800,
+          "spending_efficiency_score": 80
+        },
+        "savings_target": {
+          "amount": 200,
+          "currency": "USD"
+        },
+        "spending_limits": {
+          "Food and Drink": {
+            "daily_limit": 9.101428571428572,
+            "weekly_limit": 63.71
+          },
+          "Entertainment": {
+            "daily_limit": 0.9528571428571428,
+            "weekly_limit": 6.67
+          }
+        },
+        "daily_recommendations": [
+          {
+            "day": "Monday",
+            "actions": [
+              "Check account balance",
+              "Set weekly goals"
+            ],
+            "focus_area": "Goal Setting",
+            "motivation": "Start your week strong!"
+          },
+          {
+            "day": "Tuesday",
+            "actions": [
+              "Track expenses",
+              "Review spending limits"
+            ],
+            "focus_area": "Expense Tracking",
+            "motivation": "Stay on track!"
+          },
+          {
+            "day": "Wednesday",
+            "actions": [
+              "Mid-week check-in",
+              "Adjust if needed"
+            ],
+            "focus_area": "Progress Review",
+            "motivation": "You're halfway there!"
+          },
+          {
+            "day": "Thursday",
+            "actions": [
+              "Evaluate spending",
+              "Plan weekend budget"
+            ],
+            "focus_area": "Weekend Planning",
+            "motivation": "Prepare for success!"
+          },
+          {
+            "day": "Friday",
+            "actions": [
+              "Review week's progress",
+              "Set weekend limits"
+            ],
+            "focus_area": "Week Review",
+            "motivation": "Strong finish ahead!"
+          },
+          {
+            "day": "Saturday",
+            "actions": [
+              "Track weekend spending",
+              "Find free activities"
+            ],
+            "focus_area": "Weekend Management",
+            "motivation": "Smart weekend choices!"
+          },
+          {
+            "day": "Sunday",
+            "actions": [
+              "Calculate weekly total",
+              "Plan next week"
+            ],
+            "focus_area": "Weekly Wrap-up",
+            "motivation": "Prepare for another successful week!"
+          }
+        ],
+        "tracking_metrics": [
+          {
+            "metric_name": "Weekly Savings",
+            "target_value": 200,
+            "current_value": 0
+          },
+          {
+            "metric_name": "Days Under Budget",
+            "target_value": 7,
+            "current_value": 0
+          }
+        ],
+        "weekly_challenges": [
+          "Track every expense for 7 days",
+          "Cook at home 5 out of 7 days",
+          "Find one free entertainment activity"
+        ],
+        "success_tips": [
+          "Review progress daily",
+          "Celebrate small wins",
+          "Stay consistent with tracking"
+        ]
+      },
+      "ml_features_extracted": true
+    },
+    "recap_agent": {
+      "performance_recap": {
+        "recap_metadata": {
+          "week_period": "2025-06-23 to 2025-06-29",
+          "analysis_timestamp": "2025-06-20T08:48:40.207140",
+          "transaction_count": 5
+        },
+        "spending_performance": {
+          "total_planned_spending": 70.38,
+          "total_actual_spending": 242.29,
+          "planned_savings_target": 200,
+          "spending_vs_plan": 171.91,
+          "spending_adherence_rate": 0,
+          "over_budget": true,
+          "budget_variance_percentage": 244.25973287865875
+        },
+        "category_performance": {
+          "Food and Drink": {
+            "planned_limit": 63.71,
+            "actual_spent": 113.5,
+            "variance": 49.79,
+            "adherence_rate": 0,
+            "status": "over_budget",
+            "variance_percentage": 78.15099670381416
+          },
+          "Entertainment": {
+            "planned_limit": 6.67,
+            "actual_spent": 15.99,
+            "variance": 9.32,
+            "adherence_rate": 0,
+            "status": "over_budget",
+            "variance_percentage": 139.73013493253376
+          }
+        },
+        "goal_achievement": {
+          "metric_achievements": [
+            {
+              "metric_name": "Weekly Savings",
+              "target_value": 200,
+              "estimated_achievement_rate": 0,
+              "status": "not_achieved"
+            },
+            {
+              "metric_name": "Days Under Budget",
+              "target_value": 7,
+              "estimated_achievement_rate": 0.0,
+              "status": "not_achieved"
+            }
+          ],
+          "challenge_count": 3,
+          "overall_goal_success_rate": 0.0
+        },
+        "ai_insights": {
+          "key_insights": [
+            {
+              "insight_type": "improvement",
+              "title": "Significant Overspending Compared to Plan",
+              "description": "The actual spending was significantly higher than planned (244% over budget). This indicates a need for stricter budget adherence.",
+              "impact_level": "high"
+            },
+            {
+              "insight_type": "improvement",
+              "title": "Food and Drink Spending Exceeded Limit",
+              "description": "The 'Food and Drink' category significantly exceeded the weekly limit, accounting for a large portion of the overspending. This calls for re-evaluating grocery and dining habits.",
+              "impact_level": "medium"
+            },
+            {
+              "insight_type": "behavioral",
+              "title": "Lack of Savings",
+              "description": "The weekly savings target of $200 was not met, with no savings recorded. This suggests a need to prioritize savings and reduce discretionary spending.",
+              "impact_level": "high"
+            }
+          ],
+          "behavioral_patterns": [
+            {
+              "pattern_type": "category_preference",
+              "description": "High spending in 'Food and Drink' category indicates potential overspending on groceries, coffee shops, or dining out.",
+              "recommendation": "Analyze food-related expenses to identify areas to cut back, such as reducing restaurant visits or finding cheaper grocery options."
+            },
+            {
+              "pattern_type": "spending_timing",
+              "description": "Significant spending occurs early in the week (grocery shopping on June 10th), potentially depleting the budget before the week's end.",
+              "recommendation": "Spread out larger purchases throughout the week or plan meals ahead of time to avoid impulse buying during grocery trips."
+            }
+          ],
+          "success_highlights": [
+            "No successes identified based on the data provided. The plan was not adhered to, and no savings were achieved."
+          ],
+          "improvement_areas": [
+            {
+              "area": "Budget Adherence",
+              "current_impact": "Significant overspending and failure to meet savings goals.",
+              "suggested_action": "Implement stricter expense tracking and adhere to daily/weekly spending limits. Use budgeting apps for real-time monitoring."
+            },
+            {
+              "area": "Food and Drink Spending",
+              "current_impact": "Major contributor to overspending, impacting overall financial performance.",
+              "suggested_action": "Create a detailed meal plan, cook at home more often, and reduce impulsive food purchases."
+            },
+            {
+              "area": "Savings Prioritization",
+              "current_impact": "No savings achieved, hindering progress towards financial goals.",
+              "suggested_action": "Set up automatic transfers to a savings account and treat savings as a non-negotiable expense."
+            }
+          ],
+          "overall_performance_summary": "This week's financial performance was poor, with significant overspending and a failure to meet savings goals. Stricter budgeting and expense tracking are crucial to improve future performance. Focus on reducing spending in the 'Food and Drink' category and prioritizing savings."
+        },
+        "performance_scores": {
+          "overall_performance_score": 0.0,
+          "spending_adherence_score": 0,
+          "category_discipline_score": 0.0,
+          "goal_achievement_score": 0.0,
+          "performance_grade": "F"
+        },
+        "recommendations": [
+          {
+            "type": "budget_adjustment",
+            "priority": "high",
+            "title": "Reduce Overall Spending",
+            "description": "You exceeded budget by $171.91. Focus on staying within limits next week.",
+            "specific_action": "Set daily spending alerts"
+          },
+          {
+            "type": "category_focus",
+            "priority": "medium",
+            "title": "Optimize Food and Drink Spending",
+            "description": "You overspent in Food and Drink by $49.79",
+            "specific_action": "Set stricter limits for Food and Drink next week"
+          }
+        ]
+      },
+      "analysis_completed": true
+    }
+  },
+  "ml_pipeline_features": {
+    "planning_features": {
+      "suggested_savings_amount": 800,
+      "spending_efficiency_score": 80
+    },
+    "performance_features": {
+      "overall_performance_score": 0.0,
+      "spending_adherence_score": 0,
+      "category_discipline_score": 0.0,
+      "goal_achievement_score": 0.0,
+      "performance_grade": "F"
+    },
+    "user_profile_features": {
+      "risk_tolerance": "unknown",
+      "primary_goal": "Emergency fund",
+      "financial_knowledge": "high"
+    },
+    "spending_pattern_features": {
+      "average_monthly_spending": 4253.61,
+      "category_count": 8,
+      "potential_savings": 0
+    }
+  },
+  "integration_ready": {
+    "all_agents_completed": true,
+    "ml_features_available": true,
+    "ready_for_production": true
+  }
+}
