@@ -9,3 +9,4 @@ sagemaker
 sqlalchemy
 psycopg2-binary
 s3fs
+faker
