@@ -5,11 +5,11 @@ import { colors, typography } from '@/src/theme';
 import OptionGrid from '@/components/OptionGrid';
 
 interface StepOneProps {
-  selectedOptionId: string | null;
+  selectedOption: string | null;
   onSelectOption: (label: string) => void;
 }
 
-export default function StepOne({ selectedOptionId, onSelectOption }: StepOneProps) {
+export default function StepOne({ selectedOption, onSelectOption }: StepOneProps) {
   return (
     <View style={styles.container}>
       <View style={styles.text}>
@@ -18,7 +18,7 @@ export default function StepOne({ selectedOptionId, onSelectOption }: StepOnePro
       </View>
       <OptionGrid
         options={goalOptions}
-        selectedOptionId={selectedOptionId}
+        selectedOption={selectedOption}
         onSelectOption={onSelectOption}
         itemsPerRow={3}
       />

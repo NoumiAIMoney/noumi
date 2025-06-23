@@ -10,12 +10,12 @@ interface Option {
 
 interface Props {
   options: Option[];
-  selectedOptionId: string | null;
+  selectedOption: string | null;
   onSelectOption: (label: string) => void;
   itemsPerRow: number;
 }
 
-export default function OptionGrid({ options, selectedOptionId, onSelectOption, itemsPerRow }: Props) {
+export default function OptionGrid({ options, selectedOption, onSelectOption, itemsPerRow }: Props) {
 
   return (
     <View style={styles.grid}>
@@ -24,8 +24,8 @@ export default function OptionGrid({ options, selectedOptionId, onSelectOption, 
           key={index}
           label={option.label}
           icon={option.icon}
-          selected={selectedOptionId === option.id}
-          onPress={() => onSelectOption(option.id)}
+          selected={selectedOption === option.label}
+          onPress={() => onSelectOption(option.label)}
         />
       ))}
     </View>
