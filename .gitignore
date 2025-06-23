@@ -1,5 +1,20 @@
 # Learn more https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files
 
+# Datasets (Old versions)
+Back_End/Database/Anomaly_Scores/lstm_anomaly_scores.csv
+Back_End/Database/new_synthetic_transactions_5000.csv
+Back_End/Database/new_synthetic_transactions_50000.csv
+Back_End/Database/plaid_accounts_5000.json
+Back_End/Database/plaid_accounts_50000.json
+Back_End/Database/processed_dataset_5000_for_isolation_forest.csv
+Back_End/Database/processed_dataset_50000_for_lstm.csv
+Back_End/Database/synthetic_transactions_5001.csv
+Back_End/Database/synthetic_transactions_50001.csv
+
+# LSTM files
+Back_End/Scripts/lstm_train.py
+Back_End/Scripts/train.py
+
 # dependencies
 node_modules/
 
