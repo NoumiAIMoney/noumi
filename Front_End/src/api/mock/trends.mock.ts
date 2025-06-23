@@ -1,14 +1,10 @@
 export const mockSpendingTrends = [
   {
-    icon: '🍕',
-    trend: 'You’ve spent more on dining out this month.',
-  },
-  {
     icon: '💡',
-    trend: 'Electricity costs are down 12% from last month.',
+    trend: '47% of non-essential purchases were made from Tuesday-Thursday.',
   },
   {
     icon: '🛍️',
-    trend: 'Clothing purchases have increased.',
+    trend: 'TikTok Shop is becoming a new regular in your spending.',
   },
 ];

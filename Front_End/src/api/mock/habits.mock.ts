@@ -1,5 +1,5 @@
 export const mockHabits = [
-  { habit_description: 'Log daily expenses', occurrences: 15 },
-  { habit_description: 'Review budget weekly', occurrences: 8 },
-  { habit_description: 'Save a fixed percentage monthly', occurrences: 5 },
+  { habit_description: 'Try a No-Spend-Day', occurrences: 1 },
+  { habit_description: 'Eat at home twice', occurrences: 2 },
+  { habit_description: 'Log in to Noumi daily', occurrences: 7 },
 ];
