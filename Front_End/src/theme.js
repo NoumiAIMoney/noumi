@@ -67,6 +67,8 @@ export const colors = {
   greenBackground: '#D6E8E3',
   muted: '#888888',
   lighterFont: 'rgba(25, 25, 25, 0.698)',
+  grayFont: '#939393',
+  lightGrayBackground: '#F0F0F0'
 };
 
 export const shadows = {

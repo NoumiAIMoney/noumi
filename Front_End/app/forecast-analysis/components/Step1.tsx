@@ -1,24 +1,72 @@
+import SpikeBar from '@/components/SpikeBar';
 import { colors, typography } from '@/src/theme';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
+import HorizontalCard from '@/components/HorizontalCard';
+import TrendUpIcon from '@/assets/icons/progress.svg'
+import { getYearlyAnomalies } from '@/src/api/anomalies';
+import { getSpendingCategories } from '@/src/api/spending';
+import { getSpendingTrends } from '@/src/api/trends';
+import CategoryVerticalCard from '@/components/CategoryVerticalCard';
 
 export default function Step1() {
+  const [anomalies, setAnomalies] = useState<number[] | null>(null);
+  const [trends, setTrends] = useState<any[]>([]);
+  const [categories, setCategories] = useState<any[]>([]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [anomaliesRes, trendsRes, categoriesRes] = await Promise.all([
+          getYearlyAnomalies(),
+          getSpendingTrends(),
+          getSpendingCategories()
+        ]);
+
+        setAnomalies(anomaliesRes.anomalies);
+        setTrends(trendsRes || []);
+        setCategories(categoriesRes || []);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  if (!anomalies) return null;
+
   return (
     <View style={styles.container}>
       <View style={styles.textGroup}>
-        <Text style={styles.titleWeekly}>Spending Analysis</Text>
+        <Text style={styles.titleSpending}>Spending Analysis</Text>
       </View>
       <View style={styles.cardWrapper}>
-        <View style={styles.avatar}><Text style={styles.initial}>M</Text></ View>
+        <View style={styles.avatar}><Text style={styles.initial}>M</Text></View>
         <View style={styles.card}>
-          <Text style={styles.mainTitle}>You are on a roll, Maya!</Text>
-          <Text style={styles.subtitle}>This week's savings</Text>
-          <Text style={styles.amount}>$100</Text>
-          <Text style={styles.subtitle}>Goal progress</Text>
-          <Text style={styles.subtitle}>7%</Text>
-          {/* PROGRESS BAR */}
-          <Text style={styles.subtitle}>Your Weekly Stats</Text>
-          {/* CARDS */}
+          <Text style={styles.mainTitle}>Your past 12 months</Text>
+          <Text style={styles.subtitle}>Impulse spending spikes</Text>
+          <SpikeBar progress={anomalies} />
+
+          <Text style={styles.subtitle}>Spending trends</Text>
+          {trends.slice(0, 2).map((trend, index) => (
+            <HorizontalCard
+              key={index}
+              title={trend.trend || 'N/A'}
+              white={false}
+              icon={<TrendUpIcon width={24} height={24} fill="none" />}
+            />
+          ))}
+          <Text style={styles.subtitle}>Top 3 spending categories</Text>
+          <View style={styles.horizontalCardContainer}>
+            {categories.slice(0, 3).map((category, index) => (
+              <CategoryVerticalCard
+                key={index}
+                icon={<TrendUpIcon width={24} height={24} fill="none" />}
+                label={category.category_name}
+              />
+            ))}
+          </View>
         </View>
       </View>
     </View>
@@ -35,7 +83,7 @@ const styles = StyleSheet.create({
   textGroup: {
     alignItems: 'flex-end'
   },
-  titleWeekly: {
+  titleSpending: {
     fontFamily: typography.fontFamily.bold,
     fontSize: typography.fontSize.XXLarge,
     color: colors.lighterFont,
@@ -65,8 +113,8 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.XLarge
   },
   card: {
-    width: 353,
-    height: 543,
+    width: 363,
+    height: 623,
     borderRadius: 16,
     backgroundColor: colors.white,
     paddingTop: 40,
@@ -83,18 +131,26 @@ const styles = StyleSheet.create({
   mainTitle: {
     fontFamily: typography.fontFamily.semiBold,
     fontSize: typography.fontSize.XLarge,
-    color: colors.darkFont
+    color: colors.darkFont,
+    marginBottom: 8
   },
   subtitle: {
     fontFamily: typography.fontFamily.semiBold,
     fontSize: typography.fontSize.large,
     lineHeight: typography.lineHeight.body,
-    color: colors.darkFont
+    color: colors.darkFont,
+    marginTop: 16,
+    marginBottom: 8
   },
   amount: {
     fontFamily: typography.fontFamily.bold,
     fontSize: typography.fontSize.XXXXLarge,
     lineHeight: typography.lineHeight.XXLarge,
     color: colors.black
+  },
+  horizontalCardContainer: {
+    flexDirection: 'row',
+    gap: 24,
+    marginTop: 8,
   }
 });
