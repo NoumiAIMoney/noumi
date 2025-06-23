@@ -8,7 +8,11 @@ export default function SplashScreen() {
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      router.replace('/onboarding');
+      // UNCOMMENT
+      // router.replace('/onboarding');
+
+      // TESTING SCREENS FAST
+      router.replace('/forecast-analysis');
     }, 2000);
     return () => clearTimeout(timer);
   }, []);
