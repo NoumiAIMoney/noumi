@@ -47,3 +47,10 @@ yarn-error.*
 *.tsbuildinfo
 
 app-example
+
+# Ignore Python cache
+__pycache__/
+*.py[cod]
+
+# Ignore JSON demo files
+api_demo_results_*.json
