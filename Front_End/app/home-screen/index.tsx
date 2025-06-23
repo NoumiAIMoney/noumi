@@ -6,20 +6,19 @@ import {
   SafeAreaView,
   ScrollView,
   TouchableOpacity,
-  Dimensions,
-  Image
+  Dimensions
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { MaterialIcons } from '@expo/vector-icons';
-import Image1 from '../../assets/fire.svg'; 
-import Image2 from '../../assets/money-send.svg'; 
-import Image3 from '../../assets/money-receive.svg';
-import Image4 from '../../assets/home.svg'; 
-import Image5 from '../../assets/goals.svg'; 
-import Image6 from '../../assets/progress.svg';
-import Image7 from '../../assets/empty-wallet-remove.svg';
-import Image8 from '../../assets/Fork-Knife.svg';
+import Image1 from '@/assets/icons/fire.svg'; 
+import Image2 from '@/assets/icons/money-send.svg'; 
+import Image3 from '@/assets/icons/money-receive.svg';
+import Image4 from '@/assets/icons/home.svg'; 
+import Image5 from '@/assets/icons/goals.svg'; 
+import Image6 from '@/assets/icons/progress.svg';
+import Image7 from '@/assets/icons/empty-wallet-remove.svg';
+import Image8 from '@/assets/icons/Fork-Knife.svg';
 
 const { width } = Dimensions.get('window');
 
