@@ -37,7 +37,7 @@ export default function SpikeBar({ progress }: SpikeBarProps) {
 
 const styles = StyleSheet.create({
   card: {
-    width: 321,
+    width: 330,
     height: 103,
     gap: 16,
     borderRadius: 12,

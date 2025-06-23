@@ -55,6 +55,7 @@ export default function Step1() {
               title={trend.trend || 'N/A'}
               white={false}
               icon={<TrendUpIcon width={24} height={24} fill="none" />}
+              width={330}
             />
           ))}
           <Text style={styles.subtitle}>Top 3 spending categories</Text>

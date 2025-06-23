@@ -7,6 +7,8 @@ interface HorizontalCardProps {
   amount?: string;
   white?: boolean;
   icon: React.ReactElement;
+  width?: number;
+  onlyLabel?: boolean
 }
 
 export default function HorizontalCard({
@@ -14,17 +16,25 @@ export default function HorizontalCard({
   amount,
   white = false,
   icon,
+  width = 362,
+  onlyLabel = false
 }: HorizontalCardProps) {
   const cardBackground = white ? colors.white : colors.lightGrayBackground;
 
   return (
-    <View style={[styles.card, { backgroundColor: cardBackground }]}>
-    <View style={styles.leftContent}>
-      <View style={styles.icon}>{icon}</View>
-      <View style={{ flex: 1 }}>
-        <Text style={styles.title} numberOfLines={0}>{title}</Text>
+    <View style={[styles.card, { backgroundColor: cardBackground, width }]}>
+      <View style={styles.leftContent}>
+        <View style={styles.icon}>{icon}</View>
+        <View style={[styles.textWrapper, !amount && { maxWidth: '100%' }]}>
+          <Text style={[styles.title, onlyLabel
+            ? { fontFamily: typography.fontFamily.medium }
+            : { fontFamily: typography.fontFamily.regular }
+            ]} numberOfLines={2}
+          >
+            {title}
+          </Text>
+        </View>
       </View>
-    </View>
 
       {amount && (
         <Text style={styles.amount}>
@@ -35,10 +45,10 @@ export default function HorizontalCard({
   );
 }
 
+
 const styles = StyleSheet.create({
   card: {
-    width: '100%',
-    minHeight: 70,
+    height: 70,
     padding: 16,
     borderRadius: 12,
     flexDirection: 'row',
@@ -49,18 +59,26 @@ const styles = StyleSheet.create({
   leftContent: {
     flexDirection: 'row',
     alignItems: 'center',
+    flex: 1,
   },
   icon: {
     marginRight: 12,
   },
+  textWrapper: {
+    flexShrink: 1,
+    flexGrow: 1,
+    flexBasis: 0,
+  },
   title: {
-    fontFamily: typography.fontFamily.regular,
     fontSize: typography.fontSize.small,
     color: colors.black,
-    flexWrap: 'wrap'
+    flexWrap: 'wrap',
   },
   amount: {
-    fontFamily: typography.fontFamily.bold,
-    fontSize: typography.fontSize.large,
+    fontFamily: typography.fontFamily.medium,
+    fontSize: typography.fontSize.body,
+    color: colors.blueFont,
+    textAlign: 'right'
   },
 });
+

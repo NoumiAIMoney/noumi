@@ -6,13 +6,14 @@ import { colors } from '../src/theme';
 interface QuizProgressBarProps {
   currentStep: number;
   totalSteps: number;
+  width?: number | string
 }
 
-const QuizProgressBar: React.FC<QuizProgressBarProps> = ({ currentStep, totalSteps }) => {
+const QuizProgressBar: React.FC<QuizProgressBarProps> = ({ currentStep, totalSteps, width='80%' }) => {
   const progress = (currentStep / totalSteps) * 100;
 
   return (
-    <View style={styles.wrapper}>
+    <View style={[styles.wrapper, { width: width as any }]}>
       <View style={[styles.filler, { width: `${progress}%` }]} />
     </View>
   );
