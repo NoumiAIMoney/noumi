@@ -209,7 +209,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     fontFamily: 'Inter',
-    fontcolor: '#FFFFFF',
+    color: '#FFFFFF',
     paddingHorizontal: 20,
     paddingTop: 20,
     paddingBottom: 30,
