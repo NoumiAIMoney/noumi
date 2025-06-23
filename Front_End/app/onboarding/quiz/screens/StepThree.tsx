@@ -2,18 +2,18 @@ import Input from "@/components/Input";
 import { colors, typography } from "@/src/theme";
 import { useEffect, useState } from "react";
 import { Keyboard, StyleSheet, Text, TouchableWithoutFeedback, View } from "react-native";
-// import DollarIcon from '../../../../assets/icons/dollar.svg';
 import DollarIcon from '../../../../assets/icons/currency.svg';
 
 interface StepThreeProps {
   onStepCompleted: (completed: boolean) => void;
+  income: string | null;
+  setIncome: (val: string) => void; 
 }
 
-export default function ({onStepCompleted}: StepThreeProps) {
-  const [income, setIncome] = useState('');
+export default function ({onStepCompleted, income, setIncome}: StepThreeProps) {
 
   useEffect(() => {
-    onStepCompleted(income.trim() !== '');
+    onStepCompleted(income?.trim() !== '');
   }, [income]);
 
   return (
@@ -28,7 +28,7 @@ export default function ({onStepCompleted}: StepThreeProps) {
           keyboardType="numeric"
           mode="number"
           iconLeft={<DollarIcon width={24} height={24} stroke="#000" strokeWidth={0.5} />}
-          value={income}
+          value={income || ''}
           onChangeText={setIncome}
         />
       </View>
