@@ -12,8 +12,10 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 import json
 import logging
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Dict, Any, List
+import uuid
+import random
 
 # Load environment variables from .env file
 def load_env_file():
@@ -35,9 +37,15 @@ from noumi_agents.planning_agent.chain_of_guidance_planner import ChainOfGuidanc
 from noumi_agents.planning_agent.recap_agent import RecapAgent
 from noumi_agents.utils.llm_client import NoumiLLMClient
 
+# Import Plaid endpoint
+from plaid_endpoint import create_plaid_connect_endpoint
+
 # Initialize Flask app
 app = Flask(__name__)
 CORS(app)
+
+# Register Plaid endpoint
+create_plaid_connect_endpoint(app)
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -569,6 +577,212 @@ def extract_ml_features():
         }), 500
 
 
+@app.route('/api/plaid/connect', methods=['POST'])
+def connect_plaid():
+    """
+    Connect to Plaid and fetch transaction data.
+    
+    Expected JSON Input:
+    {
+        "public_token": "public-sandbox-token"
+    }
+    
+    Returns: Connection status and data summary
+    """
+    try:
+        # Validate request
+        if not request.is_json:
+            return jsonify({"error": "Request must be JSON"}), 400
+        
+        data = request.get_json()
+        
+        if 'public_token' not in data:
+            return jsonify({"error": "Missing 'public_token' in request"}), 400
+        
+        public_token = data['public_token']
+        
+        logger.info(f"Processing Plaid connection with token: {public_token[:10]}...")
+        
+        # Generate synthetic Plaid data (simulating real Plaid response)
+        synthetic_data = generate_synthetic_plaid_data()
+        
+        # Save to database
+        save_plaid_data_to_database(synthetic_data)
+        
+        response = {
+            "success": True,
+            "status": "connected",
+            "message": "Plaid connection established and data fetched",
+            "data_summary": {
+                "accounts_connected": len(synthetic_data["accounts"]),
+                "transactions_fetched": len(synthetic_data["transactions"]),
+                "connection_timestamp": datetime.now().isoformat()
+            }
+        }
+        
+        logger.info(f"Successfully connected Plaid and fetched {len(synthetic_data['transactions'])} transactions")
+        return jsonify(response)
+        
+    except Exception as e:
+        logger.error(f"Error in Plaid connection: {e}")
+        return jsonify({
+            "error": "Internal server error",
+            "message": str(e),
+            "success": False
+        }), 500
+
+
+def generate_synthetic_plaid_data():
+    """Generate synthetic Plaid data for testing."""
+    
+    # Generate accounts
+    accounts = [
+        {
+            "account_id": f"acc_{uuid.uuid4().hex[:8]}",
+            "name": "Checking Account",
+            "type": "depository",
+            "subtype": "checking",
+            "balance": round(random.uniform(1000, 5000), 2)
+        },
+        {
+            "account_id": f"acc_{uuid.uuid4().hex[:8]}",
+            "name": "Savings Account", 
+            "type": "depository",
+            "subtype": "savings",
+            "balance": round(random.uniform(5000, 25000), 2)
+        }
+    ]
+    
+    # Generate transactions (similar to synthetic_transactions.py)
+    transactions = []
+    merchants = [
+        ("Starbucks", "Food and Drink", 5814),
+        ("Amazon", "Shopping", 5818),
+        ("Walmart", "Shopping", 5411),
+        ("Shell", "Transportation", 5541),
+        ("Apple", "Shopping", 5732),
+        ("McDonald's", "Food and Drink", 5812),
+        ("CVS Pharmacy", "Health", 5912),
+        ("Uber", "Transportation", 4121),
+        ("Target", "Shopping", 5311),
+        ("Costco", "Shopping", 5300),
+    ]
+    
+    # Generate 30 days of transactions
+    for i in range(30):
+        date = datetime.now() - timedelta(days=i)
+        
+        # 1-3 transactions per day
+        for j in range(random.randint(1, 3)):
+            merchant, category, mcc = random.choice(merchants)
+            amount = -round(random.uniform(5, 200), 2)  # Negative for spending
+            
+            transaction = {
+                "transaction_id": f"txn_{uuid.uuid4().hex[:8]}",
+                "account_id": accounts[0]["account_id"],  # Use checking account
+                "amount": amount,
+                "date": date.strftime("%Y-%m-%d"),
+                "merchant_name": merchant,
+                "category": category,
+                "description": f"{merchant} purchase",
+                "mcc": mcc,
+                "created_at": datetime.now().isoformat()
+            }
+            transactions.append(transaction)
+    
+    return {
+        "accounts": accounts,
+        "transactions": transactions,
+        "item": {
+            "item_id": f"item_{uuid.uuid4().hex[:8]}",
+            "institution_id": "ins_123456",
+            "available_products": ["transactions", "balance"],
+            "billed_products": ["transactions"]
+        }
+    }
+
+
+def save_plaid_data_to_database(plaid_data):
+    """Save Plaid data to database following the schema."""
+    try:
+        # Import database manager
+        import sqlite3
+        import json
+        
+        # Connect to database (using the same path as Middleware)
+        db_path = "noumi.db"
+        conn = sqlite3.connect(db_path)
+        cursor = conn.cursor()
+        
+        # Create tables if they don't exist (following Middleware schema)
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS plaid_connections (
+                user_id TEXT PRIMARY KEY,
+                access_token TEXT NOT NULL,
+                accounts TEXT NOT NULL,
+                connected_at TEXT NOT NULL
+            )
+        ''')
+        
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS transactions (
+                transaction_id TEXT PRIMARY KEY,
+                user_id TEXT NOT NULL,
+                account_id TEXT NOT NULL,
+                amount REAL NOT NULL,
+                date TEXT NOT NULL,
+                description TEXT,
+                category TEXT,
+                merchant_name TEXT,
+                mcc INTEGER,
+                created_at TEXT NOT NULL
+            )
+        ''')
+        
+        # Save Plaid connection
+        user_id = "demo_user"  # For demo purposes
+        access_token = f"access_token_{uuid.uuid4().hex[:16]}"
+        
+        cursor.execute('''
+            INSERT OR REPLACE INTO plaid_connections 
+            (user_id, access_token, accounts, connected_at)
+            VALUES (?, ?, ?, ?)
+        ''', (
+            user_id,
+            access_token,
+            json.dumps(plaid_data["accounts"]),
+            datetime.now().isoformat()
+        ))
+        
+        # Save transactions
+        for transaction in plaid_data["transactions"]:
+            cursor.execute('''
+                INSERT OR REPLACE INTO transactions 
+                (transaction_id, user_id, account_id, amount, date, description, category, merchant_name, mcc, created_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ''', (
+                transaction["transaction_id"],
+                user_id,
+                transaction["account_id"],
+                transaction["amount"],
+                transaction["date"],
+                transaction["description"],
+                transaction["category"],
+                transaction["merchant_name"],
+                transaction["mcc"],
+                transaction["created_at"]
+            ))
+        
+        conn.commit()
+        conn.close()
+        
+        logger.info(f"Saved {len(plaid_data['transactions'])} transactions to database")
+        
+    except Exception as e:
+        logger.error(f"Error saving to database: {e}")
+        raise
+
+
 if __name__ == '__main__':
     logger.info("Starting Noumi AI API server...")
-    app.run(host='0.0.0.0', port=5001, debug=True) 
+    app.run(host='0.0.0.0', port=5000, debug=True) 
