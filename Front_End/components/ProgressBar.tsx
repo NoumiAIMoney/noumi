@@ -26,7 +26,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.progressBarOrangeLight,
     borderRadius: 6,
     overflow: 'hidden',
-    marginBottom: 24,
+    marginBottom: 16,
   },
   filler: {
     height: '100%',
