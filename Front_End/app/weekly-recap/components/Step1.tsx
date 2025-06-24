@@ -1,8 +1,100 @@
+import { getComputedGoal } from '@/src/api/goal';
+import { getWeeklySavings } from '@/src/api/savings';
+import { getSpendingCategories, getTotalSpending } from '@/src/api/spending';
 import { colors, typography } from '@/src/theme';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
+import ProgressBar from '@/components/ProgressBar';
+import CategoryVerticalCard from '@/components/CategoryVerticalCard';
+import TrendUpIcon from '@/assets/icons/progress.svg'
+import ArrowDownIcon from '@/assets/icons/Arrow_left.svg'
+import { getLongestStreak } from '@/src/api/streak';
+
+interface GoalData {
+  goal_name: string;
+  target_date: string;
+  goal_amount: number;
+  amount_saved: number;
+}
+
+function getCategoryWithHighestDecrease(data: { category_name: string; amount: number; month: string; }[]) {
+  const grouped: Record<string, { [month: string]: number }> = {};
+
+  data.forEach(({ category_name, amount, month }) => {
+    if (!grouped[category_name]) grouped[category_name] = {};
+    grouped[category_name][month] = amount;
+  });
+
+  let maxDrop = -Infinity;
+  let result: { category: string; decreaseAmount: number; percentageDrop: number } | null = null;
+
+  for (const [category, months] of Object.entries(grouped)) {
+    const monthEntries = Object.entries(months).sort(([a], [b]) => a.localeCompare(b));
+    if (monthEntries.length < 2) continue;
+
+    const [prevMonth, prevAmount] = monthEntries[0];
+    const [currMonth, currAmount] = monthEntries[1];
+    const drop = prevAmount - currAmount;
+
+    if (drop > maxDrop) {
+      maxDrop = drop;
+      const percentageDrop = (drop / prevAmount) * 100;
+      result = {
+        category,
+        decreaseAmount: parseFloat(drop.toFixed(2)),
+        percentageDrop: parseFloat(percentageDrop.toFixed(2)),
+      };
+    }
+  }
+
+  return result;
+}
 
 export default function Step1() {
+  const [goal, setGoal] = useState<GoalData | null>(null);
+  const [suggestedSavingsAmount, setSuggestedSavingsAmount] = useState<number | null>(null);
+  const [biggestDecrease, setBiggestDecrease] = useState<{
+    category: string;
+    decreaseAmount: number;
+    percentageDrop: number;
+  } | null>(null);
+  const [streak, setStreak] = useState<Number[]>([]);
+  const [totalSpending, setTotalSpending] = useState<Number>();
+
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const [goalData, savingsData, spendingCategories, streakData, spendingData] = await Promise.all([
+          getComputedGoal(),
+          getWeeklySavings(),
+          getSpendingCategories(),
+          getLongestStreak(),
+          getTotalSpending(),
+        ]);
+
+        setGoal(goalData);
+        setSuggestedSavingsAmount(savingsData.suggested_savings_amount_weekly);
+
+        const result = getCategoryWithHighestDecrease(spendingCategories);
+        setBiggestDecrease(result);
+        setStreak(streakData.longest_streak);
+        setTotalSpending(spendingData.spent_so_far);
+      } catch (error) {
+        console.error('Failed to fetch data:', error);
+      }
+    }
+
+    fetchData();
+  }, []);
+
+
+  if (!goal) return null;
+
+  const percentage = Math.min(
+    Math.round((goal.amount_saved / goal.goal_amount) * 100),
+    100
+  );
+
   return (
     <View style={styles.container}>
       <View style={styles.textGroup}>
@@ -14,12 +106,32 @@ export default function Step1() {
         <View style={styles.card}>
           <Text style={styles.mainTitle}>You are on a roll, Maya!</Text>
           <Text style={styles.subtitle}>This week's savings</Text>
-          <Text style={styles.amount}>$100</Text>
+          <Text style={styles.amount}>${Math.floor(suggestedSavingsAmount || 0)}</Text>
           <Text style={styles.subtitle}>Goal progress</Text>
-          <Text style={styles.subtitle}>7%</Text>
-          {/* PROGRESS BAR */}
+          <Text style={styles.percentage}>{percentage}%</Text>
+          <ProgressBar currentStep={goal.amount_saved} totalSteps={goal.goal_amount} width={202} />
           <Text style={styles.subtitle}>Your Weekly Stats</Text>
-          {/* CARDS */}
+          <View style={styles.horizontalCardContainer}>
+            <CategoryVerticalCard
+              icon={<TrendUpIcon width={24} height={24} fill="none" />}
+              label={biggestDecrease?.category || ''}
+              valueIcon={<ArrowDownIcon width={12} height={12} stroke="green" />}
+              value={`${biggestDecrease?.percentageDrop}%` || ''}
+              iconBackground='#9C5538'
+            />
+            <CategoryVerticalCard
+              icon={<TrendUpIcon width={24} height={24} fill="none" />}
+              label='Longest Streak'
+              iconBackground='#FFCE51'
+              value={`${streak} Days`}
+            />
+            <CategoryVerticalCard
+              icon={<TrendUpIcon width={24} height={24} fill="none" />}
+              label='Money Spent'
+              iconBackground='#5390D3'
+              value={`$${totalSpending}`}
+            />
+          </View>
         </View>
       </View>
     </View>
@@ -90,18 +202,34 @@ const styles = StyleSheet.create({
   mainTitle: {
     fontFamily: typography.fontFamily.semiBold,
     fontSize: typography.fontSize.XLarge,
-    color: colors.darkFont
+    color: colors.darkFont,
+    marginBottom: 16
   },
   subtitle: {
     fontFamily: typography.fontFamily.semiBold,
     fontSize: typography.fontSize.large,
     lineHeight: typography.lineHeight.body,
-    color: colors.darkFont
+    color: colors.darkFont,
+    marginTop: 16,
+    marginBottom: 8
+  },
+  percentage: {
+    fontFamily: typography.fontFamily.semiBold,
+    fontSize: typography.fontSize.large,
+    lineHeight: typography.lineHeight.body,
+    color: colors.darkFont,
+    marginTop: 8
   },
   amount: {
     fontFamily: typography.fontFamily.bold,
     fontSize: typography.fontSize.XXXXLarge,
     lineHeight: typography.lineHeight.XXLarge,
-    color: colors.black
+    color: colors.black,
+    marginBottom: 16
+  },
+  horizontalCardContainer: {
+    flexDirection: 'row',
+    gap: 24,
+    marginTop: 8,
   }
 });

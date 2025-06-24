@@ -1,10 +1,10 @@
 export const mockSpendingCategories = [
-  { category_name: 'Coffee Shops', amount: 284.51, month: '2025-06' },
+  { category_name: 'Coffee Shops', amount: 285.49, month: '2025-06' },
   { category_name: 'Shopping', amount: 289.24, month: '2025-06' },
   { category_name: 'Delivery Services', amount: 132.65, month: '2025-06' },
-  { category_name: 'Coffee Shops', amount: 250, month: '2025-05' },
-  { category_name: 'Shopping', amount: 1200, month: '2025-05' },
-  { category_name: 'Delivery Services', amount: 200, month: '2025-05' },
+  { category_name: 'Coffee Shops', amount: 300, month: '2025-05' },
+  { category_name: 'Shopping', amount: 290, month: '2025-05' },
+  { category_name: 'Delivery Services', amount: 130, month: '2025-05' },
 ];
 
 export const mockSpendingStatus = {
