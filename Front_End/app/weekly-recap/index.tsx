@@ -23,7 +23,7 @@ export default function ForecastAnalysis() {
   const CurrentStepComponent = steps[currentStep - 1];
   return (
     <View style={styles.container}>
-      <DashBar currentStep={currentStep} steps={TOTAL_STEPS} />
+      <DashBar currentStep={currentStep} steps={TOTAL_STEPS} dashWidth={58} />
 
       <CurrentStepComponent />
 

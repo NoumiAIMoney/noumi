@@ -1,36 +1,101 @@
-import SparkleIcon from '@/assets/icons/sparkle.svg';
 import { colors, typography } from '@/src/theme';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
+import { getHabits } from '@/src/api/habits';
+import HorizontalCard from '@/components/HorizontalCard';
+import CarIcon from '@/assets/icons/car.svg'
+import PrimaryButton from '@/components/PrimaryButton';
+import { router } from 'expo-router';
+
+interface Habit {
+  habit_description: string;
+  occurrences: number;
+}
 
 export default function Step5() {
+  const [habits, setHabits] = useState<Habit[]>([]);
+  useEffect(() => {
+    async function fetchGoal() {
+      try {
+        const data = await getHabits();
+        setHabits(data);
+      } catch (error) {
+        console.error('Failed to fetch habits:', error);
+      }
+    }
+    fetchGoal();
+  }, []);
+
+  if (!habits) return null;
+
   return (
-    <View style={styles.container}>
-      <SparkleIcon
-        width={80}
-        height={80}
-        stroke={colors.primaryGreen}
-        fill={colors.primaryGreen}
-        strokeWidth={1}
-      />
-      <Text style={styles.text}>Step 5</Text>
+    <View style={styles.wrapper}>
+      <View style={styles.container}>
+        <Text style={styles.text}>Try these habits to start saving more.</Text>
+        <View style={styles.cardsWrapper}>
+          {habits.slice(0, 3).map((habit, index) => (
+            <HorizontalCard
+              key={index}
+              title={habit.habit_description || 'N/A'}
+              white={true}
+              icon={
+                <View style={styles.iconWrapper}>
+                  <CarIcon width={24} height={24} fill="none" stroke={colors.white} />
+                </View>
+              }
+              onlyLabel
+            />
+          ))}
+        </View>
+      </View>
+      <View style={styles.buttonWrapper}>
+        <PrimaryButton
+          title="Home Page"
+          onPress={() => router.push('/home-screen')}
+        />
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
+  wrapper: {
+    flex: 1,
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: colors.greenBackground,
+    paddingVertical: 32,
+  },
   container: {
     flex: 1,
-    backgroundColor: colors.lightBackground,
+    backgroundColor: colors.greenBackground,
     paddingHorizontal: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 24
+    paddingTop: 32,
   },
   text: {
-    fontFamily: typography.fontFamily.medium,
-    fontSize: typography.fontSize.body,
+    fontFamily: typography.fontFamily.semiBold,
+    fontSize: typography.fontSize.XXLarge,
     color: colors.darkFont,
-    lineHeight: typography.lineHeight.body
+    letterSpacing: 0,
+    marginLeft: 8,
+    marginBottom: 24,
+    marginRight: 64
+  },
+  cardsWrapper: {
+    alignItems: 'center',
+  },
+  iconWrapper: {
+    width: 39.09,
+    height: 40,
+    padding: 10,
+    borderRadius: 100,
+    backgroundColor: '#B4698F',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 8
+  },
+  buttonWrapper: {
+    width: 400,
+    alignItems: 'center'
   }
 });
