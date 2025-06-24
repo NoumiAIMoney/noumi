@@ -1,12 +1,14 @@
 import { getComputedGoal } from '@/src/api/goal';
 import { getWeeklySavings } from '@/src/api/savings';
-import { getSpendingCategories } from '@/src/api/spending';
+import { getSpendingCategories, getTotalSpending } from '@/src/api/spending';
 import { colors, typography } from '@/src/theme';
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import ProgressBar from '@/components/ProgressBar';
 import CategoryVerticalCard from '@/components/CategoryVerticalCard';
 import TrendUpIcon from '@/assets/icons/progress.svg'
+import ArrowDownIcon from '@/assets/icons/Arrow_left.svg'
+import { getLongestStreak } from '@/src/api/streak';
 
 interface GoalData {
   goal_name: string;
@@ -56,14 +58,18 @@ export default function Step1() {
     decreaseAmount: number;
     percentageDrop: number;
   } | null>(null);
+  const [streak, setStreak] = useState<Number[]>([]);
+  const [totalSpending, setTotalSpending] = useState<Number>();
 
   useEffect(() => {
     async function fetchData() {
       try {
-        const [goalData, savingsData, spendingCategories] = await Promise.all([
+        const [goalData, savingsData, spendingCategories, streakData, spendingData] = await Promise.all([
           getComputedGoal(),
           getWeeklySavings(),
           getSpendingCategories(),
+          getLongestStreak(),
+          getTotalSpending(),
         ]);
 
         setGoal(goalData);
@@ -71,6 +77,8 @@ export default function Step1() {
 
         const result = getCategoryWithHighestDecrease(spendingCategories);
         setBiggestDecrease(result);
+        setStreak(streakData.longest_streak);
+        setTotalSpending(spendingData.spent_so_far);
       } catch (error) {
         console.error('Failed to fetch data:', error);
       }
@@ -107,14 +115,21 @@ export default function Step1() {
             <CategoryVerticalCard
               icon={<TrendUpIcon width={24} height={24} fill="none" />}
               label={biggestDecrease?.category || ''}
+              valueIcon={<ArrowDownIcon width={12} height={12} stroke="green" />}
+              value={`${biggestDecrease?.percentageDrop}%` || ''}
+              iconBackground='#9C5538'
             />
             <CategoryVerticalCard
               icon={<TrendUpIcon width={24} height={24} fill="none" />}
               label='Longest Streak'
+              iconBackground='#FFCE51'
+              value={`${streak} Days`}
             />
             <CategoryVerticalCard
               icon={<TrendUpIcon width={24} height={24} fill="none" />}
               label='Money Spent'
+              iconBackground='#5390D3'
+              value={`$${totalSpending}`}
             />
           </View>
         </View>
@@ -214,7 +229,7 @@ const styles = StyleSheet.create({
   },
   horizontalCardContainer: {
     flexDirection: 'row',
-    gap: 16,
+    gap: 24,
     marginTop: 8,
   }
 });
