@@ -8,7 +8,8 @@ interface HorizontalCardProps {
   white?: boolean;
   icon: React.ReactElement;
   width?: number;
-  onlyLabel?: boolean
+  onlyLabel?: boolean,
+  amountColor?: string;
 }
 
 export default function HorizontalCard({
@@ -17,7 +18,8 @@ export default function HorizontalCard({
   white = false,
   icon,
   width = 362,
-  onlyLabel = false
+  onlyLabel = false,
+  amountColor = colors.blueFont
 }: HorizontalCardProps) {
   const cardBackground = white ? colors.white : colors.lightGrayBackground;
 
@@ -37,7 +39,7 @@ export default function HorizontalCard({
       </View>
 
       {amount && (
-        <Text style={styles.amount}>
+        <Text style={[styles.amount, {color: amountColor}]}>
           ${amount}
         </Text>
       )}
@@ -77,7 +79,6 @@ const styles = StyleSheet.create({
   amount: {
     fontFamily: typography.fontFamily.medium,
     fontSize: typography.fontSize.body,
-    color: colors.blueFont,
     textAlign: 'right'
   },
 });
