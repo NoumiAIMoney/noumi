@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { colors, typography } from '@/src/theme';
 import ProgressBar from '@/components/ProgressBar';
+import WeeklyStreak from './WeeklyStreak';
 
 interface GoalProgressCardProps {
   title: string;
@@ -9,6 +10,9 @@ interface GoalProgressCardProps {
   amountSaved: string;
   goalAmount: string;
   percentage: string;
+  streak?: boolean;
+  height?: number;
+  width?: number;
 }
 
 export default function GoalProgressCard({
@@ -17,9 +21,12 @@ export default function GoalProgressCard({
   amountSaved,
   goalAmount,
   percentage,
+  streak=false,
+  height=126,
+  width=332
 }: GoalProgressCardProps) {
   return (
-    <View style={styles.card}>
+    <View style={[styles.card, {height, width}]}>
       <View style={styles.row}>
         <Text style={styles.title}>{title}</Text>
         <Text style={styles.daysLeft}>{daysLeft}</Text>
@@ -34,15 +41,14 @@ export default function GoalProgressCard({
         <Text style={styles.percentage}>{percentage}%</Text>
       </View>
 
-      <ProgressBar currentStep={25} totalSteps={1200} width={300}/>
+      <ProgressBar currentStep={25} totalSteps={1200} width={340}/>
+      {streak && <WeeklyStreak/>}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   card: {
-    width: 332,
-    height: 126,
     borderRadius: 16,
     padding: 16,
     backgroundColor: '#FCFCFC',

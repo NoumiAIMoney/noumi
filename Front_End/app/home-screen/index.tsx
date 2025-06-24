@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -6,32 +6,88 @@ import {
   SafeAreaView,
   ScrollView,
   TouchableOpacity,
-  Dimensions
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { MaterialIcons } from '@expo/vector-icons';
-import Image1 from '@/assets/icons/fire.svg'; 
-import Image2 from '@/assets/icons/money-send.svg'; 
-import Image3 from '@/assets/icons/money-receive.svg';
-import Image4 from '@/assets/icons/home.svg'; 
-import Image5 from '@/assets/icons/goals.svg'; 
-import Image6 from '@/assets/icons/progress.svg';
-import Image7 from '@/assets/icons/empty-wallet-remove.svg';
-import Image8 from '@/assets/icons/Fork-Knife.svg';
-
-const { width } = Dimensions.get('window');
+import ExpenseIcon from '@/assets/icons/money-send.svg'; 
+import IncomeIcon from '@/assets/icons/money-receive.svg';
+import HomeIcon from '@/assets/icons/home.svg'; 
+import GoalsIcon from '@/assets/icons/goals.svg'; 
+import ProgressIcon from '@/assets/icons/progress.svg';
+import WalletIcon from '@/assets/icons/empty-wallet-remove.svg';
+import RestaurantIcon from '@/assets/icons/Fork-Knife.svg';
+import { colors, typography } from '@/src/theme';
+import GoalProgressCard from '@/components/GoalProgressCard';
+import { getComputedGoal } from '@/src/api/goal';
+import { router } from 'expo-router';
+import { getSpendingStatus } from '@/src/api/spending';
+import { getHabits } from '@/src/api/habits';
 
 interface HomeScreenProps {
   navigation: any;
 }
 
+interface GoalData {
+  goal_name: string;
+  target_date: string;
+  goal_amount: number;
+  amount_saved: number;
+}
+
+interface SpendingData {
+  income: number;
+  expenses: number;
+  amount_safe_to_spend: number;
+}
+
+interface HabitData {
+  habit_description: string;
+  occurrences: number;
+  habit_full_prompt: string;
+}
+
 export default function HomeScreen({ navigation }: HomeScreenProps) {
+  const [goal, setGoal] = useState<GoalData | null>(null);
+  const [spendingStatus, setSpendingStatus] = useState<SpendingData | null>(null);
+  const [habits, setHabits] = useState<HabitData[]>([]);
+
+  useEffect(() => {
+    async function fetchGoal() {
+      try {
+        const [goalData, spendingData, habitData] = await Promise.all([
+          getComputedGoal(),
+          getSpendingStatus(),
+          getHabits()
+        ]);
+        setGoal(goalData);
+        setSpendingStatus(spendingData);
+        setHabits(habitData.filter((h: { habit_full_prompt: any; }) => h.habit_full_prompt))
+      } catch (error) {
+        console.error('Failed to fetch goal:', error);
+      }
+    }
+    fetchGoal();
+  }, []);
+
+  if (!goal) return null;
+
+  const targetDate = new Date(goal.target_date);
+  const today = new Date();
+  const timeDiff = targetDate.getTime() - today.getTime();
+  const daysLeft = Math.max(Math.ceil(timeDiff / (1000 * 3600 * 24)), 0);
+  const percentage = Math.min(
+    Math.round((goal.amount_saved / goal.goal_amount) * 100),
+    100
+  );
   const userName: string = "Maya";
   
   return (
     <LinearGradient
       colors={['#2E6B70', '#F3F5F5']}
+      start={{ x: 0.5, y: 0 }}
+      end={{ x: 0.5, y: 1 }}
+      locations={[0.0001, 0.4489]}
       style={styles.container}
     >
       <SafeAreaView style={styles.safeArea}>
@@ -51,58 +107,33 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
 
         {/* Trip Goal Card */}
         <View style={styles.goalCard}>
-          <View style={styles.goalHeader}>
-            <Text style={styles.goalTitle}>Trip to Mexico</Text>
-            <Text style={styles.daysLeft}>129 days left</Text>
-          </View>
-          
-          <View style={styles.goalAmount}>
-            <Text style={styles.currentAmount}>$25</Text>
-            <Text style={styles.totalAmount}> of $1200</Text>
-          </View>
-          
-          <View style={styles.progressSection}>
-            <Text style={styles.progressLabel}>Progress</Text>
-            <Text style={styles.progressPercent}>7%</Text>
-          </View>
-          
-          <View style={styles.progressBar}>
-            <View style={[styles.progressFill, { width: '7%' }]} />
-          </View>
-          
-          {/* Weekly Calendar */}
-          <View style={styles.weeklyCalendar}>
-            {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((day, index) => (
-              <View key={index} style={styles.dayContainer}>
-                <Text style={styles.dayLabel}>{day}</Text>
-                <View style={styles.dayCircle}>
-                  {index < 5 ? (
-                    <Image1
-                    />
-                  ) : (
-                    <View style={styles.emptyDay} />
-                  )}
-                </View>
-              </View>
-            ))}
-          </View>
+          <GoalProgressCard
+            title={goal.goal_name}
+            daysLeft={`${daysLeft} days left`}
+            amountSaved={String(goal.amount_saved)}
+            goalAmount={goal.goal_amount.toLocaleString()}
+            percentage={String(percentage)}
+            streak
+            height={191}
+            width={373}
+          />
         </View>
 
         {/* Weekly Recap Card */}
         <TouchableOpacity 
           style={styles.recapCard}
-          onPress={() => navigation.navigate('Progress')}
+          onPress={() => router.replace('/weekly-recap')}
         >
           <View style={styles.recapContent}>
             <View style={styles.recapIcon}>
-              <MaterialIcons name="emoji-events" size={24} color="#fff" />
+              <MaterialIcons name="emoji-events" size={24} color={colors.white} />
             </View>
             <View style={styles.recapText}>
               <Text style={styles.recapDate}>05/26 - 05/31</Text>
               <Text style={styles.recapTitle}>Your Weekly Recap</Text>
             </View>
           </View>
-          <Ionicons name="chevron-forward" size={22} color="#000000" marginLeft={-20}/>
+          <Ionicons name="chevron-forward" size={22} color={colors.black} marginLeft={-20}/>
         </TouchableOpacity>
 
         {/* My Spending Section */}
@@ -117,28 +148,43 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
           <View style={styles.spendingRow}>
             <View style={styles.safeToSpendCard}>
               <Text style={styles.safeToSpendLabel}>Safe to Spend</Text>
-              <Text style={styles.safeToSpendAmount}>$1,000.0</Text>
+              <Text style={styles.safeToSpendAmount}>
+                {`$ ${spendingStatus?.amount_safe_to_spend.toLocaleString(undefined, {
+                  minimumFractionDigits: 1,
+                  maximumFractionDigits: 1,
+                })}`}
+              </Text>
               <Text style={styles.updateDate}>Updated: 05/26/2025</Text>
             </View>
             
             <View style={styles.summaryCards}>
               <View style={styles.summaryCard}>
-                <View style={[styles.summaryIcon, { backgroundColor: '#ffffff' }]}>
-                  <Image3/>
+                <View style={[styles.summaryIcon, { backgroundColor: colors.white }]}>
+                  <IncomeIcon/>
                 </View>
                 <View>
                   <Text style={styles.summaryLabel}>Income</Text>
-                  <Text style={styles.summaryAmount}>$ 6,000.0</Text>
+                  <Text style={styles.summaryAmount}>
+                    {`$ ${spendingStatus?.income.toLocaleString(undefined, {
+                      minimumFractionDigits: 1,
+                      maximumFractionDigits: 1,
+                    })}`}
+                  </Text>
                 </View>
               </View>
               
               <View style={styles.summaryCard}>
-                <View style={[styles.summaryIcon, { backgroundColor: '#ffffff' }]}>
-                  <Image2/>
+                <View style={[styles.summaryIcon, { backgroundColor: colors.white }]}>
+                  <ExpenseIcon/>
                 </View>
                 <View>
                   <Text style={styles.summaryLabel}>Expenses</Text>
-                  <Text style={styles.summaryAmount}>$ 5,000.0</Text>
+                  <Text style={styles.summaryAmount}>
+                    {`$ ${spendingStatus?.expenses.toLocaleString(undefined, {
+                      minimumFractionDigits: 1,
+                      maximumFractionDigits: 1,
+                    })}`}
+                  </Text>
                 </View>
               </View>
             </View>
@@ -153,41 +199,32 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
               <Text style={styles.seeAllBtn}>See All</Text>
             </TouchableOpacity>
           </View>
-          
-          <View style={styles.habitCard}>
-            <View style={[styles.habitIcon, { backgroundColor: '#B4698F' }]}>
-              <Image8 style={styles.habitIconImage} />
+
+          {habits.map((habit, index) => (
+            <View key={index} style={styles.habitCard}>
+              <View style={[styles.habitIcon, { backgroundColor: index % 2 === 0 ? '#608762' : '#B4698F' }]}>
+                {(index % 2 === 0) ? <WalletIcon style={styles.habitIconImage} /> : <RestaurantIcon style={styles.habitIconImage} />}
+              </View>
+              <Text style={styles.habitText}>{habit.habit_full_prompt}</Text>
             </View>
-            <Text style={styles.habitText}>
-              Try meal planning instead of eating out at least twice.
-            </Text>
-          </View>
-          
-          <View style={styles.habitCard}>
-            <View style={[styles.habitIcon, { backgroundColor: '#608762' }]}>
-              <Image7 style={styles.habitIconImage} />
-            </View>
-            <Text style={styles.habitText}>
-              Try a No-Spend-Day this week.
-            </Text>
-          </View>
+          ))}
         </View>
         </ScrollView>
         
         {/* Bottom Navigation */}
         <View style={styles.bottomNav}>
           <TouchableOpacity style={styles.navItem}>
-            <Image4/>
+            <HomeIcon/>
             <Text style={styles.navTextActive}>Home</Text>
           </TouchableOpacity>
           
           <TouchableOpacity style={styles.navItem}>
-            <Image5/>
+            <GoalsIcon/>
             <Text style={styles.navText}>Goals</Text>
           </TouchableOpacity>
           
           <TouchableOpacity style={styles.navItem}>
-            <Image6 />
+            <ProgressIcon />
             <Text style={styles.navText}>Progress</Text>
           </TouchableOpacity>
         </View>
@@ -207,11 +244,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    fontFamily: 'Inter',
-    color: '#FFFFFF',
+    fontFamily: typography.fontFamily.semiBold,
+    fontSize: typography.fontSize.large,
+    color: colors.white,
     paddingHorizontal: 20,
-    paddingTop: 20,
-    paddingBottom: 30,
+    paddingTop: 16,
+    paddingBottom: 12,
   },
   headerLeft: {
     flexDirection: 'row',
@@ -221,142 +259,39 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: '#D05F4E',
+    backgroundColor: colors.progressBarOrange,
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 12,
   },
   avatarText: {
-    color: '#fff',
+    color: colors.white,
     fontSize: 18,
     fontWeight: 'bold',
   },
   greeting: {
-    color: '#fff',
-    fontSize: 20,
-    fontWeight: '600',
+    color: colors.white,
+    fontSize: typography.fontSize.large,
+    fontFamily: typography.fontFamily.semiBold
   },
   notificationBtn: {
     padding: 8,
   },
   goalCard: {
-    backgroundColor: '#fff',
     margin: 20,
     marginTop: 0,
-    borderRadius: 16,
-    padding: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 4,
-  },
-  goalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  goalTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    fontFamily: 'Inter',
-    color: '#191919',
-  },
-  daysLeft: {
-    fontSize: 12,
-    color: '#191919',
-  },
-  goalAmount: {
-    flexDirection: 'row',
-    alignItems: 'baseline',
-    fontFamily: 'Inter',
-    marginBottom: 12,
-  },
-  currentAmount: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#333',
-  },
-  totalAmount: {
-    fontSize: 14,
-    color: '#000000',
-  },
-  progressSection: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  progressLabel: {
-    fontSize: 14,
-    color: '#191919',
-  },
-  progressPercent: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#333',
-  },
-  progressBar: {
-    height: 8,
-    backgroundColor: '#f0f0f0',
-    borderRadius: 4,
-    marginBottom: 20,
-  },
-  progressFill: {
-    height: '100%',
-    backgroundColor: '#D05F4E',
-    borderRadius: 4,
-  },
-  weeklyCalendar: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    backgroundColor: '#EEF2F5',
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    alignItems: 'center',
-  },
-  dayContainer: {
-    alignItems: 'center',
-    flex: 1,
-    height: 30,
-  },
-  dayLabel: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#191919',
-    marginBottom: 8,
-    height: 15,
-    marginTop: -2,
-  },
-  dayCircle: {
-    width: 20,
-    height: 8,
-    borderRadius: 10,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  fireIcon: {
-    width: 18,
-    height: 18,
-  },
-  emptyDay: {
-    width: 18,
-    height: 18,
-    borderRadius: 9,
-    backgroundColor: '#D1D5DB',
   },
   recapCard: {
-    backgroundColor: '#fff',
+    backgroundColor: colors.white,
     marginHorizontal: 20,
-    marginBottom: 20,
+    marginBottom: 16,
+    height: 57,
     borderRadius: 12,
     padding: 16,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    shadowColor: '#000',
+    shadowColor: colors.black,
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
@@ -379,14 +314,14 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   recapDate: {
-    fontSize: 12,
+    fontSize: typography.fontSize.mini,
     color: '#666',
     marginBottom: 2,
   },
   recapTitle: {
-    fontSize: 16,
-    fontWeight: '500',
-    color: '#191919',
+    fontSize: typography.fontSize.body,
+    fontFamily: typography.fontFamily.medium,
+    color: colors.darkFont,
   },
   recapArrow: {
     marginLeft: 8,
@@ -394,7 +329,7 @@ const styles = StyleSheet.create({
   },
   section: {
     paddingHorizontal: 20,
-    marginBottom: 30,
+    marginBottom: 24,
   },
   sectionHeader: {
     flexDirection: 'row',
@@ -403,14 +338,14 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   sectionTitle: {
-    fontSize: 20,
-    fontWeight: '600',
-    color: '#191919',
+    fontSize: typography.fontSize.large,
+    fontFamily: typography.fontFamily.semiBold,
+    color: colors.darkFont,
   },
   seeAllBtn: {
-    fontSize: 14,
-    color: '#5E9B9C',
-    fontWeight: '500',
+    fontSize: typography.fontSize.small,
+    color: '#489FCD',
+    fontFamily: typography.fontFamily.medium,
   },
   spendingRow: {
     flexDirection: 'row',
@@ -418,25 +353,26 @@ const styles = StyleSheet.create({
   },
   safeToSpendCard: {
     flex: 1,
-    backgroundColor: '#D6E8E3',
+    backgroundColor: colors.greenBackground,
     borderRadius: 12,
     padding: 16,
     justifyContent: 'center',
     alignItems: 'center',
   },
   safeToSpendLabel: {
-    fontSize: 14,
-    color: '#191919',
+    fontSize: typography.fontSize.small,
+    color: colors.darkFont,
+    fontFamily: typography.fontFamily.semiBold,
     marginBottom: 8,
   },
   safeToSpendAmount: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: '#191919',
+    color: colors.darkFont,
     marginBottom: 8,
   },
   updateDate: {
-    fontSize: 12,
+    fontSize: typography.fontSize.mini,
     color: '#666',
   },
   summaryCards: {
@@ -444,12 +380,12 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   summaryCard: {
-    backgroundColor: '#fff',
+    backgroundColor: colors.white,
     borderRadius: 12,
     padding: 12,
     flexDirection: 'row',
     alignItems: 'center',
-    shadowColor: '#000',
+    shadowColor: colors.black,
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.05,
     shadowRadius: 2,
@@ -459,29 +395,30 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: '#ffffff',
+    backgroundColor: colors.white,
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 12,
   },
   summaryLabel: {
-    fontSize: 12,
-    color: '#666',
+    fontSize: typography.fontSize.mini,
+    fontFamily: typography.fontFamily.regular,
+    color: colors.black,
     marginBottom: 2,
   },
   summaryAmount: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#333',
+    fontSize: typography.fontSize.body,
+    fontFamily: typography.fontFamily.medium,
+    color: colors.black,
   },
   habitCard: {
-    backgroundColor: '#fff',
+    backgroundColor: colors.white,
     borderRadius: 12,
     padding: 16,
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 12,
-    shadowColor: '#000',
+    shadowColor: colors.black,
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.05,
     shadowRadius: 2,
@@ -500,21 +437,22 @@ const styles = StyleSheet.create({
   },
   habitText: {
     flex: 1,
-    fontSize: 14,
+    fontSize: typography.fontSize.small,
     color: '#333',
     lineHeight: 20,
   },
   bottomNav: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
     flexDirection: 'row',
     justifyContent: 'space-around',
     alignItems: 'center',
-    backgroundColor: '#fff',
-    paddingTop: 20,
-    paddingBottom: 10,
-    paddingHorizontal: 20,
+    backgroundColor: colors.white,
+    padding: 20,
     borderTopWidth: 1,
-    borderTopColor: '#f0f0f0',
-    bottom: 0,
+    borderTopColor: colors.lightGrayBackground,
   },
   navItem: {
     alignItems: 'center',
@@ -522,12 +460,12 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   navText: {
-    fontSize: 12,
+    fontSize: typography.fontSize.mini,
     color: '#999',
     marginTop: 4,
   },
   navTextActive: {
-    fontSize: 12,
+    fontSize: typography.fontSize.mini,
     color: '#000',
     marginTop: 4,
     fontWeight: '600',
