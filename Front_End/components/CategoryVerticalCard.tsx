@@ -8,11 +8,12 @@ interface CategoryVerticalCardProps {
   iconBackground?: string;
   value?: string | React.ReactElement;
   valueIcon?: React.ReactElement;
+  cardMinHeight?: number;
 }
 
-export default function CategoryVerticalCard({ icon, label, iconBackground='#B4698F', value, valueIcon }: CategoryVerticalCardProps) {
+export default function CategoryVerticalCard({ icon, label, iconBackground='#B4698F', value, valueIcon, cardMinHeight=110 }: CategoryVerticalCardProps) {
   return (
-    <View style={styles.card}>
+    <View style={[styles.card, {minHeight: cardMinHeight}]}>
       <View style={[styles.iconWrapper, { backgroundColor: iconBackground}]}>
         {icon}
       </View>
@@ -30,7 +31,6 @@ export default function CategoryVerticalCard({ icon, label, iconBackground='#B46
 const styles = StyleSheet.create({
   card: {
     width: 90,
-    minHeight: 110,
     borderRadius: 12,
     paddingTop: 12,
     paddingRight: 8,

@@ -1,9 +1,9 @@
-import HorizontalCard from '@/components/HorizontalCard';
 import { getSpendingCategories } from '@/src/api/spending';
 import { colors, typography } from '@/src/theme';
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import CarIcon from '@/assets/icons/car.svg'
+import CategoryVerticalCard from '@/components/CategoryVerticalCard';
 
 type SpendingCategory = {
   category_name: string;
@@ -33,20 +33,24 @@ export default function Step4() {
   return (
     <View style={styles.container}>
       <Text style={styles.text}>Your top three spending categories this week:</Text>
-      <View style={styles.cardsWrapper}>
+      <View style={styles.cardsGrid}>
         {categories.slice(0, 3).map((category, index) => (
-          <HorizontalCard
-            key={index}
-            title={category.category_name || 'N/A'}
-            white={true}
-            icon={
-              <View style={styles.iconWrapper}>
-                <CarIcon width={24} height={24} fill="none" stroke={colors.white} />
-              </View>
-            }
-            amount={String(category.amount)}
-            onlyLabel
-          />
+          <View key={index} style={styles.cardRow}>
+            <CategoryVerticalCard
+            cardMinHeight={90}
+              label={`$${category.amount}` || 'N/A'}
+              icon={
+                <View style={styles.iconWrapper}>
+                  <CarIcon width={24} height={24} fill="none" stroke={colors.white} />
+                </View>
+              }
+            />
+            <View style={styles.bulletWrapper}>
+              <Text style={styles.bulletText}>
+                {`${index + 1}. ${category.category_name}`}
+              </Text>
+            </View>
+          </View>
         ))}
       </View>
     </View>
@@ -70,7 +74,7 @@ const styles = StyleSheet.create({
     marginRight: 24
   },
   iconWrapper: {
-    width: 39.09,
+    width: 40,
     height: 40,
     padding: 10,
     borderRadius: 100,
@@ -79,8 +83,24 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginRight: 8
   },
-  cardsWrapper: {
+  cardsGrid: {
+    flexDirection: 'column',
+    marginLeft: 32,
+    gap: 16,
+  },
+  cardRow: {
+    flexDirection: 'row',
     alignItems: 'center',
+    gap: 16,
+  },
+  bulletWrapper: {
+    justifyContent: 'center',
+    height: 110,
+  },
+  bulletText: {
+    fontFamily: typography.fontFamily.semiBold,
+    fontSize: typography.fontSize.large,
+    color: colors.darkFont,
   },
 });
 
