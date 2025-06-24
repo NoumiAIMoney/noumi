@@ -14,9 +14,9 @@ import json
 import logging
 from datetime import datetime, timedelta
 from typing import Dict, Any, List
-import uuid
+import uuid 
 import random
-
+from plaid_endpoint import create_plaid_connect_endpoint
 # Load environment variables from .env file
 def load_env_file():
     """Load environment variables from .env file if it exists."""
@@ -36,9 +36,6 @@ from noumi_agents.transaction_agent.plaid_transaction_agent import PlaidTransact
 from noumi_agents.planning_agent.chain_of_guidance_planner import ChainOfGuidancePlanningAgent
 from noumi_agents.planning_agent.recap_agent import RecapAgent
 from noumi_agents.utils.llm_client import NoumiLLMClient
-
-# Import Plaid endpoint
-from plaid_endpoint import create_plaid_connect_endpoint
 
 # Initialize Flask app
 app = Flask(__name__)
@@ -579,18 +576,8 @@ def extract_ml_features():
 
 @app.route('/api/plaid/connect', methods=['POST'])
 def connect_plaid():
-    """
-    Connect to Plaid and fetch transaction data.
     
-    Expected JSON Input:
-    {
-        "public_token": "public-sandbox-token"
-    }
-    
-    Returns: Connection status and data summary
-    """
     try:
-        # Validate request
         if not request.is_json:
             return jsonify({"error": "Request must be JSON"}), 400
         
@@ -603,9 +590,7 @@ def connect_plaid():
         
         logger.info(f"Processing Plaid connection with token: {public_token[:10]}...")
         
-        # Generate synthetic Plaid data (simulating real Plaid response)
-        synthetic_data = generate_synthetic_plaid_data()
-        
+
         # Save to database
         save_plaid_data_to_database(synthetic_data)
         
@@ -632,78 +617,8 @@ def connect_plaid():
         }), 500
 
 
-def generate_synthetic_plaid_data():
-    """Generate synthetic Plaid data for testing."""
-    
-    # Generate accounts
-    accounts = [
-        {
-            "account_id": f"acc_{uuid.uuid4().hex[:8]}",
-            "name": "Checking Account",
-            "type": "depository",
-            "subtype": "checking",
-            "balance": round(random.uniform(1000, 5000), 2)
-        },
-        {
-            "account_id": f"acc_{uuid.uuid4().hex[:8]}",
-            "name": "Savings Account", 
-            "type": "depository",
-            "subtype": "savings",
-            "balance": round(random.uniform(5000, 25000), 2)
-        }
-    ]
-    
-    # Generate transactions (similar to synthetic_transactions.py)
-    transactions = []
-    merchants = [
-        ("Starbucks", "Food and Drink", 5814),
-        ("Amazon", "Shopping", 5818),
-        ("Walmart", "Shopping", 5411),
-        ("Shell", "Transportation", 5541),
-        ("Apple", "Shopping", 5732),
-        ("McDonald's", "Food and Drink", 5812),
-        ("CVS Pharmacy", "Health", 5912),
-        ("Uber", "Transportation", 4121),
-        ("Target", "Shopping", 5311),
-        ("Costco", "Shopping", 5300),
-    ]
-    
-    # Generate 30 days of transactions
-    for i in range(30):
-        date = datetime.now() - timedelta(days=i)
-        
-        # 1-3 transactions per day
-        for j in range(random.randint(1, 3)):
-            merchant, category, mcc = random.choice(merchants)
-            amount = -round(random.uniform(5, 200), 2)  # Negative for spending
-            
-            transaction = {
-                "transaction_id": f"txn_{uuid.uuid4().hex[:8]}",
-                "account_id": accounts[0]["account_id"],  # Use checking account
-                "amount": amount,
-                "date": date.strftime("%Y-%m-%d"),
-                "merchant_name": merchant,
-                "category": category,
-                "description": f"{merchant} purchase",
-                "mcc": mcc,
-                "created_at": datetime.now().isoformat()
-            }
-            transactions.append(transaction)
-    
-    return {
-        "accounts": accounts,
-        "transactions": transactions,
-        "item": {
-            "item_id": f"item_{uuid.uuid4().hex[:8]}",
-            "institution_id": "ins_123456",
-            "available_products": ["transactions", "balance"],
-            "billed_products": ["transactions"]
-        }
-    }
-
-
 def save_plaid_data_to_database(plaid_data):
-    """Save Plaid data to database following the schema."""
+    
     try:
         # Import database manager
         import sqlite3
