@@ -10,6 +10,7 @@ import { router } from 'expo-router';
 interface Habit {
   habit_description: string;
   occurrences: number;
+  habit_full_prompt: string;
 }
 
 export default function Step5() {
@@ -18,7 +19,11 @@ export default function Step5() {
     async function fetchGoal() {
       try {
         const data = await getHabits();
-        setHabits(data);
+        const filteredHabits = data.filter(
+          (habit: { habit_description: string; }) => !/noumi/i.test(habit.habit_description)
+        );
+
+        setHabits(filteredHabits);
       } catch (error) {
         console.error('Failed to fetch habits:', error);
       }
@@ -31,12 +36,12 @@ export default function Step5() {
   return (
     <View style={styles.wrapper}>
       <View style={styles.container}>
-        <Text style={styles.text}>Try these habits to start saving more.</Text>
+        <Text style={styles.text}>You did great this week. Try these habits next and watch your funds grow.</Text>
         <View style={styles.cardsWrapper}>
-          {habits.slice(0, 3).map((habit, index) => (
+          {habits.map((habit, index) => (
             <HorizontalCard
               key={index}
-              title={habit.habit_description || 'N/A'}
+              title={habit.habit_full_prompt || 'N/A'}
               white={true}
               icon={
                 <View style={styles.iconWrapper}>
@@ -78,7 +83,7 @@ const styles = StyleSheet.create({
     color: colors.darkFont,
     letterSpacing: 0,
     marginLeft: 8,
-    marginBottom: 24,
+    marginBottom: 56,
     marginRight: 64
   },
   cardsWrapper: {
