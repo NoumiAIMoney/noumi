@@ -6,7 +6,8 @@ interface HorizontalCardProps {
   title: string;
   amount?: string;
   white?: boolean;
-  icon: React.ReactElement;
+  icon?: React.ReactElement;
+  iconRight?: boolean;
   width?: number;
   onlyLabel?: boolean,
   amountColor?: string;
@@ -17,6 +18,7 @@ export default function HorizontalCard({
   amount,
   white = false,
   icon,
+  iconRight,
   width = 362,
   onlyLabel = false,
   amountColor = colors.blueFont
@@ -26,20 +28,29 @@ export default function HorizontalCard({
   return (
     <View style={[styles.card, { backgroundColor: cardBackground, width }]}>
       <View style={styles.leftContent}>
-        <View style={styles.icon}>{icon}</View>
+        {!iconRight && icon && (
+          <View style={[{ marginRight: 12 }]}>{icon}</View>
+        )}
         <View style={[styles.textWrapper, !amount && { maxWidth: '100%' }]}>
-          <Text style={[styles.title, onlyLabel
-            ? { fontFamily: typography.fontFamily.medium }
-            : { fontFamily: typography.fontFamily.regular }
-            ]} numberOfLines={2}
+          <Text
+            style={[
+              styles.title,
+              onlyLabel
+                ? { fontFamily: typography.fontFamily.medium }
+                : { fontFamily: typography.fontFamily.regular }
+            ]}
+            numberOfLines={2}
           >
             {title}
           </Text>
         </View>
+        {iconRight && icon && (
+          <View style={[{ marginLeft: 8, marginRight: 0 }]}>{icon}</View>
+        )}
       </View>
 
       {amount && (
-        <Text style={[styles.amount, {color: amountColor}]}>
+        <Text style={[styles.amount, { color: amountColor }]}>
           ${amount}
         </Text>
       )}
@@ -62,9 +73,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     flex: 1,
-  },
-  icon: {
-    marginRight: 12,
   },
   textWrapper: {
     flexShrink: 1,

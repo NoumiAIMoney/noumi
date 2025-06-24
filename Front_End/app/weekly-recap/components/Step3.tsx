@@ -1,25 +1,24 @@
 import { colors, typography } from '@/src/theme';
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import { getYearlyAnomalies } from '@/src/api/anomalies';
-import { getSpendingTrends } from '@/src/api/trends';
 import HorizontalCard from '@/components/HorizontalCard';
 import TrendUpIcon from '@/assets/icons/progress.svg'
+import { getAccomplishedHabits } from '@/src/api/habits';
+
+type Habit = {
+  habit_description: string;
+  value?: string;
+}
 
 export default function Step3() {
-  const [anomalies, setAnomalies] = useState<number[] | null>(null);
-  const [trends, setTrends] = useState<any[]>([]);
+  const [accomplishments, setAccomplishments] = useState<Habit[] | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [anomaliesRes, trendsRes] = await Promise.all([
-          getYearlyAnomalies(),
-          getSpendingTrends(),
-        ]);
+        const data = await getAccomplishedHabits();
 
-        setAnomalies(anomaliesRes.anomalies);
-        setTrends(trendsRes || []);
+        setAccomplishments(data);
       } catch (error) {
         console.error('Error fetching data:', error);
       }
@@ -28,21 +27,30 @@ export default function Step3() {
     fetchData();
   }, []);
 
-  if (!anomalies) return null;
+  if (!accomplishments) return null;
 
   return (
     <View style={styles.container}>
       <Text style={styles.subtitle}>Habits</Text>
       <View style={styles.section}>
-        {trends.slice(0, 2).map((trend, index) => (
-          <HorizontalCard
-            key={index}
-            title={trend.trend || 'N/A'}
-            white={true}
-            icon={<TrendUpIcon width={24} height={24} fill="none" />}
-            width={330}
-          />
-        ))}
+        {accomplishments.map((habit, index) => {
+          const isNoumi = habit.value?.toLowerCase().includes('noumi');
+
+          return (
+            <HorizontalCard
+              key={index}
+              title={habit.habit_description || 'N/A'}
+              white={true}
+              width={330}
+              iconRight={isNoumi}
+              {...(
+                isNoumi
+                  ? { icon: <TrendUpIcon width={24} height={24} fill="none" /> }
+                  : { amount: habit.value, amountColor: '#1BB16A' }
+              )}
+            />
+          );
+        })}
       </View>
       <Text style={styles.text}>Way to go! You're building new habits and they are paying off.</Text>
     </View>

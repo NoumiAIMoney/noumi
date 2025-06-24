@@ -5,6 +5,6 @@ export const mockHabits = [
 ];
 
 export const mockAccomplishedHabits = [
-  { habit_description: 'You bought 2 coffees instead of 7, saving $36.24.', value: '+$36.24' },
+  { habit_description: 'You bought 2 coffees instead of 7, saving $36.24.', value: '36.24' },
   { habit_description: 'You logged in to Noumi every day this week', value: 'noumi' },
 ];
