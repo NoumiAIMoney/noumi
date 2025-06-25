@@ -223,7 +223,7 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
             <Text style={styles.navText}>Goals</Text>
           </TouchableOpacity>
           
-          <TouchableOpacity style={styles.navItem}>
+          <TouchableOpacity style={styles.navItem} onPress={()=>router.replace('/progress')}>
             <ProgressIcon />
             <Text style={styles.navText}>Progress</Text>
           </TouchableOpacity>
