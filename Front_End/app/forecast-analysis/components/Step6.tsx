@@ -1,8 +1,10 @@
 
 import GoalProgressCard from '@/components/GoalProgressCard';
+import PrimaryButton from '@/components/PrimaryButton';
 import { getComputedGoal } from '@/src/api/goal';
 import { getWeeklySavings } from '@/src/api/savings';
 import { colors, typography } from '@/src/theme';
+import { router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
@@ -56,6 +58,12 @@ export default function Step6() {
           percentage={String(percentage)}
         />
       </View>
+      <View style={styles.buttonWrapper}>
+        <PrimaryButton
+          title="Home Page"
+          onPress={() => router.push('/home-screen')}
+        />
+      </View>
     </View>
   );
 }
@@ -79,5 +87,9 @@ const styles = StyleSheet.create({
   section: {
     alignItems: 'center',
     marginVertical: 16
+  },
+  buttonWrapper: {
+    width: 400,
+    alignItems: 'center'
   }
 });

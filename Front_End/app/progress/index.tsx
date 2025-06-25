@@ -79,7 +79,8 @@ const ProgressScreen: React.FC<ProgressScreenProps> = () => {
         <Text style={styles.statsTitle}>Habit Stats</Text>
         {/* Habit Stats */}
         <View style={styles.spikeCard}>
-          <SpikeBar cardWidth={370} progress={anomalies} habitCount={anomalies.reduce((acc, val) => acc + val, 0)} />
+          {/* Habit count is hard coded for now */}
+          <SpikeBar cardWidth={370} progress={anomalies} habitCount={3} />
         </View>
 
         {/* Habits for the week */}
@@ -128,7 +129,7 @@ const ProgressScreen: React.FC<ProgressScreenProps> = () => {
     <SafeAreaView style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.backButton}
           onPress={() => router.replace('/home-screen')}
         >
