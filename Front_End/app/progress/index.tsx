@@ -1,4 +1,4 @@
-import React, { JSX, useState } from 'react';
+import React, { JSX, useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -8,136 +8,78 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { MaterialIcons } from '@expo/vector-icons';
 import HomeIcon from '@/assets/icons/home.svg'; 
 import GoalsIcon from '@/assets/icons//goals.svg'; 
 import ProgressIcon from '@/assets/icons//progress.svg';
 import { colors, typography, shadows } from '@/src/theme';
 import { router } from 'expo-router';
+import HabitCard, { HydratedHabit, hydrateHabits } from '@/components/HabitCard';
+import { getHabits } from '@/src/api/habits';
+import RecapCard from '@/components/RecapCard';
+import SpikeBar from '@/components/SpikeBar';
+import { getYearlyAnomalies } from '@/src/api/anomalies';
 
 // Type definitions
-interface Habit {
-  completed: number;
-  total: number;
-  isCompleted: boolean;
-}
-
-interface HabitsState {
-  [key: string]: Habit;
-}
 
 interface ProgressScreenProps {
-  navigation: {
-    goBack: () => void;
-    navigate: (screen: string) => void;
-  };
 }
 
 type TabType = 'Active Habits' | 'Weekly Recaps';
 
-const ProgressScreen: React.FC<ProgressScreenProps> = ({ navigation }) => {
+const ProgressScreen: React.FC<ProgressScreenProps> = () => {
   const [activeTab, setActiveTab] = useState<TabType>('Active Habits');
-  const [habits, setHabits] = useState<HabitsState>({
-    'Eat at home twice': { completed: 1, total: 4, isCompleted: false },
-    'Try a No-Spend-Day': { completed: 0, total: 1, isCompleted: false },
-    'Log in to Noumi daily': { completed: 7, total: 7, isCompleted: true }
-  });
+  const [habits, setHabits] = useState<HydratedHabit[]>([]);
+  const [anomalies, setAnomalies] = useState<number[]>([])
 
-  const toggleHabit = (habitName: string): void => {
-    setHabits(prev => {
-      const newHabits = { ...prev };
-      const habit = newHabits[habitName];
-
-      if (!habit.isCompleted && habit.completed < habit.total) {
-        habit.completed += 1;
-        if (habit.completed === habit.total) {
-          habit.isCompleted = true;
-        }
+  useEffect(() => {
+    async function fetchAndHydrateHabits() {
+      try {
+        const [rawHabits, anomalyData] = await Promise.all([getHabits(), getYearlyAnomalies()]);
+        const hydrated = hydrateHabits(rawHabits);
+        setHabits(hydrated);
+        setAnomalies(anomalyData.anomalies);
+      } catch (err) {
+        console.error('Failed to fetch habits:', err);
       }
+    }
 
-      return newHabits;
-    });
+    fetchAndHydrateHabits();
+  }, []);
+
+  const toggleHabit = (habitName: string) => {
+    const updatedHabits = habits.map(habit =>
+      habit.name === habitName && !habit.isCompleted
+        ? {
+            ...habit,
+            completed: habit.completed + 1,
+            isCompleted: habit.completed + 1 >= habit.total,
+          }
+        : habit
+    );
+
+    const sorted = sortHabits(updatedHabits);
+    setHabits(sorted);
   };
 
-  // Calculate overall progress percentage for current month
-  const calculateCurrentMonthProgress = (): number => {
-    const habitEntries = Object.entries(habits);
-    const totalTasks = habitEntries.reduce((sum, [_, habit]) => sum + habit.total, 0);
-    const completedTasks = habitEntries.reduce((sum, [_, habit]) => sum + habit.completed, 0);
-    return totalTasks > 0 ? (completedTasks / totalTasks) * 100 : 0;
-  };
+  const sortHabits = (list: HydratedHabit[]): HydratedHabit[] => {
+    const incomplete = list.filter(h => !h.isCompleted);
+    const complete = list.filter(h => h.isCompleted);
 
-  const getHabitsList = (): [string, Habit][] => {
-    const habitEntries = Object.entries(habits);
+    incomplete.sort(
+      (a, b) => (a.completed / a.total) - (b.completed / b.total)
+    );
 
-    // Separate incomplete and complete habits
-    const incomplete = habitEntries.filter(([_, habit]) => !habit.isCompleted);
-    const complete = habitEntries.filter(([_, habit]) => habit.isCompleted);
-
-    // Sort incomplete habits by completion percentage (ascending - least completed first)
-    incomplete.sort(([, a], [, b]) => {
-      const aPercentage = (a.completed / a.total) * 100;
-      const bPercentage = (b.completed / b.total) * 100;
-      return aPercentage - bPercentage;
-    });
-
-    // Sort completed habits by completion order (could be by name or keep original order)
-    complete.sort(([nameA], [nameB]) => nameA.localeCompare(nameB));
-
-    // Return incomplete habits first (least completed at top), then completed habits
     return [...incomplete, ...complete];
   };
 
   const renderActiveHabits = (): JSX.Element => {
-    const currentMonthProgress = calculateCurrentMonthProgress();
 
     return (
       <View style={styles.content}>
         <Text style={styles.statsTitle}>Habit Stats</Text>
         {/* Habit Stats */}
-        <View style={styles.statsCard}>
-          <View style={styles.statsRow}>
-            <View style={styles.statsNumber}>
-              <Text style={styles.statsCount}>3</Text>
-              <Text style={styles.statsLabel}>Habits</Text>
-              <Text style={styles.statsSubLabel}>This Year</Text>
-            </View>
-            <View style={styles.calendarGrid}>
-              {Array.from({ length: 12 }, (_, i) => {
-                const currentMonth = new Date().getMonth(); // 0-11
-                const isCurrentMonth = i === currentMonth;
-                const progressHeight = isCurrentMonth ? (currentMonthProgress / 100) * 35 : 0;
-
-                return (
-                  <View key={`dot-container-${i}`} style={[styles.calendarDotContainer, { left: `${4 + i * 8}%` }]}>
-                    {/* Background dot */}
-                    <View style={[styles.calendarDot]} />
-                    {/* Progress fill */}
-                    {isCurrentMonth && (
-                      <View 
-                        style={[
-                          styles.calendarDotProgress, 
-                          { 
-                            height: progressHeight,
-                            bottom: 0,
-                          }
-                        ]} 
-                      />
-                    )}
-                    {/* Completed months (example: previous months could be fully filled) */}
-                    {i < currentMonth && (
-                      <View style={[styles.calendarDotCompleted]} />
-                    )}
-                  </View>
-                );
-              })}
-              <View style={styles.monthLabels}>
-                {['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'].map((month, i) => (
-                  <Text key={`month-${i}`} style={styles.monthLabel}>{month.charAt(0)}</Text>
-                ))}
-              </View>
-            </View>
-          </View>
+        <View style={styles.spikeCard}>
+          <SpikeBar cardWidth={370} progress={anomalies} habitCount={anomalies.reduce((acc, val) => acc + val, 0)} />
         </View>
 
         {/* Habits for the week */}
@@ -146,41 +88,12 @@ const ProgressScreen: React.FC<ProgressScreenProps> = ({ navigation }) => {
           <Text style={styles.sectionSubtitle}>When you complete a habit, mark it as done!</Text>
 
           <View style={styles.habitsList}>
-            {getHabitsList().map(([habitName, habit]) => (
-              <View key={habitName} style={styles.habitCard}>
-                <View style={styles.habitContent}>
-                  <Text style={styles.habitText}>{habitName}</Text>
-                  <View style={styles.habitProgress}>
-                    <View style={styles.progressBar}>
-                      <View 
-                        style={[
-                          styles.progressFill, 
-                          { 
-                            width: `${(habit.completed / habit.total) * 100}%`,
-                            backgroundColor: habit.isCompleted ? colors.primaryGreen : colors.progressBarOrange
-                          }
-                        ]} 
-                      />
-                    </View>
-                    <Text style={styles.progressText}>
-                      {habit.completed} out of {habit.total} complete
-                    </Text>
-                  </View>
-                </View>
-                <TouchableOpacity 
-                  style={styles.checkButton}
-                  onPress={() => toggleHabit(habitName)}
-                  disabled={habit.isCompleted}
-                >
-                  {habit.isCompleted ? (
-                    <View style={styles.checkedButton}>
-                      <Ionicons name="checkmark" size={16} color={colors.white} />
-                    </View>
-                  ) : (
-                    <View style={styles.uncheckedButton} />
-                  )}
-                </TouchableOpacity>
-              </View>
+            {habits.map((habit, index) => (
+              <HabitCard
+                key={index}
+                habit={habit}
+                onToggle={() => toggleHabit(habit.name)}
+              />
             ))}
           </View>
         </View>
@@ -200,19 +113,12 @@ const ProgressScreen: React.FC<ProgressScreenProps> = ({ navigation }) => {
           '05/12 - 05/19',
           '05/05 - 05/12',
           '04/29 - 05/05'
-        ].map((dateRange: string, index: number) => (
-          <TouchableOpacity key={index} style={styles.recapCard} onPress={()=>router.replace('/weekly-recap')}>
-            <View style={styles.recapContent}>
-              <View style={styles.recapIcon}>
-                <MaterialIcons name="emoji-events" size={24} color={colors.white} />
-              </View>
-              <View style={styles.recapText}>
-                <Text style={styles.recapDate}>{dateRange}</Text>
-                <Text style={styles.recapCardTitle}>Your Weekly Recap</Text>
-              </View>
-            </View>
-            <Ionicons name="chevron-forward" size={20} color={colors.lightGrayFont} />
-          </TouchableOpacity>
+        ].map((dateRange, index) => (
+          <RecapCard
+            key={index}
+            dateRange={dateRange}
+            onPress={() => router.replace('/weekly-recap')}
+          />
         ))}
       </View>
     </View>
@@ -261,7 +167,7 @@ const ProgressScreen: React.FC<ProgressScreenProps> = ({ navigation }) => {
       <View style={styles.bottomNav}>
         <TouchableOpacity 
           style={styles.navItem}
-          onPress={() => navigation.navigate('Home')}
+          onPress={() => router.replace('/home-screen')}
         >
           <HomeIcon />
           <Text style={styles.navText}>Home</Text>
@@ -272,7 +178,10 @@ const ProgressScreen: React.FC<ProgressScreenProps> = ({ navigation }) => {
           <Text style={styles.navText}>Goals</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.navItem}>
+        <TouchableOpacity
+          style={styles.navItem}
+          onPress={() => router.replace('/progress')}
+        >
           <ProgressIcon/>
           <Text style={styles.navTextActive}>Progress</Text>
         </TouchableOpacity>
@@ -377,49 +286,8 @@ const styles = StyleSheet.create({
     color: colors.muted,
     fontWeight: '600',
   },
-  calendarGrid: {
-    flex: 1,
-    position: 'relative',
-  },
-  calendarDotContainer: {
-    position: 'absolute',
-    width: 6,
-    height: 35,
-    top: -20,
-  },
-  calendarDot: {
-    position: 'absolute',
-    width: 6,
-    height: 35,
-    backgroundColor: colors.progressBarOrangeLight,
-    borderRadius: 25,
-    top: 0,
-  },
-  calendarDotProgress: {
-    position: 'absolute',
-    width: 6,
-    backgroundColor: colors.progressBarOrange,
-    borderRadius: 25,
-  },
-  calendarDotCompleted: {
-    position: 'absolute',
-    width: 6,
-    height: 35,
-    borderRadius: 25,
-    top: 0,
-  },
-  monthLabels: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 20,
-    gap: 8,
-  },
-  monthLabel: {
-    fontSize: typography.fontSize.mini,
-    color: colors.muted,
-    textAlign: 'center',
-    fontWeight: '700',
-    flex: 1,
+  spikeCard: {
+    marginBottom: 20
   },
   section: {
     marginBottom: 30,
@@ -439,60 +307,6 @@ const styles = StyleSheet.create({
   habitsList: {
     gap: 12,
   },
-  habitCard: {
-    backgroundColor: colors.white,
-    borderRadius: 12,
-    padding: 16,
-    flexDirection: 'row',
-    alignItems: 'center',
-    ...shadows.input,
-    width: 370,
-    height: 89,
-  },
-  habitContent: {
-    flex: 1,
-  },
-  habitText: {
-    fontSize: typography.fontSize.body,
-    color: colors.darkFont,
-    marginBottom: 8,
-    fontWeight: '500',
-  },
-  habitProgress: {
-    gap: 4,
-  },
-  progressBar: {
-    height: 11,
-    backgroundColor: colors.progressBarOrangeLight,
-    borderRadius: 8,
-    width: 170,
-  },
-  progressFill: {
-    height: '100%',
-    borderRadius: 8,
-  },
-  progressText: {
-    fontSize: typography.fontSize.mini,
-    color: colors.darkFont,
-  },
-  checkButton: {
-    marginLeft: 16,
-  },
-  uncheckedButton: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    borderWidth: 2,
-    borderColor: colors.lightGrayFont,
-  },
-  checkedButton: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    backgroundColor: colors.primaryGreen,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
   recapTitle: {
     fontSize: typography.fontSize.large,
     fontWeight: '600',
@@ -505,49 +319,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   recapsList: {
-    gap: 16,
-  },
-  recapCard: {
-    backgroundColor: colors.white,
-    borderRadius: 12,
-    padding: 16,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    shadowColor: colors.black,
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.07,
-    shadowRadius: 2,
-    elevation: 1,
-    width: 353,
-    height: 57,
-  },
-  recapContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  recapIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: colors.primaryGreen,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 12,
-  },
-  recapText: {
-    flex: 1,
-    color: colors.darkFont,
-  },
-  recapDate: {
-    fontSize: typography.fontSize.mini,
-    color: colors.lightGrayFont,
-    marginBottom: 2,
-  },
-  recapCardTitle: {
-    fontSize: typography.fontSize.body,
-    fontWeight: '500',
-    color: colors.gray,
+    gap: 4,
   },
   bottomNav: {
     flexDirection: 'row',
