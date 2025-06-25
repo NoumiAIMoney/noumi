@@ -1,0 +1,49 @@
+{
+  "timestamp": "2025-06-24T20:43:30.521067",
+  "status_code": 200,
+  "success": true,
+  "request_data": null,
+  "response_headers": {
+    "date": "Wed, 25 Jun 2025 01:43:29 GMT",
+    "server": "uvicorn",
+    "content-length": "469",
+    "content-type": "application/json"
+  },
+  "response_body": [
+    {
+      "category_name": "Shopping",
+      "amount": 2429.84,
+      "month": "2025-06"
+    },
+    {
+      "category_name": "Transportation",
+      "amount": 2230.0,
+      "month": "2025-06"
+    },
+    {
+      "category_name": "Food & Dining",
+      "amount": 1278.88,
+      "month": "2025-06"
+    },
+    {
+      "category_name": "Entertainment",
+      "amount": 1185.84,
+      "month": "2025-06"
+    },
+    {
+      "category_name": "Transportation",
+      "amount": 507.5,
+      "month": "2025-05"
+    },
+    {
+      "category_name": "Shopping",
+      "amount": 542.5,
+      "month": "2025-05"
+    },
+    {
+      "category_name": "Entertainment",
+      "amount": 525.0,
+      "month": "2025-05"
+    }
+  ]
+}

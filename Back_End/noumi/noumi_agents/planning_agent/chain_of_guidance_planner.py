@@ -100,6 +100,12 @@ class ChainOfGuidancePlanningAgent(BasePlanningAgent):
                         "Monday: Specific action",
                         "Tuesday: Specific action"
                     ],
+                    "habits": [
+                        "habit1(etc: Try meal planning instead of eating out at least twice a week)",
+                        "habit2(etc: Try No Spend Day this week)",
+                        "habit3",
+                        "habit4",
+                    ],
                     "risk_level": "low|medium|high",
                     "difficulty": "easy|medium|hard"
                 }}
@@ -161,7 +167,13 @@ class ChainOfGuidancePlanningAgent(BasePlanningAgent):
                         }},
                         "category_adjustments": {{}},
                         "daily_actions": [],
-                        "success_factors": ["factor1", "factor2"]
+                        "success_factors": ["factor1", "factor2"],
+                        "habits": [
+                            "habit1(etc: Try meal planning instead of eating out at least twice a week)",
+                            "habit2(etc: Try No Spend Day this week)",
+                            "habit3",
+                            "habit4",
+                        ]
                     }}
                 }}
             ],
@@ -225,7 +237,13 @@ class ChainOfGuidancePlanningAgent(BasePlanningAgent):
                     }},
                     "primary_strategy": "main strategy description",
                     "key_adjustments": {{}},
-                    "implementation_steps": []
+                    "implementation_steps": [],
+                    "habits": [
+                        "habit1(etc: Try meal planning instead of eating out at least twice a week)",
+                        "habit2(etc: Try No Spend Day this week)",
+                        "habit3",
+                        "habit4",
+                    ]
                 }}
             }}
         }}
@@ -360,7 +378,13 @@ class ChainOfGuidancePlanningAgent(BasePlanningAgent):
                 "Review progress daily",
                 "Celebrate small wins",
                 "Stay consistent with tracking"
-            ]
+            ],
+            "habits": [
+                        "habit1(etc: Try meal planning instead of eating out at least twice a week)",
+                        "habit2(etc: Try No Spend Day this week)",
+                        "habit3",
+                        "habit4",
+                    ]
         }}
         """
 

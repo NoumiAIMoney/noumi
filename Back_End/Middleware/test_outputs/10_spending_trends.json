@@ -1,0 +1,30 @@
+{
+  "timestamp": "2025-06-24T20:43:30.518216",
+  "status_code": 200,
+  "success": true,
+  "request_data": null,
+  "response_headers": {
+    "date": "Wed, 25 Jun 2025 01:43:29 GMT",
+    "server": "uvicorn",
+    "content-length": "356",
+    "content-type": "application/json"
+  },
+  "response_body": [
+    {
+      "icon": "\ud83d\udcc5",
+      "trend": "Thursday is your highest spending day with $1876.84 total this quarter."
+    },
+    {
+      "icon": "\ud83c\udfea",
+      "trend": "Best Buy is your top merchant with $1462.50 spent."
+    },
+    {
+      "icon": "\ud83d\udcca",
+      "trend": "Your top spending category is Shopping at $2902.34 this quarter."
+    },
+    {
+      "icon": "\ud83d\udcb3",
+      "trend": "You average 5.7 transactions per day - consider consolidating."
+    }
+  ]
+}

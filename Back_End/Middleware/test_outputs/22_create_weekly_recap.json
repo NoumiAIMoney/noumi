@@ -1,0 +1,185 @@
+{
+  "timestamp": "2025-06-24T20:44:47.467548",
+  "status_code": 200,
+  "success": true,
+  "request_data": {
+    "weekly_plan": {
+      "week_start_date": "2025-06-23",
+      "savings_target": {
+        "amount": 300.0,
+        "currency": "USD"
+      },
+      "spending_limits": {
+        "Food & Dining": {
+          "daily_limit": 20.0,
+          "weekly_limit": 140.0
+        },
+        "Transportation": {
+          "daily_limit": 15.0,
+          "weekly_limit": 105.0
+        }
+      },
+      "daily_recommendations": [
+        {
+          "day": "Monday",
+          "actions": [
+            "Check budget"
+          ],
+          "focus_area": "Planning",
+          "motivation": "Start strong!"
+        }
+      ],
+      "tracking_metrics": [],
+      "weekly_challenges": [],
+      "success_tips": [],
+      "habits": [
+        "Log in to Noumi daily",
+        "Set weekly spending limits",
+        "Track all expenses"
+      ]
+    },
+    "actual_transactions": [
+      {
+        "transaction_id": "test_txn_1",
+        "amount": -12.5,
+        "description": "Coffee Shop",
+        "category": "Food & Dining",
+        "date": "2025-06-23",
+        "merchant_name": "Starbucks"
+      },
+      {
+        "transaction_id": "test_txn_2",
+        "amount": -8.0,
+        "description": "Bus Fare",
+        "category": "Transportation",
+        "date": "2025-06-23",
+        "merchant_name": "Metro"
+      }
+    ]
+  },
+  "response_headers": {
+    "date": "Wed, 25 Jun 2025 01:43:29 GMT",
+    "server": "uvicorn",
+    "content-length": "3306",
+    "content-type": "application/json"
+  },
+  "response_body": {
+    "recap_metadata": {
+      "week_period": "2025-06-23 to 2025-06-29",
+      "analysis_timestamp": "2025-06-24T20:44:47.466515",
+      "transaction_count": 2,
+      "total_transactions": 2,
+      "total_spent": 20.5,
+      "planned_budget": 245.0,
+      "savings_achieved": 224.5
+    },
+    "spending_performance": {
+      "total_planned_spending": 245.0,
+      "total_actual_spending": 20.5,
+      "planned_savings_target": 300.0,
+      "spending_vs_plan": -224.5,
+      "spending_adherence_rate": 0.9163265306122449,
+      "over_budget": false,
+      "budget_variance_percentage": -91.63265306122449
+    },
+    "category_performance": {
+      "Food & Dining": {
+        "planned_limit": 140.0,
+        "actual_spent": 12.5,
+        "variance": -127.5,
+        "adherence_rate": 0.9107142857142857,
+        "status": "under_budget",
+        "variance_percentage": -91.07142857142857
+      },
+      "Transportation": {
+        "planned_limit": 105.0,
+        "actual_spent": 8.0,
+        "variance": -97.0,
+        "adherence_rate": 0.9238095238095239,
+        "status": "under_budget",
+        "variance_percentage": -92.38095238095238
+      }
+    },
+    "goal_achievement": {
+      "metric_achievements": [],
+      "challenge_count": 0,
+      "overall_goal_success_rate": 0
+    },
+    "ai_insights": {
+      "key_insights": [
+        {
+          "insight_type": "success",
+          "title": "Excellent Spending Adherence",
+          "description": "Spending adherence rate is over 90% across all tracked categories (Food & Dining and Transportation), showing strong discipline.",
+          "impact_level": "high"
+        },
+        {
+          "insight_type": "success",
+          "title": "Significant Underspending",
+          "description": "Total actual spending is significantly below the planned spending, indicating strong potential for achieving savings goals.",
+          "impact_level": "high"
+        },
+        {
+          "insight_type": "behavioral",
+          "title": "Early Week Spending",
+          "description": "All transactions occurred on Monday. It's important to maintain spending awareness throughout the entire week.",
+          "impact_level": "medium"
+        }
+      ],
+      "behavioral_patterns": [
+        {
+          "pattern_type": "spending_timing",
+          "description": "Spending is concentrated at the beginning of the week.",
+          "recommendation": "Distribute spending more evenly throughout the week to avoid depleting the budget early on. Plan for spending on other days."
+        }
+      ],
+      "success_highlights": [
+        "High spending adherence rate (91.6%)",
+        "Significantly underspent in both Food & Dining and Transportation categories",
+        "Successfully tracked all expenses as planned"
+      ],
+      "improvement_areas": [
+        {
+          "area": "Spending Distribution",
+          "current_impact": "Potential for overspending later in the week if early week spending is not carefully monitored.",
+          "suggested_action": "Spread spending out more evenly across all days of the week."
+        }
+      ],
+      "overall_performance_summary": "This week demonstrates excellent financial discipline with significant underspending and high adherence to spending limits. However, it's crucial to distribute spending more evenly throughout the week and not concentrate it only at the beginning."
+    },
+    "performance_scores": {
+      "overall_performance_score": 73.3,
+      "spending_adherence_score": 91.6,
+      "category_discipline_score": 91.7,
+      "goal_achievement_score": 0.0,
+      "performance_grade": "C"
+    },
+    "recommendations": [],
+    "detailed_category_analysis": {
+      "Food & Dining": {
+        "total_spent": 12.5,
+        "transaction_count": 1,
+        "merchants": {
+          "Starbucks": 12.5
+        }
+      },
+      "Transportation": {
+        "total_spent": 8.0,
+        "transaction_count": 1,
+        "merchants": {
+          "Metro": 8.0
+        }
+      }
+    },
+    "streak_analysis": {
+      "current_no_overspend_streak": 5,
+      "longest_streak_this_month": 12,
+      "streak_broken_categories": []
+    },
+    "next_week_recommendations": [
+      "Focus on the categories where you overspent",
+      "Set daily spending reminders",
+      "Review and adjust weekly limits"
+    ]
+  }
+}

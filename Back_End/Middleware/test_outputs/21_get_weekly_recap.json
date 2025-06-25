@@ -1,0 +1,157 @@
+{
+  "timestamp": "2025-06-24T20:44:44.460446",
+  "status_code": 200,
+  "success": true,
+  "request_data": null,
+  "response_headers": {
+    "date": "Wed, 25 Jun 2025 01:43:29 GMT",
+    "server": "uvicorn",
+    "content-length": "4298",
+    "content-type": "application/json"
+  },
+  "response_body": {
+    "recap_metadata": {
+      "week_period": "2025-06-30 to 2025-07-06",
+      "analysis_timestamp": "2025-06-24T20:44:44.458256",
+      "transaction_count": 20,
+      "total_transactions": 20,
+      "total_spent": 242.5,
+      "planned_budget": 501.78,
+      "savings_achieved": 259.28
+    },
+    "spending_performance": {
+      "total_planned_spending": 501.78,
+      "total_actual_spending": 242.5,
+      "planned_savings_target": 288.46,
+      "spending_vs_plan": -259.28,
+      "spending_adherence_rate": 0.5167204751086133,
+      "over_budget": false,
+      "budget_variance_percentage": -51.67204751086133
+    },
+    "category_performance": {
+      "Food and Drink": {
+        "planned_limit": 259.77,
+        "actual_spent": 0,
+        "variance": -259.77,
+        "adherence_rate": 1.0,
+        "status": "under_budget",
+        "variance_percentage": -100.0
+      },
+      "Entertainment": {
+        "planned_limit": 242.01,
+        "actual_spent": 22.5,
+        "variance": -219.51,
+        "adherence_rate": 0.9070286351803645,
+        "status": "under_budget",
+        "variance_percentage": -90.70286351803645
+      }
+    },
+    "goal_achievement": {
+      "metric_achievements": [
+        {
+          "metric_name": "Weekly Savings",
+          "target_value": 288.46,
+          "estimated_achievement_rate": 0.5167204751086133,
+          "status": "partial"
+        },
+        {
+          "metric_name": "Days Under Budget",
+          "target_value": 7,
+          "estimated_achievement_rate": 1.0,
+          "status": "achieved"
+        }
+      ],
+      "challenge_count": 3,
+      "overall_goal_success_rate": 0.7583602375543066
+    },
+    "ai_insights": {
+      "key_insights": [
+        {
+          "insight_type": "success",
+          "title": "Significantly Under Budget Overall",
+          "description": "Total actual spending was significantly lower than planned spending, indicating strong potential for exceeding savings goals this week. Spending adherence rate was 51.67%.",
+          "impact_level": "high"
+        },
+        {
+          "insight_type": "improvement",
+          "title": "No Spending Recorded in Food & Drink",
+          "description": "There were no recorded expenses in the Food & Drink category this week, which is unusual and may indicate a data tracking issue or unusually strict adherence to the weekly challenge to cook at home. It also may indicate underspending in essential areas.",
+          "impact_level": "medium"
+        },
+        {
+          "insight_type": "behavioral",
+          "title": "Entertainment Spending Well Below Limit",
+          "description": "Entertainment spending was well below the planned limit, suggesting either a conscious effort to reduce discretionary spending or a lack of entertainment opportunities this week.",
+          "impact_level": "medium"
+        }
+      ],
+      "behavioral_patterns": [
+        {
+          "pattern_type": "category_preference",
+          "description": "A strong preference for Starbucks purchases are observed on a given day.",
+          "recommendation": "Explore less expensive alternatives or limit visits to reduce potential overspending on coffee."
+        }
+      ],
+      "success_highlights": [
+        "Excellent overall spending control resulting in significantly lower than planned expenses.",
+        "Successful adherence to Entertainment spending limits."
+      ],
+      "improvement_areas": [
+        {
+          "area": "Food and Drink Tracking",
+          "current_impact": "Lack of recorded spending in this category makes it difficult to assess actual performance and identify potential areas for optimization or potential underspending in necessary areas.",
+          "suggested_action": "Ensure accurate tracking of all food and drink expenses, even if they are minimal. Consider if current tracking methods require adjustment, or whether spending in this category is simply low due to conscious effort or change in normal routine."
+        }
+      ],
+      "overall_performance_summary": "This week showed a strong performance in controlling overall spending, with significant savings potential. However, the lack of recorded spending in the Food & Drink category needs further investigation to ensure accurate tracking and to ensure there is no underspending in a key category."
+    },
+    "performance_scores": {
+      "overall_performance_score": 74.0,
+      "spending_adherence_score": 51.7,
+      "category_discipline_score": 95.4,
+      "goal_achievement_score": 75.8,
+      "performance_grade": "C"
+    },
+    "recommendations": [],
+    "detailed_category_analysis": {
+      "Transportation": {
+        "total_spent": 17.5,
+        "transaction_count": 2,
+        "merchants": {
+          "Chevron": 17.5
+        }
+      },
+      "Entertainment": {
+        "total_spent": 22.5,
+        "transaction_count": 2,
+        "merchants": {
+          "AMC Theaters": 22.5
+        }
+      },
+      "Shopping": {
+        "total_spent": 27.5,
+        "transaction_count": 2,
+        "merchants": {
+          "Best Buy": 27.5
+        }
+      },
+      "Food & Dining": {
+        "total_spent": 175.0,
+        "transaction_count": 14,
+        "merchants": {
+          "Starbucks": 175.0
+        }
+      }
+    },
+    "streak_analysis": {
+      "current_no_overspend_streak": 5,
+      "longest_streak_this_month": 12,
+      "streak_broken_categories": []
+    },
+    "next_week_recommendations": [
+      "Focus on the categories where you overspent",
+      "Set daily spending reminders",
+      "Review and adjust weekly limits"
+    ]
+  }
+}

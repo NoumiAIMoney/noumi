@@ -1,0 +1,15 @@
+{
+  "timestamp": "2025-06-24T20:43:30.540857",
+  "status_code": 200,
+  "success": true,
+  "request_data": null,
+  "response_headers": {
+    "date": "Wed, 25 Jun 2025 01:43:29 GMT",
+    "server": "uvicorn",
+    "content-length": "22",
+    "content-type": "application/json"
+  },
+  "response_body": {
+    "longest_streak": 145
+  }
+}

@@ -189,6 +189,29 @@ class DatabaseManager:
             print(f"Error getting user: {e}")
             return None
     
+    def get_user_by_email(self, email: str) -> Optional[User]:
+        """Get user by email address"""
+        try:
+            conn = self.get_connection()
+            cursor = conn.cursor()
+            
+            cursor.execute('SELECT * FROM users WHERE email = ?', (email,))
+            row = cursor.fetchone()
+            conn.close()
+            
+            if row:
+                return User(
+                    id=row[0],
+                    email=row[1],
+                    name=row[2],
+                    created_at=row[3],
+                    preferences=json.loads(row[4]) if row[4] else {}
+                )
+            return None
+        except Exception as e:
+            print(f"Error getting user by email: {e}")
+            return None
+    
     # Goal operations
     def save_user_goal(self, goal: UserGoal) -> bool:
         """Save or update user goal"""

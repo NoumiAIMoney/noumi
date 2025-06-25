@@ -1,0 +1,18 @@
+{
+  "timestamp": "2025-06-24T20:43:30.504507",
+  "status_code": 200,
+  "success": true,
+  "request_data": {
+    "public_token": "public-sandbox-test-token-12345"
+  },
+  "response_headers": {
+    "date": "Wed, 25 Jun 2025 01:43:29 GMT",
+    "server": "uvicorn",
+    "content-length": "80",
+    "content-type": "application/json"
+  },
+  "response_body": {
+    "status": "connected",
+    "message": "Plaid connection established and data fetched"
+  }
+}
