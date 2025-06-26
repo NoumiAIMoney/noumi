@@ -1,15 +1,18 @@
+import { USE_MOCK, USE_SPECIFIC_REAL } from './config';
 import { api } from './index';
-import { USE_MOCK } from './config';
-import { mockHabits, mockAccomplishedHabits } from './mock/habits.mock';
+import { mockAccomplishedHabits, mockHabits } from './mock/habits.mock';
 
 export async function getHabits() {
+  if (USE_SPECIFIC_REAL.habits || !USE_MOCK) {
+    const res = await api.get('/habits');
+    console.log(res.data)
+    return res.data;
+  }
+
   if (USE_MOCK) {
     await new Promise(res => setTimeout(res, 300));
     return mockHabits;
   }
-
-  const res = await api.get('/habits');
-  return res.data;
 }
 
 export async function getAccomplishedHabits() {

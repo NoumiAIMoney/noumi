@@ -41,9 +41,8 @@ interface SpendingData {
 }
 
 interface HabitData {
-  habit_description: string;
-  occurrences: number;
-  habit_full_prompt: string;
+  description: string;
+  weekly_occurrences: number;
 }
 
 export default function HomeScreen({ navigation }: HomeScreenProps) {
@@ -204,7 +203,7 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
               <View style={[styles.habitIcon, { backgroundColor: index % 2 === 0 ? '#608762' : '#B4698F' }]}>
                 {(index % 2 === 0) ? <WalletIcon style={styles.habitIconImage} /> : <RestaurantIcon style={styles.habitIconImage} />}
               </View>
-              <Text style={styles.habitText}>{habit.habit_full_prompt}</Text>
+              <Text style={styles.habitText}>{habit.description}</Text>
             </View>
           ))}
         </View>

@@ -19,12 +19,6 @@ import {
   View
 } from 'react-native';
 
-interface Habit {
-  completed: number;
-  total: number;
-  isCompleted: boolean;
-}
-
 interface ProgressScreenProps {
   navigation: {
     goBack: () => void;
