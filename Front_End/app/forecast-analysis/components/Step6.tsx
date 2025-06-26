@@ -54,6 +54,7 @@ export default function Step6() {
           amountSaved={String(goal.amount_saved + Number(suggestedSavingsAmount))}
           goalAmount={goal.goal_amount.toLocaleString()}
           percentage={String(percentage)}
+          barWidth={299}
         />
       </View>
     </View>

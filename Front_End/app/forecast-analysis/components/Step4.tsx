@@ -49,6 +49,7 @@ export default function Step4() {
           amountSaved={String(goal.amount_saved)}
           goalAmount={goal.goal_amount.toLocaleString()}
           percentage={String(percentage)}
+          barWidth={299}
         />
       </View>
     </View>
