@@ -1,28 +1,27 @@
-import React, { useEffect, useState } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  SafeAreaView,
-  ScrollView,
-  TouchableOpacity,
-} from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
-import { Ionicons } from '@expo/vector-icons';
-import { MaterialIcons } from '@expo/vector-icons';
-import ExpenseIcon from '@/assets/icons/money-send.svg'; 
-import IncomeIcon from '@/assets/icons/money-receive.svg';
-import HomeIcon from '@/assets/icons/home.svg'; 
-import GoalsIcon from '@/assets/icons/goals.svg'; 
-import ProgressIcon from '@/assets/icons/progress.svg';
 import WalletIcon from '@/assets/icons/empty-wallet-remove.svg';
 import RestaurantIcon from '@/assets/icons/Fork-Knife.svg';
-import { colors, typography } from '@/src/theme';
+import GoalsIcon from '@/assets/icons/goals.svg';
+import HomeIcon from '@/assets/icons/home.svg';
+import IncomeIcon from '@/assets/icons/money-receive.svg';
+import ExpenseIcon from '@/assets/icons/money-send.svg';
+import ProgressIcon from '@/assets/icons/progress.svg';
 import GoalProgressCard from '@/components/GoalProgressCard';
 import { getComputedGoal } from '@/src/api/goal';
-import { router } from 'expo-router';
-import { getSpendingStatus } from '@/src/api/spending';
 import { getHabits } from '@/src/api/habits';
+import { getSpendingStatus } from '@/src/api/spending';
+import { colors, typography } from '@/src/theme';
+import { Ionicons, MaterialIcons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
+import { router } from 'expo-router';
+import React, { useEffect, useState } from 'react';
+import {
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 
 interface HomeScreenProps {
   navigation: any;
@@ -223,7 +222,7 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
             <Text style={styles.navText}>Goals</Text>
           </TouchableOpacity>
           
-          <TouchableOpacity style={styles.navItem}>
+          <TouchableOpacity style={styles.navItem} onPress={()=> router.replace('/progress')}>
             <ProgressIcon />
             <Text style={styles.navText}>Progress</Text>
           </TouchableOpacity>
