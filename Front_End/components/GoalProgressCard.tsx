@@ -1,7 +1,7 @@
-import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-import { colors, typography } from '@/src/theme';
 import ProgressBar from '@/components/ProgressBar';
+import { colors, typography } from '@/src/theme';
+import React from 'react';
+import { StyleSheet, Text, View } from 'react-native';
 import WeeklyStreak from './WeeklyStreak';
 
 interface GoalProgressCardProps {
@@ -13,6 +13,7 @@ interface GoalProgressCardProps {
   streak?: boolean;
   height?: number;
   width?: number;
+  barWidth?: number
 }
 
 export default function GoalProgressCard({
@@ -23,7 +24,8 @@ export default function GoalProgressCard({
   percentage,
   streak=false,
   height=126,
-  width=332
+  width=332,
+  barWidth= 340
 }: GoalProgressCardProps) {
   return (
     <View style={[styles.card, {height, width}]}>
@@ -41,7 +43,7 @@ export default function GoalProgressCard({
         <Text style={styles.percentage}>{percentage}%</Text>
       </View>
 
-      <ProgressBar currentStep={25} totalSteps={1200} width={340}/>
+      <ProgressBar currentStep={25} totalSteps={1200} width={barWidth}/>
       {streak && <WeeklyStreak/>}
     </View>
   );

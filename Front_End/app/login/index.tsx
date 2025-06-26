@@ -105,6 +105,7 @@ export default function SignUpScreen({ navigation }: SignUpScreenProps) {
             isValid ? styles.enabledBtn : styles.disabledBtn,
           ]}
           disabled={!isValid}
+          onPress={()=> router.replace('/home-screen')}
         >
           <Text style={styles.primaryText}>Log In</Text>
         </TouchableOpacity>
