@@ -1,9 +1,9 @@
+import { categoryIcons } from '@/components/CategoryIcons';
+import CategoryVerticalCard from '@/components/CategoryVerticalCard';
 import { getSpendingCategories } from '@/src/api/spending';
 import { colors, typography } from '@/src/theme';
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import CarIcon from '@/assets/icons/car.svg'
-import CategoryVerticalCard from '@/components/CategoryVerticalCard';
 
 type SpendingCategory = {
   category_name: string;
@@ -41,7 +41,7 @@ export default function Step4() {
               label={`$${category.amount}` || 'N/A'}
               icon={
                 <View style={styles.iconWrapper}>
-                  <CarIcon width={24} height={24} fill="none" stroke={colors.white} />
+                  {categoryIcons[category.category_name || 'Uncategorized'] || categoryIcons['Uncategorized']}
                 </View>
               }
             />
@@ -81,7 +81,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#B4698F',
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: 8
   },
   cardsGrid: {
     flexDirection: 'column',
