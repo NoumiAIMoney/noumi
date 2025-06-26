@@ -1,9 +1,9 @@
+import CarIcon from '@/assets/icons/car.svg';
+import HorizontalCard from '@/components/HorizontalCard';
+import { getHabits } from '@/src/api/habits';
 import { colors, typography } from '@/src/theme';
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import { getHabits } from '@/src/api/habits';
-import HorizontalCard from '@/components/HorizontalCard';
-import CarIcon from '@/assets/icons/car.svg'
 
 interface Habit {
   habit_description: string;
@@ -75,6 +75,5 @@ const styles = StyleSheet.create({
     backgroundColor: '#B4698F',
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: 8
   },
 });

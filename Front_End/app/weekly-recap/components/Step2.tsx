@@ -1,9 +1,9 @@
+import { categoryIcons } from '@/components/CategoryIcons';
 import HorizontalCard from '@/components/HorizontalCard';
 import { getSpendingCategories } from '@/src/api/spending';
 import { colors, typography } from '@/src/theme';
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import CarIcon from '@/assets/icons/car.svg'
 
 type SpendingCategory = {
   category: string;
@@ -80,7 +80,7 @@ export default function Step2() {
           white={true}
           icon={
             <View style={styles.iconWrapper}>
-              <CarIcon width={24} height={24} fill="none" stroke={colors.white} />
+              {categoryIcons[category.category || 'Uncategorized'] || categoryIcons['Uncategorized']}
             </View>
           }
           amount={`-${String(category.decreaseAmount)}`}
@@ -95,7 +95,7 @@ export default function Step2() {
           white={true}
           icon={
             <View style={styles.iconWrapper}>
-              <CarIcon width={24} height={24} fill="none" stroke={colors.white} />
+              {categoryIcons[category.category || 'Uncategorized'] || categoryIcons['Uncategorized']}
             </View>
           }
           amount={String(category.previousAmount)}
@@ -137,7 +137,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#9C5538',
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: 8
   },
   cardsWrapper: {
     alignItems: 'center',

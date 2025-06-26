@@ -1,14 +1,15 @@
+import ArrowDownIcon from '@/assets/icons/Arrow_left.svg';
+import TrendUpIcon from '@/assets/icons/progress.svg';
+import { categoryIcons } from '@/components/CategoryIcons';
+import CategoryVerticalCard from '@/components/CategoryVerticalCard';
+import ProgressBar from '@/components/ProgressBar';
 import { getComputedGoal } from '@/src/api/goal';
 import { getWeeklySavings } from '@/src/api/savings';
 import { getSpendingCategories, getTotalSpending } from '@/src/api/spending';
+import { getLongestStreak } from '@/src/api/streak';
 import { colors, typography } from '@/src/theme';
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import ProgressBar from '@/components/ProgressBar';
-import CategoryVerticalCard from '@/components/CategoryVerticalCard';
-import TrendUpIcon from '@/assets/icons/progress.svg'
-import ArrowDownIcon from '@/assets/icons/Arrow_left.svg'
-import { getLongestStreak } from '@/src/api/streak';
 
 interface GoalData {
   goal_name: string;
@@ -113,7 +114,7 @@ export default function Step1() {
           <Text style={styles.subtitle}>Your Weekly Stats</Text>
           <View style={styles.horizontalCardContainer}>
             <CategoryVerticalCard
-              icon={<TrendUpIcon width={24} height={24} fill="none" />}
+              icon={categoryIcons[biggestDecrease?.category || 'Uncategorized'] || categoryIcons['Uncategorized']}
               label={biggestDecrease?.category || ''}
               valueIcon={<ArrowDownIcon width={12} height={12} stroke="green" />}
               value={`${biggestDecrease?.percentageDrop}%` || ''}
