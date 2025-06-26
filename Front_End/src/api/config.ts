@@ -3,7 +3,11 @@ export const USE_MOCK = true;
 
 export const USE_SPECIFIC_REAL = {
     anomalies: true,
-    habits: true
+    habits: true,
+    goal: true,
+    plaid: true,
+    quiz: false,
+    savings: true
 }
 
 export const MOCK_TOKEN = "mock_jwt_token";

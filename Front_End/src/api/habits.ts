@@ -5,7 +5,6 @@ import { mockAccomplishedHabits, mockHabits } from './mock/habits.mock';
 export async function getHabits() {
   if (USE_SPECIFIC_REAL.habits || !USE_MOCK) {
     const res = await api.get('/habits');
-    console.log(res.data)
     return res.data;
   }
 
