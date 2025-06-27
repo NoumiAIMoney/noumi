@@ -8,3 +8,21 @@ export function formatDollarAmountsInText(text: string): string {
     })}`;
   });
 }
+
+export function getCurrentWeekRange(): string {
+  const today = new Date();
+  const dayOfWeek = today.getDay();
+
+  const diffToMonday = (dayOfWeek + 6) % 7;
+
+  const monday = new Date(today);
+  monday.setDate(today.getDate() - diffToMonday);
+
+  const sunday = new Date(monday);
+  sunday.setDate(monday.getDate() + 6);
+
+  const format = (date: Date): string =>
+    `${String(date.getMonth() + 1).padStart(2, '0')}/${String(date.getDate()).padStart(2, '0')}`;
+
+  return `${format(monday)} - ${format(sunday)}`;
+}
