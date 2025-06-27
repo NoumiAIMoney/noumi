@@ -9,10 +9,10 @@ export default function SplashScreen() {
   useEffect(() => {
     const timer = setTimeout(() => {
       // UNCOMMENT
-      // router.replace('/onboarding');
+      router.replace('/onboarding');
 
       // TESTING SCREENS FAST
-      router.replace('/home-screen');
+      // router.replace('/home-screen');
     }, 2000);
     return () => clearTimeout(timer);
   }, []);

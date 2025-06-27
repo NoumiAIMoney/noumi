@@ -111,7 +111,7 @@ export default function Step1() {
           <Text style={styles.subtitle}>Goal progress</Text>
           <Text style={styles.percentage}>{percentage}%</Text>
           <ProgressBar currentStep={goal.amount_saved} totalSteps={goal.goal_amount} width={202} />
-          <Text style={styles.subtitle}>Your Weekly Stats</Text>
+          <Text style={styles.subtitle}>Your Stats</Text>
           <View style={styles.horizontalCardContainer}>
             <CategoryVerticalCard
               icon={categoryIcons[biggestDecrease?.category || 'Uncategorized'] || categoryIcons['Uncategorized']}
