@@ -60,7 +60,7 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
         ]);
         setGoal(goalData);
         setSpendingStatus(spendingData);
-        setHabits(habitData.filter((h: { habit_full_prompt: any; }) => h.habit_full_prompt))
+        setHabits(habitData.filter((h: { description: any; }) => h.description))
       } catch (error) {
         console.error('Failed to fetch goal:', error);
       }
