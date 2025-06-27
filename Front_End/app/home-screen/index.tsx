@@ -1,6 +1,4 @@
-import WalletIcon from '@/assets/icons/empty-wallet-remove.svg';
-import RestaurantIcon from '@/assets/icons/Fork-Knife.svg';
-import GoalsIcon from '@/assets/icons/goals.svg';
+import { default as GoalsIcon, default as UncategorizedIcon } from '@/assets/icons/goals.svg';
 import HomeIcon from '@/assets/icons/home.svg';
 import IncomeIcon from '@/assets/icons/money-receive.svg';
 import ExpenseIcon from '@/assets/icons/money-send.svg';
@@ -211,11 +209,7 @@ export default function HomeScreen() {
                       { backgroundColor: index % 2 === 0 ? '#608762' : '#B4698F' },
                     ]}
                   >
-                    {index % 2 === 0 ? (
-                      <WalletIcon style={styles.habitIconImage} />
-                    ) : (
-                      <RestaurantIcon style={styles.habitIconImage} />
-                    )}
+                    <UncategorizedIcon style={styles.habitIconImage} />
                   </View>
                   <Text style={styles.habitText}>{habit.description}</Text>
                 </View>
@@ -230,11 +224,7 @@ export default function HomeScreen() {
                     { backgroundColor: index % 2 === 0 ? '#608762' : '#B4698F' },
                   ]}
                 >
-                  {index % 2 === 0 ? (
-                    <WalletIcon style={styles.habitIconImage} />
-                  ) : (
-                    <RestaurantIcon style={styles.habitIconImage} />
-                  )}
+                  <UncategorizedIcon style={styles.habitIconImage} />
                 </View>
                 <Text style={styles.habitText}>{habit.description}</Text>
               </View>
