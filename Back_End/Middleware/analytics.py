@@ -293,9 +293,22 @@ class TransactionAnalyzer:
             if not quiz_data or not quiz_data.get('goal_amount'):
                 raise Exception("Goal data not found for savings calculation")
             
-            # Suggested weekly savings = goal amount / 52 weeks
+            # Suggested weekly savings = goal amount / (target date - today in weeks)
             goal_amount = quiz_data.get('goal_amount', 0)
-            suggested_weekly = goal_amount / 52
+            goal_target_date = quiz_data.get('target_date')  # probably datetime.date
+
+            # convert today to date only
+            today = datetime.today().date()
+
+            # if goal_target_date is datetime.datetime, convert to date
+            if hasattr(goal_target_date, 'date'):
+                goal_target_date = goal_target_date if isinstance(goal_target_date, datetime.date) else goal_target_date.date()
+
+            days_diff = (goal_target_date - today).days
+
+            weeks_to_target = max(days_diff / 7, 1)
+
+            suggested_weekly = goal_amount / weeks_to_target
             
             return {
                 "actual_savings": actual_savings,

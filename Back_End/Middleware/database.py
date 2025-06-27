@@ -684,7 +684,7 @@ class DatabaseManager:
                 
                 goals = self.get_user_goals(user_id)
                 if goals:
-                    goal = goals[0]
+                    goal = goals[-1]
                     quiz_responses.update({
                         "goal_name": goal.goal_name,
                         "goal_amount": goal.goal_amount,
