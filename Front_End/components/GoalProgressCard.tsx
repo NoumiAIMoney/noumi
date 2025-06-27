@@ -35,7 +35,9 @@ export default function GoalProgressCard({
       </View>
 
       <Text style={styles.amount}>
-        <Text style={styles.amountSaved}>${amountSaved}</Text> of ${goalAmount}
+        <Text style={styles.amountSaved}>
+          ${Math.round(Number(amountSaved) || 0).toLocaleString()}
+        </Text> of ${goalAmount}
       </Text>
 
       <View style={styles.row}>
@@ -43,7 +45,7 @@ export default function GoalProgressCard({
         <Text style={styles.percentage}>{percentage}%</Text>
       </View>
 
-      <ProgressBar currentStep={25} totalSteps={1200} width={barWidth}/>
+      <ProgressBar currentStep={Number(amountSaved.replace(/,/g, ''))} totalSteps={Number(goalAmount.replace(/,/g, ''))} width={barWidth}/>
       {streak && <WeeklyStreak/>}
     </View>
   );

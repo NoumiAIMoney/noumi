@@ -34,7 +34,7 @@ export default function Step4() {
   const timeDiff = targetDate.getTime() - today.getTime();
   const daysLeft = Math.max(Math.ceil(timeDiff / (1000 * 3600 * 24)), 0);
   const percentage = Math.min(
-    Math.round((goal.amount_saved / goal.goal_amount) * 100),
+    Math.round((0 / goal.goal_amount) * 100),
     100
   );
 
@@ -46,7 +46,8 @@ export default function Step4() {
         <GoalProgressCard
           title={goal.goal_name}
           daysLeft={`${daysLeft} days left`}
-          amountSaved={String(goal.amount_saved)}
+          // WHEN SIGNING UP NO SAVINGS TOWARDS THIS GOAL YET
+          amountSaved={String(0)}
           goalAmount={goal.goal_amount.toLocaleString()}
           percentage={String(percentage)}
           barWidth={299}

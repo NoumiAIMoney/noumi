@@ -42,7 +42,7 @@ export default function Step6() {
   const timeDiff = targetDate.getTime() - today.getTime();
   const daysLeft = Math.max(Math.ceil(timeDiff / (1000 * 3600 * 24)) - 7, 0);
   const percentage = Math.min(
-    Math.round((goal.amount_saved / goal.goal_amount) * 100),
+    Math.round((Number(suggestedSavingsAmount) / goal.goal_amount) * 100),
     100
   );
 
@@ -53,7 +53,8 @@ export default function Step6() {
         <GoalProgressCard
           title={goal.goal_name}
           daysLeft={`${daysLeft} days left`}
-          amountSaved={String(goal.amount_saved + Number(suggestedSavingsAmount))}
+          // no savings + suggested amount
+          amountSaved={String(0 + Number(suggestedSavingsAmount))}
           goalAmount={goal.goal_amount.toLocaleString()}
           percentage={String(percentage)}
           barWidth={299}
@@ -81,13 +82,14 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.XXLarge,
     color: colors.darkFont,
     letterSpacing: 0,
-    marginLeft: 8,
+    marginLeft: 32,
     marginBottom: 24,
-    marginRight: 64
+    marginRight: 72
   },
   section: {
     alignItems: 'center',
-    marginVertical: 16
+    marginTop: 16,
+    marginBottom: 300
   },
   buttonWrapper: {
     width: 400,

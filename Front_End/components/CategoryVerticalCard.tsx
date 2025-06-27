@@ -1,6 +1,6 @@
 import { colors, typography } from '@/src/theme';
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 
 interface CategoryVerticalCardProps {
   icon: React.ReactElement;
@@ -41,7 +41,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   iconWrapper: {
-    width: 39.09,
+    width: 40,
     height: 40,
     padding: 10,
     borderRadius: 100,
@@ -54,6 +54,7 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.body,
     textAlign: 'center',
     color: colors.darkFont,
+    height: 40
   },
   valueWrapper: {
     flexDirection: 'row',

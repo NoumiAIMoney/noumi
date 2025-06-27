@@ -11,6 +11,8 @@ type SpendingCategory = {
   month: string;
 };
 
+const COLORS = ['#B4698F', '#E97272', '#FFCE51']
+
 export default function Step2() {
   const [categories, setCategories] = useState<SpendingCategory[]>([]);
 
@@ -39,11 +41,11 @@ export default function Step2() {
             title={category.category_name || 'N/A'}
             white={true}
             icon={
-              <View style={styles.iconWrapper}>
+              <View style={[styles.iconWrapper, {backgroundColor: COLORS[index]}]}>
                 {categoryIcons[category.category_name || 'Uncategorized'] || categoryIcons['Uncategorized']}
               </View>
             }
-            amount={String(category.amount)}
+            amount={category.amount.toLocaleString()}
             onlyLabel
           />
         ))}
@@ -75,11 +77,10 @@ const styles = StyleSheet.create({
     marginLeft: 8
   },
   iconWrapper: {
-    width: 39.09,
+    width: 40,
     height: 40,
     padding: 10,
     borderRadius: 100,
-    backgroundColor: '#B4698F',
     alignItems: 'center',
     justifyContent: 'center',
   },
