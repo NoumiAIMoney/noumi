@@ -1,0 +1,1044 @@
+{
+  "test_session": {
+    "timestamp": "2025-06-24T20:43:30.457342",
+    "total_tests": 22,
+    "passed": 22,
+    "failed": 0,
+    "success_rate": "100.0%"
+  },
+  "detailed_results": {
+    "01_root_endpoint": {
+      "timestamp": "2025-06-24T20:43:30.477382",
+      "status_code": 200,
+      "success": true,
+      "request_data": null,
+      "response_headers": {
+        "date": "Wed, 25 Jun 2025 01:43:29 GMT",
+        "server": "uvicorn",
+        "content-length": "112",
+        "content-type": "application/json"
+      },
+      "response_body": {
+        "message": "Welcome to Noumi API",
+        "status": "healthy",
+        "version": "1.0.0",
+        "timestamp": "2025-06-24T20:43:30.476314"
+      }
+    },
+    "02_health_check": {
+      "timestamp": "2025-06-24T20:43:30.480655",
+      "status_code": 200,
+      "success": true,
+      "request_data": null,
+      "response_headers": {
+        "date": "Wed, 25 Jun 2025 01:43:29 GMT",
+        "server": "uvicorn",
+        "content-length": "83",
+        "content-type": "application/json"
+      },
+      "response_body": {
+        "status": "healthy",
+        "timestamp": "2025-06-24T20:43:30.480074",
+        "service": "noumi-api"
+      }
+    },
+    "03_user_registration": {
+      "timestamp": "2025-06-24T20:43:30.485411",
+      "status_code": 200,
+      "success": true,
+      "request_data": {
+        "email": "testuser@example.com",
+        "password": "securepassword123",
+        "name": "Test User"
+      },
+      "response_headers": {
+        "date": "Wed, 25 Jun 2025 01:43:29 GMT",
+        "server": "uvicorn",
+        "content-length": "190",
+        "content-type": "application/json"
+      },
+      "response_body": {
+        "message": "User already registered, returning existing user",
+        "user": {
+          "id": "76a32188-73e8-4438-b614-af6dbacce0cd",
+          "email": "testuser@example.com",
+          "name": "Test User"
+        },
+        "token": "mock_jwt_token"
+      }
+    },
+    "04_user_login": {
+      "timestamp": "2025-06-24T20:43:30.488901",
+      "status_code": 200,
+      "success": true,
+      "request_data": {
+        "email": "testuser@example.com",
+        "password": "securepassword123"
+      },
+      "response_headers": {
+        "date": "Wed, 25 Jun 2025 01:43:29 GMT",
+        "server": "uvicorn",
+        "content-length": "130",
+        "content-type": "application/json"
+      },
+      "response_body": {
+        "message": "Login successful",
+        "user": {
+          "id": "user_123",
+          "email": "testuser@example.com",
+          "name": "Mock User"
+        },
+        "token": "mock_jwt_token"
+      }
+    },
+    "05_current_user_info": {
+      "timestamp": "2025-06-24T20:43:30.494919",
+      "status_code": 200,
+      "success": true,
+      "request_data": null,
+      "response_headers": {
+        "date": "Wed, 25 Jun 2025 01:43:29 GMT",
+        "server": "uvicorn",
+        "content-length": "154",
+        "content-type": "application/json"
+      },
+      "response_body": {
+        "id": "user_123",
+        "email": "user@example.com",
+        "name": "Mock User",
+        "created_at": "2025-06-24T20:43:30.494385",
+        "preferences": {
+          "theme": "light",
+          "currency": "USD"
+        }
+      }
+    },
+    "06_quiz_submission": {
+      "timestamp": "2025-06-24T20:43:30.500108",
+      "status_code": 200,
+      "success": true,
+      "request_data": {
+        "goal_name": "Dream Vacation to Japan",
+        "goal_description": "Save money for a 2-week trip to Japan including flights, hotels, and activities",
+        "goal_amount": 5000.0,
+        "target_date": "2025-12-15",
+        "net_monthly_income": 7500.0
+      },
+      "response_headers": {
+        "date": "Wed, 25 Jun 2025 01:43:29 GMT",
+        "server": "uvicorn",
+        "content-length": "16",
+        "content-type": "application/json"
+      },
+      "response_body": {
+        "success": true
+      }
+    },
+    "07_plaid_connection": {
+      "timestamp": "2025-06-24T20:43:30.504507",
+      "status_code": 200,
+      "success": true,
+      "request_data": {
+        "public_token": "public-sandbox-test-token-12345"
+      },
+      "response_headers": {
+        "date": "Wed, 25 Jun 2025 01:43:29 GMT",
+        "server": "uvicorn",
+        "content-length": "80",
+        "content-type": "application/json"
+      },
+      "response_body": {
+        "status": "connected",
+        "message": "Plaid connection established and data fetched"
+      }
+    },
+    "08_insert_sample_data": {
+      "timestamp": "2025-06-24T20:43:30.508500",
+      "status_code": 200,
+      "success": true,
+      "request_data": null,
+      "response_headers": {
+        "date": "Wed, 25 Jun 2025 01:43:29 GMT",
+        "server": "uvicorn",
+        "content-length": "92",
+        "content-type": "application/json"
+      },
+      "response_body": {
+        "message": "Sample data inserted successfully",
+        "transactions_added": 90,
+        "goal_created": false
+      }
+    },
+    "09_yearly_anomalies": {
+      "timestamp": "2025-06-24T20:43:30.512087",
+      "status_code": 200,
+      "success": true,
+      "request_data": null,
+      "response_headers": {
+        "date": "Wed, 25 Jun 2025 01:43:29 GMT",
+        "server": "uvicorn",
+        "content-length": "39",
+        "content-type": "application/json"
+      },
+      "response_body": {
+        "anomalies": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    },
+    "10_spending_trends": {
+      "timestamp": "2025-06-24T20:43:30.518216",
+      "status_code": 200,
+      "success": true,
+      "request_data": null,
+      "response_headers": {
+        "date": "Wed, 25 Jun 2025 01:43:29 GMT",
+        "server": "uvicorn",
+        "content-length": "356",
+        "content-type": "application/json"
+      },
+      "response_body": [
+        {
+          "icon": "\ud83d\udcc5",
+          "trend": "Thursday is your highest spending day with $1876.84 total this quarter."
+        },
+        {
+          "icon": "\ud83c\udfea",
+          "trend": "Best Buy is your top merchant with $1462.50 spent."
+        },
+        {
+          "icon": "\ud83d\udcca",
+          "trend": "Your top spending category is Shopping at $2902.34 this quarter."
+        },
+        {
+          "icon": "\ud83d\udcb3",
+          "trend": "You average 5.7 transactions per day - consider consolidating."
+        }
+      ]
+    },
+    "11_spending_categories": {
+      "timestamp": "2025-06-24T20:43:30.521067",
+      "status_code": 200,
+      "success": true,
+      "request_data": null,
+      "response_headers": {
+        "date": "Wed, 25 Jun 2025 01:43:29 GMT",
+        "server": "uvicorn",
+        "content-length": "469",
+        "content-type": "application/json"
+      },
+      "response_body": [
+        {
+          "category_name": "Shopping",
+          "amount": 2429.84,
+          "month": "2025-06"
+        },
+        {
+          "category_name": "Transportation",
+          "amount": 2230.0,
+          "month": "2025-06"
+        },
+        {
+          "category_name": "Food & Dining",
+          "amount": 1278.88,
+          "month": "2025-06"
+        },
+        {
+          "category_name": "Entertainment",
+          "amount": 1185.84,
+          "month": "2025-06"
+        },
+        {
+          "category_name": "Transportation",
+          "amount": 507.5,
+          "month": "2025-05"
+        },
+        {
+          "category_name": "Shopping",
+          "amount": 542.5,
+          "month": "2025-05"
+        },
+        {
+          "category_name": "Entertainment",
+          "amount": 525.0,
+          "month": "2025-05"
+        }
+      ]
+    },
+    "12_computed_goal": {
+      "timestamp": "2025-06-24T20:43:30.523663",
+      "status_code": 200,
+      "success": true,
+      "request_data": null,
+      "response_headers": {
+        "date": "Wed, 25 Jun 2025 01:43:29 GMT",
+        "server": "uvicorn",
+        "content-length": "111",
+        "content-type": "application/json"
+      },
+      "response_body": {
+        "goal_name": "Dream Vacation to Japan",
+        "target_date": "2025-12-15",
+        "goal_amount": 5000.0,
+        "amount_saved": 36502.94
+      }
+    },
+    "13_user_habits": {
+      "timestamp": "2025-06-24T20:43:30.527772",
+      "status_code": 200,
+      "success": true,
+      "request_data": null,
+      "response_headers": {
+        "date": "Wed, 25 Jun 2025 01:43:29 GMT",
+        "server": "uvicorn",
+        "content-length": "130",
+        "content-type": "application/json"
+      },
+      "response_body": [
+        {
+          "habit_description": "Log in to Noumi daily",
+          "occurrences": 7
+        },
+        {
+          "habit_description": "Set weekly spending limits",
+          "occurrences": 1
+        }
+      ]
+    },
+    "14_weekly_streak": {
+      "timestamp": "2025-06-24T20:43:30.531680",
+      "status_code": 200,
+      "success": true,
+      "request_data": null,
+      "response_headers": {
+        "date": "Wed, 25 Jun 2025 01:43:29 GMT",
+        "server": "uvicorn",
+        "content-length": "15",
+        "content-type": "application/json"
+      },
+      "response_body": [
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ]
+    },
+    "15_spending_status": {
+      "timestamp": "2025-06-24T20:43:30.535079",
+      "status_code": 200,
+      "success": true,
+      "request_data": null,
+      "response_headers": {
+        "date": "Wed, 25 Jun 2025 01:43:29 GMT",
+        "server": "uvicorn",
+        "content-length": "63",
+        "content-type": "application/json"
+      },
+      "response_body": {
+        "income": 7500.0,
+        "expenses": 7124.56,
+        "amount_safe_to_spend": 0.0
+      }
+    },
+    "16_weekly_savings": {
+      "timestamp": "2025-06-24T20:43:30.537953",
+      "status_code": 200,
+      "success": true,
+      "request_data": null,
+      "response_headers": {
+        "date": "Wed, 25 Jun 2025 01:43:29 GMT",
+        "server": "uvicorn",
+        "content-length": "66",
+        "content-type": "application/json"
+      },
+      "response_body": {
+        "actual_savings": 4602.06,
+        "suggested_savings_amount_weekly": 375.0
+      }
+    },
+    "17_longest_streak": {
+      "timestamp": "2025-06-24T20:43:30.540857",
+      "status_code": 200,
+      "success": true,
+      "request_data": null,
+      "response_headers": {
+        "date": "Wed, 25 Jun 2025 01:43:29 GMT",
+        "server": "uvicorn",
+        "content-length": "22",
+        "content-type": "application/json"
+      },
+      "response_body": {
+        "longest_streak": 145
+      }
+    },
+    "18_total_spending": {
+      "timestamp": "2025-06-24T20:43:30.543968",
+      "status_code": 200,
+      "success": true,
+      "request_data": null,
+      "response_headers": {
+        "date": "Wed, 25 Jun 2025 01:43:29 GMT",
+        "server": "uvicorn",
+        "content-length": "24",
+        "content-type": "application/json"
+      },
+      "response_body": {
+        "spent_so_far": 8497.06
+      }
+    },
+    "19_get_weekly_plan": {
+      "timestamp": "2025-06-24T20:43:52.849579",
+      "status_code": 200,
+      "success": true,
+      "request_data": null,
+      "response_headers": {
+        "date": "Wed, 25 Jun 2025 01:43:29 GMT",
+        "server": "uvicorn",
+        "content-length": "1856",
+        "content-type": "application/json"
+      },
+      "response_body": {
+        "week_start_date": "2025-06-30",
+        "savings_target": {
+          "amount": 5000.0,
+          "currency": "USD"
+        },
+        "spending_limits": {
+          "Food and Drink": {
+            "daily_limit": 18.27,
+            "weekly_limit": 127.89
+          },
+          "Entertainment": {
+            "daily_limit": 16.94,
+            "weekly_limit": 118.58
+          }
+        },
+        "daily_recommendations": [
+          {
+            "day": "Monday",
+            "actions": [
+              "Check account balance",
+              "Set weekly goals"
+            ],
+            "focus_area": "Goal Setting",
+            "motivation": "Start your week strong!"
+          },
+          {
+            "day": "Tuesday",
+            "actions": [
+              "Track expenses",
+              "Review spending limits"
+            ],
+            "focus_area": "Expense Tracking",
+            "motivation": "Stay on track!"
+          },
+          {
+            "day": "Wednesday",
+            "actions": [
+              "Mid-week check-in",
+              "Adjust if needed"
+            ],
+            "focus_area": "Progress Review",
+            "motivation": "You're halfway there!"
+          },
+          {
+            "day": "Thursday",
+            "actions": [
+              "Evaluate spending",
+              "Plan weekend budget"
+            ],
+            "focus_area": "Weekend Planning",
+            "motivation": "Prepare for success!"
+          },
+          {
+            "day": "Friday",
+            "actions": [
+              "Review week's progress",
+              "Set weekend limits"
+            ],
+            "focus_area": "Week Review",
+            "motivation": "Strong finish ahead!"
+          },
+          {
+            "day": "Saturday",
+            "actions": [
+              "Track weekend spending",
+              "Find free activities"
+            ],
+            "focus_area": "Weekend Management",
+            "motivation": "Smart weekend choices!"
+          },
+          {
+            "day": "Sunday",
+            "actions": [
+              "Calculate weekly total",
+              "Plan next week"
+            ],
+            "focus_area": "Weekly Wrap-up",
+            "motivation": "Prepare for another successful week!"
+          }
+        ],
+        "tracking_metrics": [
+          {
+            "metric_name": "Weekly Savings",
+            "target_value": 200,
+            "current_value": 0
+          },
+          {
+            "metric_name": "Days Under Budget",
+            "target_value": 7,
+            "current_value": 0
+          }
+        ],
+        "weekly_challenges": [
+          "Track every expense for 7 days",
+          "Cook at home 5 out of 7 days",
+          "Find one free entertainment activity"
+        ],
+        "success_tips": [
+          "Review progress daily",
+          "Celebrate small wins",
+          "Stay consistent with tracking"
+        ],
+        "ml_features": {
+          "suggested_savings_amount": 5200,
+          "spending_efficiency_score": 75
+        },
+        "habits": [
+          "habit1(etc: Try meal planning instead of eating out at least twice a week)",
+          "habit2(etc: Try No Spend Day this week)",
+          "habit3",
+          "habit4"
+        ]
+      }
+    },
+    "20_create_weekly_plan": {
+      "timestamp": "2025-06-24T20:44:16.887540",
+      "status_code": 200,
+      "success": true,
+      "request_data": {
+        "user_preferences": {
+          "risk_tolerance": "moderate",
+          "savings_goals": {
+            "primary_goal": "Dream Vacation to Japan",
+            "target_amount": 5000.0,
+            "timeframe_months": 8
+          },
+          "spending_priorities": [
+            "Food & Dining",
+            "Transportation",
+            "Entertainment",
+            "Shopping"
+          ],
+          "financial_knowledge": "intermediate",
+          "motivation_style": "milestone_focused"
+        },
+        "spending_analysis": {
+          "monthly_analysis": {
+            "average_monthly_spending": 3200.0
+          },
+          "category_analysis": {
+            "Food & Dining": {
+              "total_amount": 450.0,
+              "percentage": 14.0
+            },
+            "Transportation": {
+              "total_amount": 380.0,
+              "percentage": 12.0
+            },
+            "Entertainment": {
+              "total_amount": 250.0,
+              "percentage": 8.0
+            },
+            "Shopping": {
+              "total_amount": 600.0,
+              "percentage": 19.0
+            }
+          }
+        },
+        "force_regenerate": true
+      },
+      "response_headers": {
+        "date": "Wed, 25 Jun 2025 01:43:29 GMT",
+        "server": "uvicorn",
+        "content-length": "1907",
+        "content-type": "application/json"
+      },
+      "response_body": {
+        "week_start_date": "2025-06-30",
+        "savings_target": {
+          "amount": 325.0,
+          "currency": "USD"
+        },
+        "spending_limits": {
+          "Food and Drink": {
+            "daily_limit": 12.33,
+            "weekly_limit": 86.3125
+          },
+          "Entertainment": {
+            "daily_limit": 5.0,
+            "weekly_limit": 35.0
+          }
+        },
+        "daily_recommendations": [
+          {
+            "day": "Monday",
+            "actions": [
+              "Check account balance",
+              "Set weekly goals"
+            ],
+            "focus_area": "Goal Setting",
+            "motivation": "Start your week strong!"
+          },
+          {
+            "day": "Tuesday",
+            "actions": [
+              "Track expenses",
+              "Review spending limits"
+            ],
+            "focus_area": "Expense Tracking",
+            "motivation": "Stay on track!"
+          },
+          {
+            "day": "Wednesday",
+            "actions": [
+              "Mid-week check-in",
+              "Adjust if needed"
+            ],
+            "focus_area": "Progress Review",
+            "motivation": "You're halfway there!"
+          },
+          {
+            "day": "Thursday",
+            "actions": [
+              "Evaluate spending",
+              "Plan weekend budget"
+            ],
+            "focus_area": "Weekend Planning",
+            "motivation": "Prepare for success!"
+          },
+          {
+            "day": "Friday",
+            "actions": [
+              "Review week's progress",
+              "Set weekend limits"
+            ],
+            "focus_area": "Week Review",
+            "motivation": "Strong finish ahead!"
+          },
+          {
+            "day": "Saturday",
+            "actions": [
+              "Track weekend spending",
+              "Find free activities"
+            ],
+            "focus_area": "Weekend Management",
+            "motivation": "Smart weekend choices!"
+          },
+          {
+            "day": "Sunday",
+            "actions": [
+              "Calculate weekly total",
+              "Plan next week"
+            ],
+            "focus_area": "Weekly Wrap-up",
+            "motivation": "Prepare for another successful week!"
+          }
+        ],
+        "tracking_metrics": [
+          {
+            "metric_name": "Weekly Savings",
+            "target_value": 325.0,
+            "current_value": 0
+          },
+          {
+            "metric_name": "Days Under Budget",
+            "target_value": 7,
+            "current_value": 0
+          }
+        ],
+        "weekly_challenges": [
+          "Track every expense for 7 days",
+          "Cook at home 5 out of 7 days",
+          "Find one free entertainment activity"
+        ],
+        "success_tips": [
+          "Review progress daily",
+          "Celebrate small wins",
+          "Stay consistent with tracking"
+        ],
+        "ml_features": {
+          "suggested_savings_amount": 320.0,
+          "spending_efficiency_score": 86.0
+        },
+        "habits": [
+          "Try meal planning instead of eating out at least three times a week",
+          "Try No Spend Day this week",
+          "Increase automated savings by $25 this week",
+          "Explore opportunities for a side hustle"
+        ]
+      }
+    },
+    "21_get_weekly_recap": {
+      "timestamp": "2025-06-24T20:44:44.460446",
+      "status_code": 200,
+      "success": true,
+      "request_data": null,
+      "response_headers": {
+        "date": "Wed, 25 Jun 2025 01:43:29 GMT",
+        "server": "uvicorn",
+        "content-length": "4298",
+        "content-type": "application/json"
+      },
+      "response_body": {
+        "recap_metadata": {
+          "week_period": "2025-06-30 to 2025-07-06",
+          "analysis_timestamp": "2025-06-24T20:44:44.458256",
+          "transaction_count": 20,
+          "total_transactions": 20,
+          "total_spent": 242.5,
+          "planned_budget": 501.78,
+          "savings_achieved": 259.28
+        },
+        "spending_performance": {
+          "total_planned_spending": 501.78,
+          "total_actual_spending": 242.5,
+          "planned_savings_target": 288.46,
+          "spending_vs_plan": -259.28,
+          "spending_adherence_rate": 0.5167204751086133,
+          "over_budget": false,
+          "budget_variance_percentage": -51.67204751086133
+        },
+        "category_performance": {
+          "Food and Drink": {
+            "planned_limit": 259.77,
+            "actual_spent": 0,
+            "variance": -259.77,
+            "adherence_rate": 1.0,
+            "status": "under_budget",
+            "variance_percentage": -100.0
+          },
+          "Entertainment": {
+            "planned_limit": 242.01,
+            "actual_spent": 22.5,
+            "variance": -219.51,
+            "adherence_rate": 0.9070286351803645,
+            "status": "under_budget",
+            "variance_percentage": -90.70286351803645
+          }
+        },
+        "goal_achievement": {
+          "metric_achievements": [
+            {
+              "metric_name": "Weekly Savings",
+              "target_value": 288.46,
+              "estimated_achievement_rate": 0.5167204751086133,
+              "status": "partial"
+            },
+            {
+              "metric_name": "Days Under Budget",
+              "target_value": 7,
+              "estimated_achievement_rate": 1.0,
+              "status": "achieved"
+            }
+          ],
+          "challenge_count": 3,
+          "overall_goal_success_rate": 0.7583602375543066
+        },
+        "ai_insights": {
+          "key_insights": [
+            {
+              "insight_type": "success",
+              "title": "Significantly Under Budget Overall",
+              "description": "Total actual spending was significantly lower than planned spending, indicating strong potential for exceeding savings goals this week. Spending adherence rate was 51.67%.",
+              "impact_level": "high"
+            },
+            {
+              "insight_type": "improvement",
+              "title": "No Spending Recorded in Food & Drink",
+              "description": "There were no recorded expenses in the Food & Drink category this week, which is unusual and may indicate a data tracking issue or unusually strict adherence to the weekly challenge to cook at home. It also may indicate underspending in essential areas.",
+              "impact_level": "medium"
+            },
+            {
+              "insight_type": "behavioral",
+              "title": "Entertainment Spending Well Below Limit",
+              "description": "Entertainment spending was well below the planned limit, suggesting either a conscious effort to reduce discretionary spending or a lack of entertainment opportunities this week.",
+              "impact_level": "medium"
+            }
+          ],
+          "behavioral_patterns": [
+            {
+              "pattern_type": "category_preference",
+              "description": "A strong preference for Starbucks purchases are observed on a given day.",
+              "recommendation": "Explore less expensive alternatives or limit visits to reduce potential overspending on coffee."
+            }
+          ],
+          "success_highlights": [
+            "Excellent overall spending control resulting in significantly lower than planned expenses.",
+            "Successful adherence to Entertainment spending limits."
+          ],
+          "improvement_areas": [
+            {
+              "area": "Food and Drink Tracking",
+              "current_impact": "Lack of recorded spending in this category makes it difficult to assess actual performance and identify potential areas for optimization or potential underspending in necessary areas.",
+              "suggested_action": "Ensure accurate tracking of all food and drink expenses, even if they are minimal. Consider if current tracking methods require adjustment, or whether spending in this category is simply low due to conscious effort or change in normal routine."
+            }
+          ],
+          "overall_performance_summary": "This week showed a strong performance in controlling overall spending, with significant savings potential. However, the lack of recorded spending in the Food & Drink category needs further investigation to ensure accurate tracking and to ensure there is no underspending in a key category."
+        },
+        "performance_scores": {
+          "overall_performance_score": 74.0,
+          "spending_adherence_score": 51.7,
+          "category_discipline_score": 95.4,
+          "goal_achievement_score": 75.8,
+          "performance_grade": "C"
+        },
+        "recommendations": [],
+        "detailed_category_analysis": {
+          "Transportation": {
+            "total_spent": 17.5,
+            "transaction_count": 2,
+            "merchants": {
+              "Chevron": 17.5
+            }
+          },
+          "Entertainment": {
+            "total_spent": 22.5,
+            "transaction_count": 2,
+            "merchants": {
+              "AMC Theaters": 22.5
+            }
+          },
+          "Shopping": {
+            "total_spent": 27.5,
+            "transaction_count": 2,
+            "merchants": {
+              "Best Buy": 27.5
+            }
+          },
+          "Food & Dining": {
+            "total_spent": 175.0,
+            "transaction_count": 14,
+            "merchants": {
+              "Starbucks": 175.0
+            }
+          }
+        },
+        "streak_analysis": {
+          "current_no_overspend_streak": 5,
+          "longest_streak_this_month": 12,
+          "streak_broken_categories": []
+        },
+        "next_week_recommendations": [
+          "Focus on the categories where you overspent",
+          "Set daily spending reminders",
+          "Review and adjust weekly limits"
+        ]
+      }
+    },
+    "22_create_weekly_recap": {
+      "timestamp": "2025-06-24T20:44:47.467548",
+      "status_code": 200,
+      "success": true,
+      "request_data": {
+        "weekly_plan": {
+          "week_start_date": "2025-06-23",
+          "savings_target": {
+            "amount": 300.0,
+            "currency": "USD"
+          },
+          "spending_limits": {
+            "Food & Dining": {
+              "daily_limit": 20.0,
+              "weekly_limit": 140.0
+            },
+            "Transportation": {
+              "daily_limit": 15.0,
+              "weekly_limit": 105.0
+            }
+          },
+          "daily_recommendations": [
+            {
+              "day": "Monday",
+              "actions": [
+                "Check budget"
+              ],
+              "focus_area": "Planning",
+              "motivation": "Start strong!"
+            }
+          ],
+          "tracking_metrics": [],
+          "weekly_challenges": [],
+          "success_tips": [],
+          "habits": [
+            "Log in to Noumi daily",
+            "Set weekly spending limits",
+            "Track all expenses"
+          ]
+        },
+        "actual_transactions": [
+          {
+            "transaction_id": "test_txn_1",
+            "amount": -12.5,
+            "description": "Coffee Shop",
+            "category": "Food & Dining",
+            "date": "2025-06-23",
+            "merchant_name": "Starbucks"
+          },
+          {
+            "transaction_id": "test_txn_2",
+            "amount": -8.0,
+            "description": "Bus Fare",
+            "category": "Transportation",
+            "date": "2025-06-23",
+            "merchant_name": "Metro"
+          }
+        ]
+      },
+      "response_headers": {
+        "date": "Wed, 25 Jun 2025 01:43:29 GMT",
+        "server": "uvicorn",
+        "content-length": "3306",
+        "content-type": "application/json"
+      },
+      "response_body": {
+        "recap_metadata": {
+          "week_period": "2025-06-23 to 2025-06-29",
+          "analysis_timestamp": "2025-06-24T20:44:47.466515",
+          "transaction_count": 2,
+          "total_transactions": 2,
+          "total_spent": 20.5,
+          "planned_budget": 245.0,
+          "savings_achieved": 224.5
+        },
+        "spending_performance": {
+          "total_planned_spending": 245.0,
+          "total_actual_spending": 20.5,
+          "planned_savings_target": 300.0,
+          "spending_vs_plan": -224.5,
+          "spending_adherence_rate": 0.9163265306122449,
+          "over_budget": false,
+          "budget_variance_percentage": -91.63265306122449
+        },
+        "category_performance": {
+          "Food & Dining": {
+            "planned_limit": 140.0,
+            "actual_spent": 12.5,
+            "variance": -127.5,
+            "adherence_rate": 0.9107142857142857,
+            "status": "under_budget",
+            "variance_percentage": -91.07142857142857
+          },
+          "Transportation": {
+            "planned_limit": 105.0,
+            "actual_spent": 8.0,
+            "variance": -97.0,
+            "adherence_rate": 0.9238095238095239,
+            "status": "under_budget",
+            "variance_percentage": -92.38095238095238
+          }
+        },
+        "goal_achievement": {
+          "metric_achievements": [],
+          "challenge_count": 0,
+          "overall_goal_success_rate": 0
+        },
+        "ai_insights": {
+          "key_insights": [
+            {
+              "insight_type": "success",
+              "title": "Excellent Spending Adherence",
+              "description": "Spending adherence rate is over 90% across all tracked categories (Food & Dining and Transportation), showing strong discipline.",
+              "impact_level": "high"
+            },
+            {
+              "insight_type": "success",
+              "title": "Significant Underspending",
+              "description": "Total actual spending is significantly below the planned spending, indicating strong potential for achieving savings goals.",
+              "impact_level": "high"
+            },
+            {
+              "insight_type": "behavioral",
+              "title": "Early Week Spending",
+              "description": "All transactions occurred on Monday. It's important to maintain spending awareness throughout the entire week.",
+              "impact_level": "medium"
+            }
+          ],
+          "behavioral_patterns": [
+            {
+              "pattern_type": "spending_timing",
+              "description": "Spending is concentrated at the beginning of the week.",
+              "recommendation": "Distribute spending more evenly throughout the week to avoid depleting the budget early on. Plan for spending on other days."
+            }
+          ],
+          "success_highlights": [
+            "High spending adherence rate (91.6%)",
+            "Significantly underspent in both Food & Dining and Transportation categories",
+            "Successfully tracked all expenses as planned"
+          ],
+          "improvement_areas": [
+            {
+              "area": "Spending Distribution",
+              "current_impact": "Potential for overspending later in the week if early week spending is not carefully monitored.",
+              "suggested_action": "Spread spending out more evenly across all days of the week."
+            }
+          ],
+          "overall_performance_summary": "This week demonstrates excellent financial discipline with significant underspending and high adherence to spending limits. However, it's crucial to distribute spending more evenly throughout the week and not concentrate it only at the beginning."
+        },
+        "performance_scores": {
+          "overall_performance_score": 73.3,
+          "spending_adherence_score": 91.6,
+          "category_discipline_score": 91.7,
+          "goal_achievement_score": 0.0,
+          "performance_grade": "C"
+        },
+        "recommendations": [],
+        "detailed_category_analysis": {
+          "Food & Dining": {
+            "total_spent": 12.5,
+            "transaction_count": 1,
+            "merchants": {
+              "Starbucks": 12.5
+            }
+          },
+          "Transportation": {
+            "total_spent": 8.0,
+            "transaction_count": 1,
+            "merchants": {
+              "Metro": 8.0
+            }
+          }
+        },
+        "streak_analysis": {
+          "current_no_overspend_streak": 5,
+          "longest_streak_this_month": 12,
+          "streak_broken_categories": []
+        },
+        "next_week_recommendations": [
+          "Focus on the categories where you overspent",
+          "Set daily spending reminders",
+          "Review and adjust weekly limits"
+        ]
+      }
+    }
+  },
+  "database_info": {
+    "using_real_sqlite": true,
+    "mock_data_removed": true,
+    "database_file": "noumi.db"
+  }
+}

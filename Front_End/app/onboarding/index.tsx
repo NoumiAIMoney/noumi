@@ -7,9 +7,6 @@ import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 export default function OnboardingScreen() {
   const router = useRouter();
-  const [step, setStep] = useState(1);
-  const [stepTwoCompleted, setStepTwoCompleted] = useState(false);
-  const [selectionId, setSelectionId] = useState<string | null>(null);
 
   const navigateToAuth = () => {
     router.replace('/auth-selection');

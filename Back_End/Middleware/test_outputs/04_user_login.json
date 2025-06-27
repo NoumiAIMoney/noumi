@@ -1,0 +1,24 @@
+{
+  "timestamp": "2025-06-24T20:43:30.488901",
+  "status_code": 200,
+  "success": true,
+  "request_data": {
+    "email": "testuser@example.com",
+    "password": "securepassword123"
+  },
+  "response_headers": {
+    "date": "Wed, 25 Jun 2025 01:43:29 GMT",
+    "server": "uvicorn",
+    "content-length": "130",
+    "content-type": "application/json"
+  },
+  "response_body": {
+    "message": "Login successful",
+    "user": {
+      "id": "user_123",
+      "email": "testuser@example.com",
+      "name": "Mock User"
+    },
+    "token": "mock_jwt_token"
+  }
+}

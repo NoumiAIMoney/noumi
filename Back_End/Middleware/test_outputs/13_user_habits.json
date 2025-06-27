@@ -1,0 +1,22 @@
+{
+  "timestamp": "2025-06-24T20:43:30.527772",
+  "status_code": 200,
+  "success": true,
+  "request_data": null,
+  "response_headers": {
+    "date": "Wed, 25 Jun 2025 01:43:29 GMT",
+    "server": "uvicorn",
+    "content-length": "130",
+    "content-type": "application/json"
+  },
+  "response_body": [
+    {
+      "habit_description": "Log in to Noumi daily",
+      "occurrences": 7
+    },
+    {
+      "habit_description": "Set weekly spending limits",
+      "occurrences": 1
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "timestamp": "2025-06-24T20:43:30.537953",
+  "status_code": 200,
+  "success": true,
+  "request_data": null,
+  "response_headers": {
+    "date": "Wed, 25 Jun 2025 01:43:29 GMT",
+    "server": "uvicorn",
+    "content-length": "66",
+    "content-type": "application/json"
+  },
+  "response_body": {
+    "actual_savings": 4602.06,
+    "suggested_savings_amount_weekly": 375.0
+  }
+}

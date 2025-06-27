@@ -1,32 +1,35 @@
-import React, { useState, useEffect } from 'react';
+import DateTimePicker from '@react-native-community/datetimepicker';
+import React, { useEffect, useState } from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
   Keyboard,
-  TouchableWithoutFeedback,
   KeyboardAvoidingView,
   Platform,
+  StyleSheet,
+  Text,
+  TouchableWithoutFeedback,
+  View,
 } from 'react-native';
-import DateTimePicker from '@react-native-community/datetimepicker';
 
-import { colors, typography } from '@/src/theme';
-import OptionCarousel from '@/components/OptionCarousel';
 import Input from '@/components/Input';
+import OptionCarousel from '@/components/OptionCarousel';
+import { colors, typography } from '@/src/theme';
 import CalendarIcon from '../../../../assets/icons/calendar.svg';
-import DollarIcon from '../../../../assets/icons/dollar.svg';
+import DollarIcon from '../../../../assets/icons/currency.svg';
 import { goalOptions } from '../../../../lib/goalOptions';
 
 interface StepTwoProps {
-  selectedOptionId: string | null;
+  selectedOption: string | null;
   onStepCompleted: (completed: boolean) => void;
-  // onSelectOption: (id: string) => void;
+  onSelectOption: (label: string) => void;
+  goalDescription: string | null;
+  setGoalDescription: (val: string) => void;
+  goalAmount: string | null;
+  setGoalAmount: (val: string) => void;
+  goalDate: Date | null;
+  setGoalDate: (date: Date) => void;
 }
 
-export default function StepTwo({ selectedOptionId, onStepCompleted }: StepTwoProps) {
-  const [goalName, setGoalName] = useState('');
-  const [amount, setAmount] = useState('');
-  const [targetDate, setTargetDate] = useState<Date | null>(null);
+export default function StepTwo({ selectedOption, onStepCompleted, onSelectOption, goalDescription, setGoalDescription, goalAmount, setGoalAmount, goalDate, setGoalDate }: StepTwoProps) {
   const [showDatePicker, setShowDatePicker] = useState(false);
 
   const openTargetDatePicker = () => {
@@ -36,18 +39,18 @@ export default function StepTwo({ selectedOptionId, onStepCompleted }: StepTwoPr
   const handleDateChange = (_event: any, selectedDate?: Date) => {
     setShowDatePicker(false);
     if (_event?.type === 'set' && selectedDate) {
-      setTargetDate(selectedDate);
+      setGoalDate(selectedDate);
     }
   };
 
   useEffect(() => {
     const allFilled =
-      !!selectedOptionId &&
-      goalName.trim() !== '' &&
-      amount.trim() !== '' &&
-      targetDate !== null;
+      !!selectedOption &&
+      goalDescription?.trim() !== '' &&
+      goalAmount?.trim() !== '' &&
+      goalDate !== null;
     onStepCompleted(allFilled);
-  }, [selectedOptionId, goalName, amount, targetDate]);
+  }, [selectedOption, goalDescription, goalAmount, goalDate]);
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
@@ -65,8 +68,8 @@ export default function StepTwo({ selectedOptionId, onStepCompleted }: StepTwoPr
             <Text style={styles.label}>Your money goal</Text>
             <OptionCarousel
               options={goalOptions}
-              selectedOptionId={selectedOptionId}
-              onSelectOption={()=> {}}
+              selectedOption={selectedOption}
+              onSelectOption={onSelectOption}
             />
           </View>
 
@@ -74,22 +77,22 @@ export default function StepTwo({ selectedOptionId, onStepCompleted }: StepTwoPr
             label="Name your goal"
             mode="text"
             placeholder="What are you saving for?"
-            value={goalName}
-            onChangeText={setGoalName}
+            value={goalDescription || ''}
+            onChangeText={setGoalDescription}
           />
 
           <Input
             label="Set the amount"
             keyboardType="numeric"
             mode="number"
-            iconLeft={<DollarIcon width={30} height={30} stroke="#000" />}
-            value={amount}
-            onChangeText={setAmount}
+            iconLeft={<DollarIcon width={24} height={24} stroke="#000" strokeWidth={0.5} />}
+            value={goalAmount || ''}
+            onChangeText={setGoalAmount}
           />
           {showDatePicker && (
             <View style={styles.pickerContainer}>
               <DateTimePicker
-                value={targetDate || new Date()}
+                value={goalDate || new Date()}
                 mode="date"
                 display="inline"
                 onChange={handleDateChange}
@@ -100,10 +103,10 @@ export default function StepTwo({ selectedOptionId, onStepCompleted }: StepTwoPr
             label="Target Date"
             placeholder="dd/mm/yy"
             value={
-              targetDate
-                ? `${targetDate.getDate().toString().padStart(2, '0')}/${(targetDate.getMonth() + 1)
+              goalDate
+                ? `${goalDate.getDate().toString().padStart(2, '0')}/${(goalDate.getMonth() + 1)
                     .toString()
-                    .padStart(2, '0')}/${targetDate.getFullYear()}`
+                    .padStart(2, '0')}/${goalDate.getFullYear()}`
                 : ''
             }
             onChangeText={() => {}}

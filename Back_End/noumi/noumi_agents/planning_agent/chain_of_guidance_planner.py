@@ -76,8 +76,14 @@ class ChainOfGuidancePlanningAgent(BasePlanningAgent):
         content = f"""
         USER SPENDING DATA: {json.dumps(self.spending_analysis)}
         USER PREFERENCES: {json.dumps(self.user_preferences)}
-        
-        Generate diverse weekly savings plan options. Return ONLY valid JSON:
+        USE_EXAMPLE_HABITS_FORMAT: [
+                {{"description": "Try meal planning twice weekly", "weekly_occurrences": 2}},
+                {{"description": "Use a No Spend Day this week", "weekly_occurrences": 1}},
+                {{"description": "Track expenses daily", "weekly_occurrences": 7}},
+                {{"description": "Login to Noumi daily", "weekly_occurrences": 7}}
+            ]
+
+        Generate diverse weekly savings plan options. Each habit should include both description and weekly_occurrences. Using USE_EXAMPLE_HABITS_FORMAT as a reference, return ONLY valid JSON:
         {{
             "options": [
                 {{
@@ -100,6 +106,7 @@ class ChainOfGuidancePlanningAgent(BasePlanningAgent):
                         "Monday: Specific action",
                         "Tuesday: Specific action"
                     ],
+                    "habits": "USE_EXAMPLE_HABITS_FORMAT",
                     "risk_level": "low|medium|high",
                     "difficulty": "easy|medium|hard"
                 }}
@@ -134,8 +141,14 @@ class ChainOfGuidancePlanningAgent(BasePlanningAgent):
         OPTIONS TO EVALUATE: {json.dumps(options)}
         USER CONTEXT: {json.dumps(self.user_preferences)}
         SPENDING REALITY: {json.dumps(self.spending_analysis)}
-        
-        Evaluate each option and provide improvements. Return ONLY valid JSON:
+        USE_EXAMPLE_HABITS_FORMAT: [
+                {{"description": "Try meal planning twice weekly", "weekly_occurrences": 2}},
+                {{"description": "Use a No Spend Day this week", "weekly_occurrences": 1}},
+                {{"description": "Track expenses daily", "weekly_occurrences": 7}},
+                {{"description": "Login to Noumi daily", "weekly_occurrences": 7}}
+            ]
+
+        Evaluate each option and provide improvements. Using USE_EXAMPLE_HABITS_FORMAT as a reference, return ONLY valid JSON:
         {{
             "evaluated_options": [
                 {{
@@ -161,7 +174,8 @@ class ChainOfGuidancePlanningAgent(BasePlanningAgent):
                         }},
                         "category_adjustments": {{}},
                         "daily_actions": [],
-                        "success_factors": ["factor1", "factor2"]
+                        "success_factors": ["factor1", "factor2"],
+                        "habits": "USE_EXAMPLE_HABITS_FORMAT"
                     }}
                 }}
             ],
@@ -196,8 +210,14 @@ class ChainOfGuidancePlanningAgent(BasePlanningAgent):
         content = f"""
         EVALUATED OPTIONS: {json.dumps(refined_options)}
         USER PROFILE: {json.dumps(self.user_preferences)}
-        
-        Apply deterministic selection algorithm. Return ONLY valid JSON:
+        USE_EXAMPLE_HABITS_FORMAT: [
+                {{"description": "Try meal planning twice weekly", "weekly_occurrences": 2}},
+                {{"description": "Use a No Spend Day this week", "weekly_occurrences": 1}},
+                {{"description": "Track expenses daily", "weekly_occurrences": 7}},
+                {{"description": "Login to Noumi daily", "weekly_occurrences": 7}}
+            ]
+
+        Apply deterministic selection algorithm. Using USE_EXAMPLE_HABITS_FORMAT as a reference, return ONLY valid JSON:
         {{
             "selection_process": {{
                 "weighted_scores": [
@@ -225,7 +245,8 @@ class ChainOfGuidancePlanningAgent(BasePlanningAgent):
                     }},
                     "primary_strategy": "main strategy description",
                     "key_adjustments": {{}},
-                    "implementation_steps": []
+                    "implementation_steps": [],
+                    "habits": "USE_EXAMPLE_HABITS_FORMAT"
                 }}
             }}
         }}
@@ -274,7 +295,7 @@ class ChainOfGuidancePlanningAgent(BasePlanningAgent):
         SPENDING_DATA: {json.dumps(self.spending_analysis)}
         NEXT_MONDAY: {next_monday.strftime('%Y-%m-%d')}
         
-        Convert to exact standard format with ML features. Return ONLY valid JSON:
+        Convert to exact standard format with ML features. Using USE_EXAMPLE_HABITS_FORMAT as a reference, return ONLY valid JSON:
         {{
             "week_start_date": "{next_monday.strftime('%Y-%m-%d')}",
             "ml_features": {{
@@ -352,14 +373,20 @@ class ChainOfGuidancePlanningAgent(BasePlanningAgent):
                 }}
             ],
             "weekly_challenges": [
-                "Track every expense for 7 days",
-                "Cook at home 5 out of 7 days", 
-                "Find one free entertainment activity"
+                "",
+                "",
+                ""
             ],
             "success_tips": [
-                "Review progress daily",
-                "Celebrate small wins",
-                "Stay consistent with tracking"
+                "",
+                "",
+                ""
+            ],
+            "habits": [
+                {{"description": "", "weekly_occurrences": }},
+                {{"description": "", "weekly_occurrences": }},
+                {{"description": "", "weekly_occurrences": }},
+                {{"description": "", "weekly_occurrences": }}
             ]
         }}
         """

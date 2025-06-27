@@ -1,0 +1,25 @@
+{
+  "timestamp": "2025-06-24T20:43:30.485411",
+  "status_code": 200,
+  "success": true,
+  "request_data": {
+    "email": "testuser@example.com",
+    "password": "securepassword123",
+    "name": "Test User"
+  },
+  "response_headers": {
+    "date": "Wed, 25 Jun 2025 01:43:29 GMT",
+    "server": "uvicorn",
+    "content-length": "190",
+    "content-type": "application/json"
+  },
+  "response_body": {
+    "message": "User already registered, returning existing user",
+    "user": {
+      "id": "76a32188-73e8-4438-b614-af6dbacce0cd",
+      "email": "testuser@example.com",
+      "name": "Test User"
+    },
+    "token": "mock_jwt_token"
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "timestamp": "2025-06-24T20:43:30.477382",
+  "status_code": 200,
+  "success": true,
+  "request_data": null,
+  "response_headers": {
+    "date": "Wed, 25 Jun 2025 01:43:29 GMT",
+    "server": "uvicorn",
+    "content-length": "112",
+    "content-type": "application/json"
+  },
+  "response_body": {
+    "message": "Welcome to Noumi API",
+    "status": "healthy",
+    "version": "1.0.0",
+    "timestamp": "2025-06-24T20:43:30.476314"
+  }
+}

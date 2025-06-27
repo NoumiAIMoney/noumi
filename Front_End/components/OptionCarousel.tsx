@@ -10,18 +10,18 @@ interface Option {
 
 interface Props {
   options: Option[];
-  selectedOptionId: string | null;
-  onSelectOption: (id: string) => void;
+  selectedOption: string | null;
+  onSelectOption: (label: string) => void;
 }
 
-export default function OptionCarousel({ options, selectedOptionId, onSelectOption }: Props) {
+export default function OptionCarousel({ options, selectedOption, onSelectOption }: Props) {
   const scrollViewRef = useRef<ScrollView>(null);
   const cardWidth = (Dimensions.get('window').width - 80) / 3;
   const gap = 10;
 
   useEffect(() => {
-    if (selectedOptionId && scrollViewRef.current) {
-      const selectedIndex = options.findIndex((o) => o.id === selectedOptionId);
+    if (selectedOption && scrollViewRef.current) {
+      const selectedIndex = options.findIndex((o) => o.label === selectedOption);
       if (selectedIndex !== -1) {
         const maxIndex = options.length - 3;
         let scrollIndex = selectedIndex - 1;
@@ -33,7 +33,7 @@ export default function OptionCarousel({ options, selectedOptionId, onSelectOpti
         scrollViewRef.current.scrollTo({ x: offset, animated: false });
       }
     }
-  }, [selectedOptionId, options]);
+  }, [selectedOption, options]);
 
   return (
     <ScrollView
@@ -50,8 +50,8 @@ export default function OptionCarousel({ options, selectedOptionId, onSelectOpti
           <OptionCard
             label={option.label}
             icon={option.icon}
-            selected={selectedOptionId === option.id}
-            onPress={() => onSelectOption(option.id)}
+            selected={selectedOption === option.label}
+            onPress={() => onSelectOption(option.label)}
           />
         </View>
       ))}
