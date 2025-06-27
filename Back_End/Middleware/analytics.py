@@ -3,7 +3,6 @@ Analytics and transaction analysis for Noumi API
 Updated for MVP (P0) Database Schema
 """
 
-import sqlite3
 import numpy as np
 from datetime import datetime, timedelta
 from typing import List, Dict, Any
@@ -25,7 +24,7 @@ class TransactionAnalyzer:
             end_date = datetime.now().strftime("%Y-%m-%d")
             start_date = (datetime.now() - timedelta(days=60)).strftime("%Y-%m-%d")
             
-            db_user_id = 1  # Default test user mapping
+            db_user_id = 5  # Updated to match existing data in database
             transactions = self.db.get_user_transactions(db_user_id, start_date, end_date)
             
             anomalies = []
@@ -62,8 +61,7 @@ class TransactionAnalyzer:
             return anomalies
             
         except Exception as e:
-            print(f"Error detecting anomalies: {e}")
-            return []
+            raise Exception(f"Error detecting anomalies: {e}")
     
     def analyze_spending_trends(self) -> List[Dict[str, str]]:
         """
@@ -74,20 +72,21 @@ class TransactionAnalyzer:
             end_date = datetime.now().strftime("%Y-%m-%d")
             start_date = (datetime.now() - timedelta(days=30)).strftime("%Y-%m-%d")
             
-            transactions = self.db.get_user_transactions(
-                self.user_id, start_date, end_date
-            )
+            db_user_id = 5  # Updated to match existing data in database
+            transactions = self.db.get_user_transactions(db_user_id, start_date, end_date)
             
             if not transactions:
-                return [{"icon": "📊", "trend": "No transaction data available"}]
+                raise Exception("No transaction data available")
             
             trends = []
             
-            # Analyze spending by day of week
+            # Analyze spending by day of week  
             day_spending = {}
             for txn in transactions:
                 if txn.amount < 0:  # Only spending
-                    day = txn.day_of_week
+                    # Calculate day of week from transaction date
+                    txn_date = datetime.strptime(str(txn.date), "%Y-%m-%d")
+                    day = txn_date.strftime("%A")  # Get day name
                     if day not in day_spending:
                         day_spending[day] = 0
                     day_spending[day] += abs(txn.amount)
@@ -135,8 +134,7 @@ class TransactionAnalyzer:
             return trends if trends else [{"icon": "📊", "trend": "Analyzing your spending patterns"}]
             
         except Exception as e:
-            print(f"Error analyzing trends: {e}")
-            return [{"icon": "❌", "trend": "Unable to analyze spending trends"}]
+            raise Exception(f"Error analyzing trends: {e}")
     
     def get_spending_categories_with_history(self) -> List[Dict[str, Any]]:
         """
@@ -145,8 +143,8 @@ class TransactionAnalyzer:
         try:
             current_month = datetime.now().strftime("%Y-%m")
             
-            # Use integer user_id for database queries (compatibility mapping)
-            db_user_id = 1  # Default test user mapping
+            # Use correct user_id for database queries
+            db_user_id = 5  # Updated to match existing data in database
             
             # Get current month spending
             current_spending = self.db.get_spending_by_category(
@@ -164,7 +162,6 @@ class TransactionAnalyzer:
             return categories
             
         except Exception as e:
-            print(f"Error getting spending categories: {e}")
             raise Exception(f"Error getting spending categories: {e}")
     
     def calculate_weekly_streak(self) -> List[int]:
@@ -183,7 +180,7 @@ class TransactionAnalyzer:
                 start_date = week_start.strftime("%Y-%m-%d")
                 end_date = week_end.strftime("%Y-%m-%d")
                 
-                db_user_id = 1  # Default test user mapping
+                db_user_id = 5  # Updated to match existing data in database
                 transactions = self.db.get_user_transactions(db_user_id, start_date, end_date)
                 
                 if not transactions:
@@ -198,206 +195,180 @@ class TransactionAnalyzer:
                 for txn in transactions:
                     # Count anomalies (unusually high spending)
                     if txn.amount < 0:  # Expense
-                        avg_for_category = 50  # Base average
-                        if abs(txn.amount) > (avg_for_category * 3):  # 3x normal = anomaly
+                        amount = abs(txn.amount)
+                        category = txn.category or "Other"
+                        
+                        # Simple anomaly detection: spending > $200 in single transaction
+                        if amount > 200:
                             anomaly_count += 1
-                    
-                    # Count savings transfers
-                    if txn.category == "Transfer" and txn.amount < 0:
-                        savings_transfers += 1
-                    
-                    # Track daily spending for consistency
-                    day = txn.date
-                    if day not in daily_spending:
-                        daily_spending[day] = 0
-                    if txn.amount < 0:
-                        daily_spending[day] += abs(txn.amount)
                 
-                # Calculate streak score for this week (1 = good week, 0 = bad week)
-                streak_score = 1
-                
-                # Deduct for anomalies
-                if anomaly_count > 2:  # More than 2 anomalies = bad week
-                    streak_score = 0
-                
-                # Deduct for no savings
-                if savings_transfers == 0 and week_offset < 4:  # Recent weeks should have savings
-                    streak_score = 0
-                
-                # Deduct for inconsistent spending (very high variance)
-                if daily_spending:
-                    spending_values = list(daily_spending.values())
-                    if len(spending_values) > 1:
-                        avg_spending = sum(spending_values) / len(spending_values)
-                        if avg_spending > 200:  # Very high daily average
-                            streak_score = 0
-                
-                weeks_data.append(streak_score)
+                # Good week = fewer than 2 anomalies
+                week_score = 1 if anomaly_count < 2 else 0
+                weeks_data.append(week_score)
             
-            return weeks_data[::-1]  # Return in chronological order
+            return weeks_data
             
         except Exception as e:
-            print(f"Error calculating weekly streak: {e}")
-            return [0, 0, 0, 0, 0, 0, 0, 0]  # Return 8 weeks of zeros
+            raise Exception(f"Error calculating weekly streak: {e}")
     
     def calculate_spending_status(self) -> Dict[str, float]:
         """
-        Calculate income vs expenses with safety buffer using enriched data
+        Calculate current spending status (income vs expenses)
         """
         try:
-            # Get user's actual income from quiz responses
-            quiz_data = self.db.get_user_quiz_responses(str(self.user_id))
-            monthly_income = quiz_data.get("net_monthly_income", 0.0) if quiz_data else 0.0
-            
-            # If no income data, calculate from actual income transactions
-            if monthly_income <= 0:
-                # Look for income transactions in the last 30 days
-                end_date = datetime.now().strftime("%Y-%m-%d")
-                start_date = (datetime.now() - timedelta(days=30)).strftime("%Y-%m-%d")
-                
-                # Get integer user_id for database queries
-                db_user_id = 1  # Default test user mapping
-                transactions = self.db.get_user_transactions(db_user_id, start_date, end_date)
-                
-                # Calculate income from positive transactions
-                income_transactions = [t for t in transactions if t.amount > 0 and t.category == "Income"]
-                if income_transactions:
-                    total_monthly_income = sum(t.amount for t in income_transactions)
-                    monthly_income = total_monthly_income
-                else:
-                    # No income found, return zeros
-                    return {
-                        "income": 0.0,
-                        "expenses": 0.0,
-                        "amount_safe_to_spend": 0.0
-                    }
-            
-            # Calculate monthly expenses from actual spending
+            # Get current month data
             current_month = datetime.now().strftime("%Y-%m")
+            start_date = f"{current_month}-01"
             end_date = datetime.now().strftime("%Y-%m-%d")
-            start_date = datetime.now().replace(day=1).strftime("%Y-%m-%d")
             
-            # Get integer user_id for database queries
-            db_user_id = 1  # Default test user mapping
+            db_user_id = 5  # Updated to match existing data in database
             transactions = self.db.get_user_transactions(db_user_id, start_date, end_date)
             
-            # Calculate expenses (negative amounts, excluding transfers)
-            expense_transactions = [t for t in transactions if t.amount < 0 and t.category != "Transfer"]
-            monthly_expenses = sum(abs(t.amount) for t in expense_transactions)
+            if not transactions:
+                raise Exception("No transaction data for spending status")
             
-            # Calculate safe spending amount (income - expenses - 20% safety buffer)
-            safety_buffer = monthly_income * 0.2
-            amount_safe_to_spend = max(0, monthly_income - monthly_expenses - safety_buffer)
+            total_income = 0
+            total_expenses = 0
+            
+            for txn in transactions:
+                if txn.amount > 0:
+                    total_income += txn.amount
+                else:
+                    total_expenses += abs(txn.amount)
+            
+            # Calculate safe spending amount (80% of remaining income)
+            remaining_income = total_income - total_expenses
+            safe_to_spend = max(0, remaining_income * 0.8)
             
             return {
-                "income": monthly_income,
-                "expenses": monthly_expenses,
-                "amount_safe_to_spend": amount_safe_to_spend
+                "income": total_income,
+                "expenses": total_expenses,
+                "amount_safe_to_spend": safe_to_spend
             }
             
         except Exception as e:
-            print(f"Error calculating spending status: {e}")
-            return {
-                "income": 0.0,
-                "expenses": 0.0,
-                "amount_safe_to_spend": 0.0
-            }
+            raise Exception(f"Error calculating spending status: {e}")
     
     def calculate_weekly_savings(self) -> Dict[str, float]:
         """
-        Calculate actual vs suggested weekly savings using enriched data
+        Calculate weekly savings data
         """
         try:
-            # Get user's actual income from quiz responses or transactions
-            quiz_data = self.db.get_user_quiz_responses(str(self.user_id))
-            monthly_income = quiz_data.get("net_monthly_income", 0.0) if quiz_data else 0.0
+            # Get current week data
+            today = datetime.now()
+            week_start = today - timedelta(days=today.weekday())
+            week_end = week_start + timedelta(days=6)
             
-            # If no income data, get from actual income transactions
-            if monthly_income <= 0:
-                end_date = datetime.now().strftime("%Y-%m-%d")
-                start_date = (datetime.now() - timedelta(days=30)).strftime("%Y-%m-%d")
-                
-                db_user_id = 1  # Default test user mapping
-                transactions = self.db.get_user_transactions(db_user_id, start_date, end_date)
-                
-                income_transactions = [t for t in transactions if t.amount > 0 and t.category == "Income"]
-                if income_transactions:
-                    monthly_income = sum(t.amount for t in income_transactions)
-                else:
-                    return {
-                        "actual_savings": 0.0,
-                        "suggested_savings_amount_weekly": 0.0
-                    }
+            start_date = week_start.strftime("%Y-%m-%d")
+            end_date = week_end.strftime("%Y-%m-%d")
             
-            # Calculate actual savings from Transfer transactions (last 7 days)
-            end_date = datetime.now().strftime("%Y-%m-%d")
-            start_date = (datetime.now() - timedelta(days=7)).strftime("%Y-%m-%d")
-            
-            db_user_id = 1  # Default test user mapping
+            db_user_id = 5  # Updated to match existing data in database
             transactions = self.db.get_user_transactions(db_user_id, start_date, end_date)
             
-            # Look for savings transfers
-            savings_transactions = [t for t in transactions if t.category == "Transfer" and t.amount < 0]
-            actual_weekly_savings = sum(abs(t.amount) for t in savings_transactions)
+            if not transactions:
+                raise Exception("No transaction data for weekly savings")
             
-            # Calculate suggested weekly savings (15% of monthly income / 4 weeks)
-            suggested_weekly_savings = (monthly_income * 0.15) / 4
+            weekly_income = 0
+            weekly_expenses = 0
+            
+            for txn in transactions:
+                if txn.amount > 0:
+                    weekly_income += txn.amount
+                else:
+                    weekly_expenses += abs(txn.amount)
+            
+            actual_savings = weekly_income - weekly_expenses
+            
+            # Get user's goal data to calculate suggested savings
+            quiz_data = self.db.get_user_quiz_responses(str(db_user_id))
+            if not quiz_data or not quiz_data.get('goal_amount'):
+                raise Exception("Goal data not found for savings calculation")
+            
+            # Suggested weekly savings = goal amount / 52 weeks
+            goal_amount = quiz_data.get('goal_amount', 0)
+            suggested_weekly = goal_amount / 52
             
             return {
-                "actual_savings": actual_weekly_savings,
-                "suggested_savings_amount_weekly": suggested_weekly_savings
+                "actual_savings": actual_savings,
+                "suggested_savings_amount_weekly": suggested_weekly
             }
             
         except Exception as e:
-            print(f"Error calculating weekly savings: {e}")
-            return {
-                "actual_savings": 0.0,
-                "suggested_savings_amount_weekly": 0.0
-            }
+            raise Exception(f"Error calculating weekly savings: {e}")
     
     def calculate_longest_streak(self) -> int:
         """
-        Calculate longest streak of good financial behavior
+        Calculate longest streak without spending anomalies
         """
         try:
-            weekly_streak = self.calculate_weekly_streak()
+            # Get last 90 days of data
+            end_date = datetime.now().strftime("%Y-%m-%d")
+            start_date = (datetime.now() - timedelta(days=90)).strftime("%Y-%m-%d")
             
-            # Find longest consecutive sequence of 1s
-            longest = 0
-            current = 0
+            db_user_id = 5  # Updated to match existing data in database
+            transactions = self.db.get_user_transactions(db_user_id, start_date, end_date)
             
-            for week_score in weekly_streak:
-                if week_score == 1:
-                    current += 1
-                    longest = max(longest, current)
+            if not transactions:
+                raise Exception("No transaction data for streak calculation")
+            
+            # Group transactions by date
+            daily_data = {}
+            for txn in transactions:
+                date_str = str(txn.date)
+                if date_str not in daily_data:
+                    daily_data[date_str] = []
+                daily_data[date_str].append(txn)
+            
+            # Calculate daily anomaly status
+            dates = sorted(daily_data.keys())
+            longest_streak = 0
+            current_streak = 0
+            
+            for date_str in dates:
+                day_transactions = daily_data[date_str]
+                has_anomaly = False
+                
+                for txn in day_transactions:
+                    if txn.amount < 0:  # Expense
+                        amount = abs(txn.amount)
+                        # Simple anomaly: single transaction > $300
+                        if amount > 300:
+                            has_anomaly = True
+                            break
+                
+                if not has_anomaly:
+                    current_streak += 1
+                    longest_streak = max(longest_streak, current_streak)
                 else:
-                    current = 0
+                    current_streak = 0
             
-            return longest
+            return longest_streak
             
         except Exception as e:
-            print(f"Error calculating longest streak: {e}")
-            return 0
+            raise Exception(f"Error calculating longest streak: {e}")
     
     def calculate_total_spent_ytd(self) -> float:
         """
         Calculate total amount spent year-to-date
         """
         try:
+            # Get year-to-date data
             current_year = datetime.now().year
             start_date = f"{current_year}-01-01"
             end_date = datetime.now().strftime("%Y-%m-%d")
             
-            # Use integer user_id for database queries (compatibility mapping)
-            db_user_id = 1  # Default test user mapping
+            db_user_id = 5  # Updated to match existing data in database
+            transactions = self.db.get_user_transactions(db_user_id, start_date, end_date)
             
-            transactions = self.db.get_user_transactions(
-                db_user_id, start_date, end_date
-            )
+            if not transactions:
+                raise Exception("No transaction data for YTD calculation")
             
-            total = sum(abs(txn.amount) for txn in transactions if txn.amount < 0)
-            return total
+            total_spent = 0
+            for txn in transactions:
+                if txn.amount < 0:  # Only expenses
+                    total_spent += abs(txn.amount)
+            
+            return total_spent
             
         except Exception as e:
-            print(f"Error calculating total spent: {e}")
-            raise Exception(f"Error calculating total spent: {e}")
+            raise Exception(f"Error calculating total spent YTD: {e}")

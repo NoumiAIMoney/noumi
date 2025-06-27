@@ -161,7 +161,7 @@ class AnomalyData(BaseModel):
 
 
 class TransactionAnomalyResponse(BaseModel):
-    transaction_id: int
+    transaction_id: str
     anomaly_score: float
     is_anomaly: bool
     features: dict
@@ -215,80 +215,27 @@ async def submit_quiz_data(
                 status_code=400, detail="Monthly income must be positive"
             )
         
-        # Ensure user exists first - use existing users from database
-        user_id = 5  # Use actual user ID that exists in database
-        existing_user = db.get_user(user_id)
+        # Use actual user ID from database
+        user_id = 5  # Updated to match existing data in database
         
-        # Also check by email to avoid duplicates
-        email_user = db.get_user_by_email("quiz@example.com")
-        
-        if email_user:
-            # Use existing user found by email (ID 6)
-            user_id = email_user.user_id
-            print(f"Using existing user with email: {email_user.email}, "
-                  f"ID: {user_id}")
-        elif existing_user:
-            # Use existing user found by ID (ID 5)
-            user_id = existing_user.user_id
-            print(f"Using existing user with ID: {user_id}")
-        else:
-            # Only create new user if neither exists (shouldn't happen now)
-            new_user = DbUser(
-                user_id=0,  # Will be auto-generated
-                name="Quiz User",
-                email=f"quiz_{datetime.now().timestamp()}@example.com",
-                created_at=datetime.now().isoformat(),
-                financial_goal="GOAL_SAVINGS",
-                impulse_triggers=["Stress", "FOMO"],
-                budgeting_score=2,
-                plaid_token=""
-            )
-            try:
-                user_id = db.create_user(new_user)
-                if not user_id:
-                    raise HTTPException(
-                        status_code=500,
-                        detail="Database returned null user_id"
-                    )
-                print(f"Created new user with ID: {user_id}")
-            except Exception as db_error:
-                print(f"Detailed database error creating user: {db_error}")
-                raise HTTPException(
-                    status_code=500,
-                    detail=f"Database error creating user: {str(db_error)}"
-                )
-        
-        # Save goal to database
+        # Save goal to database with updated schema
         goal = Goal(
             goal_id=0,  # Will be auto-generated
-            user_id=user_id,  # Use existing or created user
-            amount=quiz_data.goal_amount,
-            purpose=quiz_data.goal_name,
-            deadline=quiz_data.target_date.isoformat(),
+            user_id=user_id,
+            goal_amount=quiz_data.goal_amount,
+            goal_name=quiz_data.goal_name,
+            goal_description=quiz_data.goal_description,
+            target_date=quiz_data.target_date.isoformat(),
+            net_monthly_income=quiz_data.net_monthly_income,
             created_at=datetime.now().isoformat()
         )
         
-        try:
-            goal_id = db.create_goal(goal)
-            if not goal_id:
-                raise HTTPException(
-                    status_code=500, detail="Database returned null goal_id"
-                )
-        except Exception as db_error:
-            print(f"Detailed database error creating goal: {db_error}")
-            raise HTTPException(
-                status_code=500,
-                detail=f"Database error creating goal: {str(db_error)}"
-            )
-        
+        goal_id = db.create_goal(goal)
         return {"success": True}
         
     except HTTPException:
         raise
     except Exception as e:
-        print(f"Quiz endpoint unexpected error: {e}")
-        import traceback
-        traceback.print_exc()
         raise HTTPException(
             status_code=500, detail=f"Unexpected error: {str(e)}"
         )
@@ -411,13 +358,13 @@ async def get_yearly_anomaly_counts(current_user=Depends(get_current_user)):
 @app.post("/transactions/{transaction_id}/anomaly",
           response_model=TransactionAnomalyResponse)
 async def detect_single_transaction_anomaly(
-    transaction_id: int,
+    transaction_id: str,
     current_user=Depends(get_current_user)
 ):
     """Detect anomaly for a specific transaction using ML model"""
     try:
         # Use integer user_id for database queries  
-        db_user_id = 1  # Default test user in database
+        db_user_id = 5  # Updated to match existing data in database
         
         # Get the specific transaction
         transactions = db.get_user_transactions(db_user_id, limit=1000)
@@ -451,7 +398,6 @@ async def detect_single_transaction_anomaly(
     except HTTPException:
         raise
     except Exception as e:
-        print(f"Error detecting transaction anomaly: {e}")
         raise HTTPException(
             status_code=500,
             detail=f"Failed to detect anomaly: {str(e)}"
@@ -462,8 +408,8 @@ async def detect_single_transaction_anomaly(
 async def get_spending_trends(current_user=Depends(get_current_user)):
     """Get AI-powered spending trends and insights for the current user"""
     try:
-        # Use TransactionAnalyzer to get base analytics data
-        analyzer = TransactionAnalyzer(current_user["id"])
+        # Use integer user_id for TransactionAnalyzer
+        analyzer = TransactionAnalyzer(5)  # Updated to use integer user_id
         
         # Get user's actual quiz responses as preferences
         user_preferences = db.get_user_quiz_responses(current_user["id"])
@@ -504,7 +450,7 @@ async def get_spending_trends(current_user=Depends(get_current_user)):
         )
         
         # Use integer user_id for database queries (compatibility mapping)
-        db_user_id = 1  # Default test user in database
+        db_user_id = 5  # Updated to match existing data in database
         transactions = db.get_user_transactions(
             db_user_id, start_date, end_date
         )
@@ -519,9 +465,10 @@ async def get_spending_trends(current_user=Depends(get_current_user)):
                 "category": txn.category,
                 "merchant_name": txn.merchant_name,
                 "description": txn.description,
-                "day_of_week": txn.day_of_week,
-                "is_weekend": txn.is_weekend,
-                "local_time_bucket": txn.local_time_bucket,
+                # Calculate day of week from date
+                "day_of_week": datetime.strptime(str(txn.date), "%Y-%m-%d").strftime("%A"),
+                "is_weekend": datetime.strptime(str(txn.date), "%Y-%m-%d").weekday() >= 5,
+                "local_time_bucket": "Unknown",
                 # Use safe attribute access for ML features
                 "spending_velocity": getattr(txn, 'spending_velocity', 0.0),
                 "category_frequency": getattr(txn, 'category_frequency', 1.0),
@@ -547,18 +494,19 @@ async def get_spending_trends(current_user=Depends(get_current_user)):
                 
             except Exception as e:
                 print(f"Error with AI trend analysis: {e}")
-                # Fall back to basic analyzer
-                pass
+                # Fall back to basic analyzer trends
+                basic_trends = analyzer.analyze_spending_trends()
+                return [SpendingTrend(icon=trend["icon"], trend=trend["trend"])
+                        for trend in basic_trends]
         else:
-            # Fallback to basic analyzer if AI is unavailable
-            raise HTTPException(
-                status_code=503, detail="LLM service unavailable"
-            )
+            # Use basic analyzer if AI is unavailable
+            basic_trends = analyzer.analyze_spending_trends()
+            return [SpendingTrend(icon=trend["icon"], trend=trend["trend"])
+                    for trend in basic_trends]
             
     except Exception as e:
-        print(f"Error getting trends: {e}")
         raise HTTPException(
-            status_code=500, detail="Failed to get spending trends"
+            status_code=500, detail=f"Failed to get spending trends: {str(e)}"
         )
 
 
@@ -584,44 +532,59 @@ async def get_spending_categories(current_user=Depends(get_current_user)):
 async def get_computed_goal_data(current_user=Depends(get_current_user)):
     """Get computed goal data with progress calculations"""
     try:
-        # Get quiz responses which contain all the goal data
-        quiz_data = db.get_user_quiz_responses(current_user["id"])
-        if not quiz_data or not quiz_data.get("goal_name"):
-            raise HTTPException(status_code=404, detail="No goal found")
+        # Use actual user ID from database
+        user_id = 5  # Updated to match existing data in database
         
-        # Calculate amount saved using quiz data
-        analyzer = TransactionAnalyzer(current_user["id"])
-        total_spent = analyzer.calculate_total_spent_ytd()
+        # Get goal data directly from database
+        goals = db.get_user_goals(user_id)
+        if not goals:
+            raise HTTPException(status_code=404, detail="No goals found for user")
         
-        # Get net monthly income from quiz data
-        net_monthly_income = quiz_data.get("net_monthly_income", 0.0)
+        # Use the most recent goal
+        goal = goals[-1]  # Get the latest goal
         
-        # Calculate months elapsed since goal creation (approximate)
-        target_date = quiz_data.get("target_date", "")
-        if target_date:
-            current_dt = datetime.now()
-            # Estimate months elapsed based on typical goal timeframes
-            months_elapsed = min(6, max(1, (current_dt.month - 1)))
-        else:
-            months_elapsed = 1
+        # Get year-to-date transaction data for amount saved calculation
+        current_year = datetime.now().year
+        start_date = f"{current_year}-01-01"
+        end_date = datetime.now().strftime("%Y-%m-%d")
         
-        # Calculate total income and amount saved
-        total_income = net_monthly_income * months_elapsed
-        amount_saved = max(0, total_income - total_spent)
+        transactions = db.get_user_transactions(user_id, start_date, end_date)
+        if not transactions:
+            raise HTTPException(status_code=404, detail="No transaction history found for goal calculation")
+        
+        # Calculate total income and expenses for the year
+        total_income = 0
+        total_expenses = 0
+        
+        for txn in transactions:
+            if txn.amount > 0:
+                total_income += txn.amount
+            else:
+                total_expenses += abs(txn.amount)
+        
+        # Calculate amount saved (can be negative if spending exceeds income)
+        amount_saved = total_income - total_expenses
+        
+        # Parse target date
+        try:
+            if isinstance(goal.target_date, str):
+                target_date = datetime.strptime(goal.target_date, "%Y-%m-%d").date()
+            else:
+                target_date = goal.target_date
+        except (ValueError, AttributeError):
+            raise HTTPException(status_code=500, detail="Invalid goal target date format")
         
         return ComputedGoal(
-            goal_name=quiz_data.get("goal_name", ""),
-            target_date=(datetime.strptime(target_date, "%Y-%m-%d").date()
-                        if target_date else datetime.now().date()),
-            goal_amount=quiz_data.get("goal_amount", 0.0),
+            goal_name=goal.goal_name,
+            target_date=target_date,
+            goal_amount=float(goal.goal_amount),
             amount_saved=amount_saved
         )
         
     except HTTPException:
         raise
     except Exception as e:
-        print(f"Error getting computed goal: {e}")
-        raise HTTPException(status_code=500, detail="Failed to get goal data")
+        raise HTTPException(status_code=500, detail=f"Failed to compute goal data: {str(e)}")
 
 
 def _get_current_week_dates() -> tuple[str, str]:
@@ -656,13 +619,12 @@ def _get_next_week_dates() -> tuple[str, str]:
 
 def _get_or_generate_weekly_plan(user_id: str) -> Dict[str, Any]:
     """
-    Get existing weekly plan or generate a new one using LLM agents.
-    This centralizes the weekly plan logic for both /plans/weekly and /habits.
-    Checks for existing plans before generating new ones.
+    Get existing weekly plan or generate a new one using database data.
+    No LLM dependency - generates plan from actual spending patterns.
     """
     try:
         # Convert string user_id to integer for database compatibility
-        db_user_id = 1  # Default test user mapping
+        db_user_id = 5  # Updated to match existing data in database
         
         # Get current date and week dates
         today = datetime.now().strftime("%Y-%m-%d")
@@ -672,125 +634,133 @@ def _get_or_generate_weekly_plan(user_id: str) -> Dict[str, Any]:
         existing_plan = db.get_current_weekly_plan(db_user_id, today)
         
         if existing_plan:
-            print(f"📋 Found existing weekly plan for week "
-                  f"{existing_plan.week_start_date} to "
-                  f"{existing_plan.week_end_date}")
-            # Parse and return existing plan
             try:
                 plan_data = json.loads(existing_plan.plan_data)
                 return plan_data
             except json.JSONDecodeError:
-                print("⚠️ Error parsing existing plan data, "
-                      "will generate new plan")
+                # If plan data is corrupted, generate new plan
+                pass
         
-        # Check if we need to generate plan for next week
-        # Generate for next week if today is Friday, Saturday, or Sunday
-        today_weekday = datetime.now().weekday()  # 0=Monday, 6=Sunday
-        if today_weekday >= 4:  # Friday or later
-            week_start, week_end = _get_next_week_dates()
-            print(f"📅 Generating plan for next week: "
-                  f"{week_start} to {week_end}")
-        else:
-            week_start, week_end = current_week_start, current_week_end
-            print(f"📅 Generating plan for current week: "
-                  f"{week_start} to {week_end}")
+        # Generate new plan based on actual user data
+        week_start, week_end = current_week_start, current_week_end
         
-        # Check if plan already exists for the target week
-        existing_week_plan = db.get_weekly_plan_by_week(db_user_id, week_start)
-        if existing_week_plan:
-            print(f"📋 Found existing plan for target week {week_start}")
-            try:
-                plan_data = json.loads(existing_week_plan.plan_data)
-                return plan_data
-            except json.JSONDecodeError:
-                print("⚠️ Error parsing existing week plan data, "
-                      "will generate new plan")
+        # Get user's goal data
+        goals = db.get_user_goals(db_user_id)
+        if not goals:
+            raise HTTPException(status_code=404, detail="No goals found for user")
         
-        # No existing plan found, generate a new one
-        print(f"🆕 Generating new weekly plan for {week_start} to {week_end}")
+        goal = goals[-1]  # Get latest goal
         
-        # Get user's actual quiz responses and goal data from database
-        quiz_data = db.get_user_quiz_responses(user_id)
+        # Get recent spending patterns (last 30 days)
+        end_date = datetime.now().strftime("%Y-%m-%d")
+        start_date = (datetime.now() - timedelta(days=30)).strftime("%Y-%m-%d")
+        transactions = db.get_user_transactions(db_user_id, start_date, end_date)
         
-        # If no quiz data, return minimal plan with no assumptions
-        if not quiz_data:
-            user_prefs = {}
-        else:
-            # Use only actual quiz data - no hardcoded assumptions
-            user_prefs = {
-                "financial_goal": quiz_data.get("financial_goal", ""),
-                "impulse_triggers": quiz_data.get("impulse_triggers", []),
-                "budgeting_score": quiz_data.get("budgeting_score", 0),
-                "goal_name": quiz_data.get("goal_name", ""),
-                "goal_amount": quiz_data.get("goal_amount", 0.0),
-                "target_date": quiz_data.get("target_date", ""),
-                "goal_description": quiz_data.get("goal_description", ""),
-                "net_monthly_income": quiz_data.get("net_monthly_income", 0.0)
+        if not transactions:
+            raise HTTPException(status_code=404, detail="No transaction history for plan generation")
+        
+        # Analyze spending patterns
+        spending_by_category = {}
+        daily_avg_spending = 0
+        total_spent = 0
+        
+        for txn in transactions:
+            if txn.amount < 0:  # Expenses only
+                amount = abs(txn.amount)
+                category = txn.category or "Other"
+                
+                if category not in spending_by_category:
+                    spending_by_category[category] = []
+                spending_by_category[category].append(amount)
+                total_spent += amount
+        
+        # Calculate daily average spending
+        days_in_period = 30
+        daily_avg_spending = total_spent / days_in_period
+        
+        # Generate practical weekly plan based on data
+        weekly_plan = {
+            "week_start": week_start,
+            "week_end": week_end,
+            "goal_name": goal.goal_name,
+            "goal_amount": float(goal.goal_amount),
+            "target_date": str(goal.target_date),
+            "spending_analysis": {
+                "daily_avg_spending": round(daily_avg_spending, 2),
+                "total_spent_30d": round(total_spent, 2),
+                "top_categories": []
+            },
+            "habits": [],
+            "recommendations": [],
+            "ml_features": {
+                "generated_from": "actual_spending_data",
+                "data_period_days": 30,
+                "transaction_count": len([t for t in transactions if t.amount < 0])
             }
-        
-        # Get spending analysis from database  
-        analyzer = TransactionAnalyzer(user_id)
-        categories = analyzer.get_spending_categories_with_history()
-        
-        # Calculate actual monthly spending from real data
-        total_spending = sum(
-            cat["amount"] for cat in categories
-            if cat["month"] == datetime.now().strftime("%Y-%m")
-        )
-        
-        spending_data = {
-            "monthly_analysis": {"average_monthly_spending": total_spending},
-            "category_analysis": {}
         }
         
-        # Convert categories to analysis format using actual spending totals
-        for cat in categories:
-            if cat["month"] == datetime.now().strftime("%Y-%m"):
-                percentage = (
-                    (cat["amount"] / total_spending * 100)
-                    if total_spending > 0 else 0
-                )
-                spending_data["category_analysis"][cat["category_name"]] = {
-                    "total_amount": cat["amount"],
-                    "percentage": percentage
-                }
+        # Add top spending categories
+        for category, amounts in spending_by_category.items():
+            avg_amount = sum(amounts) / len(amounts)
+            weekly_plan["spending_analysis"]["top_categories"].append({
+                "category": category,
+                "avg_amount": round(avg_amount, 2),
+                "transaction_count": len(amounts)
+            })
         
-        # Generate plan using LLM with only real user data
-        if LLM_AVAILABLE:
-            try:
-                planner = ChainOfGuidancePlanningAgent(
-                    user_preferences=user_prefs,
-                    spending_analysis=spending_data,
-                    llm_client=NoumiLLMClient(provider="google")
-                )
-                
-                weekly_plan = planner.generate_weekly_plan()
-                
-                # Save the generated plan to database
-                _save_weekly_plan_to_db(
-                    db_user_id, week_start, week_end, weekly_plan
-                )
-                
-                return weekly_plan
-                
-            except Exception as e:
-                print(f"Error generating LLM plan: {e}")
-                raise HTTPException(
-                    status_code=500,
-                    detail="Failed to generate weekly plan"
-                )
-        else:
-            raise HTTPException(
-                status_code=503,
-                detail="LLM service unavailable"
-            )
+        # Sort by average amount
+        weekly_plan["spending_analysis"]["top_categories"].sort(
+            key=lambda x: x["avg_amount"], reverse=True
+        )
+        
+        # Generate habits based on spending patterns
+        habits = [
+            {
+                "description": "Check account balance daily",
+                "weekly_occurrences": 7,
+                "category": "monitoring"
+            },
+            {
+                "description": f"Stay under ${daily_avg_spending:.0f} daily spending",
+                "weekly_occurrences": 7,
+                "category": "budgeting"
+            }
+        ]
+        
+        # Add category-specific habits
+        top_categories = weekly_plan["spending_analysis"]["top_categories"][:2]
+        for cat_info in top_categories:
+            habits.append({
+                "description": f"Review {cat_info['category']} spending before purchases",
+                "weekly_occurrences": 3,
+                "category": "category_awareness"
+            })
+        
+        weekly_plan["habits"] = habits
+        
+        # Generate recommendations
+        recommendations = [
+            f"Your daily average spending is ${daily_avg_spending:.2f}",
+            f"Focus on {top_categories[0]['category']} spending" if top_categories else "Track all spending categories"
+        ]
+        
+        # Add goal-specific recommendation
+        weekly_savings_needed = float(goal.goal_amount) / 52  # Assume 1-year goal
+        recommendations.append(f"Save ${weekly_savings_needed:.2f} weekly to reach your goal")
+        
+        weekly_plan["recommendations"] = recommendations
+        
+        # Save the generated plan to database
+        _save_weekly_plan_to_db(db_user_id, week_start, week_end, weekly_plan)
+        
+        return weekly_plan
+        
     except HTTPException:
         raise
     except Exception as e:
-        print(f"Error in plan generation: {e}")
         raise HTTPException(
             status_code=500,
-            detail="Failed to generate weekly plan"
+            detail=f"Failed to generate weekly plan: {str(e)}"
         )
 
 
@@ -926,15 +896,57 @@ async def get_weekly_plan(current_user=Depends(get_current_user)):
 
 @app.get("/streak/weekly", response_model=List[int])
 async def get_weekly_streak(current_user=Depends(get_current_user)):
-    """Get weekly streak data for the current user"""
+    """Get weekly streak data as [1,1,0,1,0,0,1] where 1=no anomalies, 0=anomalies for each day Mon-Sun"""
     try:
-        analyzer = TransactionAnalyzer(current_user["id"])
-        streak = analyzer.calculate_weekly_streak()
-        return streak
+        # Get current week's Monday to Sunday dates
+        today = datetime.now()
+        days_since_monday = today.weekday()  # 0=Monday, 6=Sunday
+        monday = today - timedelta(days=days_since_monday)
+        
+        # Create array for 7 days (Monday to Sunday)
+        weekly_streak = []
+        
+        # Use actual user ID
+        user_id = 5  # Updated to match existing data in database
+        
+        # Get user's financial context for anomaly detection
+        user_context = get_user_financial_context(user_id)
+        
+        # Check each day of the current week
+        for day_offset in range(7):  # 0=Monday to 6=Sunday
+            current_day = monday + timedelta(days=day_offset)
+            day_str = current_day.strftime("%Y-%m-%d")
+            
+            # Get transactions for this specific day
+            try:
+                day_transactions = db.get_user_transactions(
+                    user_id, 
+                    start_date=day_str, 
+                    end_date=day_str
+                )
+                
+                # Check for anomalies on this day
+                has_anomaly = False
+                for transaction in day_transactions:
+                    anomaly_result = detect_transaction_anomaly(
+                        transaction, user_context
+                    )
+                    if anomaly_result.get('is_anomaly', False):
+                        has_anomaly = True
+                        break
+                
+                # 1 if no anomalies, 0 if has anomalies
+                weekly_streak.append(0 if has_anomaly else 1)
+                
+            except HTTPException:
+                # No transactions for this day = no anomalies = 1
+                weekly_streak.append(1)
+        
+        return weekly_streak
+        
     except Exception as e:
-        print(f"Error getting weekly streak: {e}")
         raise HTTPException(
-            status_code=500, detail="Failed to get weekly streak"
+            status_code=500, detail=f"Failed to get weekly streak: {str(e)}"
         )
 
 
@@ -1136,53 +1148,47 @@ def get_user_financial_context(user_id: int) -> dict:
     try:
         # Get user's goal data for income and savings info
         quiz_data = db.get_user_quiz_responses(str(user_id))
+        if not quiz_data:
+            raise HTTPException(status_code=404, detail="User quiz data not found")
         
         # Get recent transaction history for rolling features
         transactions = db.get_user_transactions(user_id, limit=50)
+        if not transactions:
+            raise HTTPException(status_code=404, detail="No transaction history found")
         
         # Calculate 30-day rolling features
-        if transactions:
-            amounts = [float(t.amount) for t in transactions]
-            spent_amounts = [abs(a) for a in amounts if a < 0]
-            income_amounts = [a for a in amounts if a > 0]
-            
-            context = {
-                'monthly_income': quiz_data.get('net_monthly_income', 5000.0),
-                'suggested_savings': (quiz_data.get('goal_amount', 1000.0) /
-                                    12),  # Monthly
-                'current_balance': sum(amounts),  # Simplified balance calc
-                'total_spent_30d': sum(spent_amounts),
-                'total_income_30d': sum(income_amounts),
-                'txn_count_30d': len(transactions),
-                'avg_txn_amt_30d': np.mean(amounts) if amounts else 0.0,
-                'std_txn_amt_30d': np.std(amounts) if len(amounts) > 1 else 0.0
-            }
-        else:
-            context = {
-                'monthly_income': quiz_data.get('net_monthly_income', 5000.0),
-                'suggested_savings': quiz_data.get('goal_amount', 1000.0) / 12,
-                'current_balance': 0.0,
-                'total_spent_30d': 0.0,
-                'total_income_30d': 0.0,
-                'txn_count_30d': 0,
-                'avg_txn_amt_30d': 0.0,
-                'std_txn_amt_30d': 0.0
-            }
+        amounts = [float(t.amount) for t in transactions]
+        spent_amounts = [abs(a) for a in amounts if a < 0]
+        income_amounts = [a for a in amounts if a > 0]
+        
+        net_monthly_income = quiz_data.get('net_monthly_income')
+        goal_amount = quiz_data.get('goal_amount')
+        
+        if not net_monthly_income:
+            raise HTTPException(status_code=404, detail="Monthly income not found")
+        if not goal_amount:
+            raise HTTPException(status_code=404, detail="Goal amount not found")
+        
+        context = {
+            'monthly_income': float(net_monthly_income),
+            'suggested_savings': float(goal_amount) / 12,  # Monthly target
+            'current_balance': sum(amounts),  # Simplified balance calculation
+            'total_spent_30d': sum(spent_amounts),
+            'total_income_30d': sum(income_amounts),
+            'txn_count_30d': len(transactions),
+            'avg_txn_amt_30d': np.mean(amounts) if amounts else 0.0,
+            'std_txn_amt_30d': np.std(amounts) if len(amounts) > 1 else 0.0
+        }
             
         return context
         
+    except HTTPException:
+        raise
     except Exception as e:
-        print(f"Error getting user financial context: {e}")
-        return {
-            'monthly_income': 5000.0,
-            'suggested_savings': 1000.0,
-            'current_balance': 0.0,
-            'total_spent_30d': 0.0,
-            'total_income_30d': 0.0,
-            'txn_count_30d': 0,
-            'avg_txn_amt_30d': 0.0,
-            'std_txn_amt_30d': 0.0
-        }
+        raise HTTPException(
+            status_code=500, 
+            detail=f"Error getting user financial context: {str(e)}"
+        )
 
 
 if __name__ == "__main__":

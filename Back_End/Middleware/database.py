@@ -47,9 +47,10 @@ MODEL_PATH = "model.pkl"  # Update this path as needed
 @dataclass
 class User:
     user_id: int
-    name: str
     email: str
+    password_hash: str
     created_at: str
+    name: str
     financial_goal: str  # e.g., 'GOAL_DEBT', 'GOAL_EFUND'
     impulse_triggers: List[str]  # e.g., ['Stress', 'FOMO', 'Boredom']
     budgeting_score: int  # 1 = sticks to budgets, 3 = budgets stress me out
@@ -60,10 +61,12 @@ class User:
 class Goal:
     goal_id: int
     user_id: int
-    amount: float
-    purpose: str  # e.g., 'Pay off credit card', 'Save for a move'
-    deadline: str  # date
-    created_at: str
+    goal_amount: float
+    goal_name: str
+    goal_description: str
+    target_date: str  # date
+    net_monthly_income: Optional[float] = None
+    created_at: str = None
 
 
 @dataclass
@@ -76,21 +79,22 @@ class BankAccount:
 
 @dataclass
 class Transaction:
-    transaction_id: int
-    account_id: int
+    transaction_id: str  # TEXT in actual schema
+    account_id: str  # TEXT in actual schema
+    user_id: int
     amount: float
     date: str
     merchant_name: str
-    category: str  # e.g., 'Retail', 'Dining'
-    description: str
-    mcc: int  # Merchant Category Code for ML processing
-    local_time_bucket: str  # e.g., 'Evening', for spending context
-    rolling_spend_window: float  # Rolling spend window for ML enrichment
-    day_of_week: str  # e.g., 'Monday', 'Tuesday'
-    is_weekend: bool  # True if Saturday/Sunday
-    rolling_spend_7d: float  # 7-day rolling spend for this user/category
-    category_frequency: float  # Frequency of transactions in category
-    category_variance: float  # Variance of spending in this category
+    category: str
+    mcc: int
+    description: str = ""  # Not in current schema but kept for compatibility
+    local_time_bucket: str = ""  # Not in current schema
+    rolling_spend_window: float = 0.0  # Not in current schema
+    day_of_week: str = ""  # Not in current schema
+    is_weekend: bool = False  # Not in current schema
+    rolling_spend_7d: float = 0.0  # Not in current schema
+    category_frequency: float = 0.0  # Not in current schema
+    category_variance: float = 0.0  # Not in current schema
 
 
 @dataclass
@@ -174,40 +178,49 @@ def load_model():
 def get_base_features(account_id: str):
     """Retrieve base features from PostgreSQL database."""
     with get_db_connection() as conn:
-        # Convert account_id to integer for proper type matching
-        account_id_int = int(account_id)
+        # account_id is already text, no conversion needed
         
         # Get user data with monthly income from goals table
         user_query = """
-        SELECT u.user_id, COALESCE(g.net_monthly_income, 5000.0) as monthly_income 
+        SELECT u.user_id, g.net_monthly_income 
         FROM users u 
-        JOIN bank_accounts ba ON u.user_id = ba.user_id 
+        JOIN plaid_accounts pa ON u.user_id = pa.user_id 
         LEFT JOIN goals g ON u.user_id = g.user_id
-        WHERE ba.account_id = %s
+        WHERE pa.account_id = %s
         LIMIT 1
         """
-        user_df = pd.read_sql_query(user_query, conn, 
-                                   params=(account_id_int,))
+        user_df = pd.read_sql_query(user_query, conn, params=(account_id,))
+        
+        if user_df.empty:
+            raise HTTPException(status_code=404, detail="Account not found")
+        
+        monthly_income = user_df['net_monthly_income'].iloc[0]
+        if pd.isna(monthly_income):
+            raise HTTPException(status_code=404, detail="Monthly income not found")
         
         # Get suggested savings amount (from goals table)
         savings_query = """
-        SELECT g.goal_amount as suggested_savings_amount 
+        SELECT g.goal_amount 
         FROM goals g
-        JOIN bank_accounts ba ON g.user_id = ba.user_id 
-        WHERE ba.account_id = %s 
+        JOIN plaid_accounts pa ON g.user_id = pa.user_id 
+        WHERE pa.account_id = %s 
         ORDER BY g.created_at DESC LIMIT 1
         """
-        savings_df = pd.read_sql_query(savings_query, conn, 
-                                      params=(account_id_int,))
+        savings_df = pd.read_sql_query(savings_query, conn, params=(account_id,))
+        
+        if savings_df.empty:
+            raise HTTPException(status_code=404, detail="Goal not found")
         
         # Calculate current balance from transactions
         balance_query = """
-        SELECT COALESCE(SUM(amount), 0) as current_balance
+        SELECT SUM(amount) as current_balance
         FROM transactions 
         WHERE account_id = %s
         """
-        balance_df = pd.read_sql_query(balance_query, conn, 
-                                      params=(account_id_int,))
+        balance_df = pd.read_sql_query(balance_query, conn, params=(account_id,))
+        
+        if balance_df.empty or pd.isna(balance_df['current_balance'].iloc[0]):
+            raise HTTPException(status_code=404, detail="No transaction history found")
         
         # Get transactions (last 30 days for rolling features)
         transactions_query = """
@@ -217,17 +230,15 @@ def get_base_features(account_id: str):
         AND date >= CURRENT_DATE - INTERVAL '30 days'
         ORDER BY date DESC
         """
-        transactions_df = pd.read_sql_query(transactions_query, conn, 
-                                          params=(account_id_int,))
+        transactions_df = pd.read_sql_query(transactions_query, conn, params=(account_id,))
+        
+        if transactions_df.empty:
+            raise HTTPException(status_code=404, detail="No recent transactions found")
         
         return {
-            'monthly_income': (user_df['monthly_income'].iloc[0] 
-                             if not user_df.empty else 5000.0),
-            'suggested_savings': (
-                savings_df['suggested_savings_amount'].iloc[0] 
-                if not savings_df.empty else 1000.0),
-            'current_balance': (balance_df['current_balance'].iloc[0] 
-                              if not balance_df.empty else 0.0),
+            'monthly_income': float(monthly_income),
+            'suggested_savings': float(savings_df['goal_amount'].iloc[0]),
+            'current_balance': float(balance_df['current_balance'].iloc[0]),
             'transactions': transactions_df
         }
 
@@ -237,24 +248,7 @@ def preprocess_features(base_data):
     transactions = base_data['transactions']
     
     if transactions.empty:
-        # Return default features if no transactions
-        return {
-            'amount': 0.0,
-            'days_since_txn': 0,
-            'merchant_category': 0,  # Encoded
-            'is_income': 0,
-            'total_spent_30d': 0.0,
-            'total_income_30d': 0.0,
-            'txn_count_30d': 0,
-            'avg_txn_amt_30d': 0.0,
-            'std_txn_amt_30d': 0.0,
-            'net_cash_flow_30d': 0.0,
-            'monthly_income': base_data['monthly_income'],
-            'suggested_savings': base_data['suggested_savings'],
-            'balance_at_txn_time': base_data['current_balance'],
-            'savings_delta': (base_data['current_balance'] - 
-                            base_data['suggested_savings'])
-        }
+        raise HTTPException(status_code=404, detail="No transactions for feature extraction")
     
     # Convert date column and sort
     transactions['date'] = pd.to_datetime(transactions['date'])
@@ -362,26 +356,28 @@ class DatabaseManager:
             conn = self.get_connection()
             cursor = conn.cursor()
             
-            cursor.execute('SELECT * FROM users WHERE user_id = %s', 
-                         (user_id,))
+            cursor.execute('SELECT * FROM users WHERE user_id = %s', (user_id,))
             row = cursor.fetchone()
             conn.close()
             
             if row:
                 return User(
                     user_id=row[0],
-                    name=row[1],
-                    email=row[2],
-                    created_at=row[3],
-                    financial_goal=row[4],
-                    impulse_triggers=json.loads(row[5]) if row[5] else [],
-                    budgeting_score=row[6],
-                    plaid_token=row[7]
+                    email=row[1],
+                    password_hash=row[2],
+                    created_at=str(row[3]),
+                    name=row[4],
+                    financial_goal=row[5],
+                    impulse_triggers=json.loads(row[6]) if row[6] else [],
+                    budgeting_score=row[7],
+                    plaid_token=row[8] or ""
                 )
-            return None
+            else:
+                raise HTTPException(status_code=404, detail="User not found")
+        except HTTPException:
+            raise
         except Exception as e:
-            print(f"Error getting user: {e}")
-            return None
+            raise HTTPException(status_code=500, detail=f"Error getting user: {e}")
     
     def get_user_by_email(self, email: str) -> Optional[User]:
         """Get user by email address"""
@@ -425,14 +421,12 @@ class DatabaseManager:
             conn = self.get_connection()
             cursor = conn.cursor()
             
-            # Map Goal dataclass fields to actual PostgreSQL column names
             cursor.execute('''
-                INSERT INTO goals (user_id, goal_amount, goal_name, target_date, 
-                                 created_at)
-                VALUES (%s, %s, %s, %s, %s) RETURNING goal_id
+                INSERT INTO goals (user_id, goal_name, goal_description, goal_amount, target_date, net_monthly_income, created_at)
+                VALUES (%s, %s, %s, %s, %s, %s, %s) RETURNING goal_id
             ''', (
-                goal.user_id, goal.amount, goal.purpose, goal.deadline, 
-                goal.created_at
+                goal.user_id, goal.goal_name, goal.goal_description, goal.goal_amount, goal.target_date, 
+                goal.net_monthly_income, goal.created_at
             ))
             
             goal_id = cursor.fetchone()[0]
@@ -440,8 +434,7 @@ class DatabaseManager:
             conn.close()
             return goal_id
         except Exception as e:
-            print(f"Error creating goal: {e}")
-            return None
+            raise HTTPException(status_code=500, detail=f"Error creating goal: {e}")
     
     def get_user_goals(self, user_id: int) -> List[Goal]:
         """Get all goals for a user"""
@@ -449,30 +442,30 @@ class DatabaseManager:
             conn = self.get_connection()
             cursor = conn.cursor()
             
-            cursor.execute('''
-                SELECT goal_id, user_id, goal_amount, goal_name, target_date, created_at 
-                FROM goals 
-                WHERE user_id = %s 
-                ORDER BY created_at DESC
-            ''', (user_id,))
-            
+            cursor.execute('SELECT * FROM goals WHERE user_id = %s', (user_id,))
             rows = cursor.fetchall()
             conn.close()
+            
+            if not rows:
+                raise HTTPException(status_code=404, detail="No goals found for user")
             
             goals = []
             for row in rows:
                 goals.append(Goal(
                     goal_id=row[0],
                     user_id=row[1],
-                    amount=row[2],      # goal_amount -> amount
-                    purpose=row[3],     # goal_name -> purpose
-                    deadline=row[4],    # target_date -> deadline
-                    created_at=row[5]
+                    goal_name=row[2],
+                    goal_description=row[3],
+                    goal_amount=row[4],
+                    target_date=row[5],
+                    net_monthly_income=row[6],
+                    created_at=row[7]
                 ))
             return goals
+        except HTTPException:
+            raise
         except Exception as e:
-            print(f"Error getting goals: {e}")
-            return []
+            raise HTTPException(status_code=500, detail=f"Error getting goals: {e}")
     
     # Bank Account operations
     def create_bank_account(self, account: BankAccount) -> int:
@@ -561,8 +554,7 @@ class DatabaseManager:
             
             query = '''
                 SELECT t.* FROM transactions t
-                JOIN bank_accounts ba ON t.account_id = ba.account_id
-                WHERE ba.user_id = %s
+                WHERE t.user_id = %s
             '''
             params = [user_id]
             
@@ -584,30 +576,28 @@ class DatabaseManager:
             rows = cursor.fetchall()
             conn.close()
             
+            if not rows:
+                raise HTTPException(status_code=404, detail="No transactions found")
+            
             transactions = []
             for row in rows:
                 transactions.append(Transaction(
                     transaction_id=row[0],
                     account_id=row[1],
-                    amount=row[2],
-                    date=row[3],
-                    merchant_name=row[4],
-                    category=row[5],
-                    description=row[6],
-                    mcc=row[7],
-                    local_time_bucket=row[8],
-                    rolling_spend_window=row[9],
-                    day_of_week=row[10],
-                    is_weekend=bool(row[11]),
-                    rolling_spend_7d=row[12],
-                    category_frequency=row[13],
-                    category_variance=row[14]
+                    user_id=row[2],
+                    amount=row[3],
+                    date=row[4],
+                    merchant_name=row[5],
+                    category=row[6],
+                    mcc=row[7]
+                    # row[8] is created_at, not needed for Transaction object
                 ))
             
             return transactions
+        except HTTPException:
+            raise
         except Exception as e:
-            print(f"Error getting transactions: {e}")
-            return []
+            raise HTTPException(status_code=500, detail=f"Error getting transactions: {e}")
     
     def get_spending_by_category(self, user_id: int, 
                                start_date: str = None) -> Dict[str, float]:
@@ -645,40 +635,43 @@ class DatabaseManager:
         try:
             new_goal = Goal(
                 goal_id=0,  # Will be auto-generated
-                user_id=1,  # Default user for migration
-                amount=goal_data.goal_amount,
-                purpose=goal_data.goal_name,
-                deadline=goal_data.target_date,
+                user_id=5,  # Updated to match existing data
+                goal_amount=goal_data.goal_amount,
+                goal_name=goal_data.goal_name,
+                goal_description=goal_data.goal_description,
+                target_date=goal_data.target_date,
+                net_monthly_income=goal_data.net_monthly_income,
                 created_at=goal_data.created_at
             )
             goal_id = self.create_goal(new_goal)
             return goal_id is not None
         except Exception as e:
-            print(f"Error in legacy save_user_goal: {e}")
-            return False
+            raise HTTPException(status_code=500, detail=f"Error in save_user_goal: {e}")
     
     def get_user_goal(self, user_id_str: str):
         """Legacy compatibility method"""
         try:
-            goals = self.get_user_goals(1)
+            goals = self.get_user_goals(5)  # Updated to match existing data
             if goals:
                 goal = goals[0]
                 from types import SimpleNamespace
                 return SimpleNamespace(
-                    goal_name=goal.purpose,
-                    goal_amount=goal.amount,
-                    target_date=goal.deadline,
-                    net_monthly_income=5000.0
+                    goal_name=goal.goal_name,
+                    goal_amount=goal.goal_amount,
+                    target_date=goal.target_date,
+                    net_monthly_income=goal.net_monthly_income
                 )
-            return None
+            else:
+                raise HTTPException(status_code=404, detail="No goals found")
+        except HTTPException:
+            raise
         except Exception as e:
-            print(f"Error in legacy get_user_goal: {e}")
-            return None
+            raise HTTPException(status_code=500, detail=f"Error in get_user_goal: {e}")
 
     def get_user_quiz_responses(self, user_id_str: str) -> Optional[Dict]:
         """Get user's quiz responses for AI agents"""
         try:
-            user_id = 1  # Default user for testing
+            user_id = 5  # Updated to match existing data in database
             
             user = self.get_user(user_id)
             if user:
@@ -694,10 +687,11 @@ class DatabaseManager:
                 if goals:
                     goal = goals[0]
                     quiz_responses.update({
-                        "goal_name": goal.purpose,
-                        "goal_amount": goal.amount,
-                        "target_date": goal.deadline,
-                        "goal_description": goal.purpose
+                        "goal_name": goal.goal_name,
+                        "goal_amount": goal.goal_amount,
+                        "target_date": goal.target_date,
+                        "goal_description": goal.goal_description,
+                        "net_monthly_income": goal.net_monthly_income or 6000.0
                     })
                 
                 return quiz_responses
@@ -711,22 +705,117 @@ class DatabaseManager:
                 "target_date": "2025-12-31",
                 "goal_description": "Build emergency savings",
                 "name": "Test User",
-                "email": "test@example.com"
+                "email": "test@example.com",
+                "net_monthly_income": 5000.0
             }
             
         except Exception as e:
-            print(f"Error getting user quiz responses: {e}")
-            return {
-                "financial_goal": "GOAL_SAVINGS",
-                "impulse_triggers": ["Stress", "FOMO"],
-                "budgeting_score": 2,
-                "goal_name": "Emergency Fund",
-                "goal_amount": 5000.0,
-                "target_date": "2025-12-31",
-                "goal_description": "Build emergency savings",
-                "name": "Test User",
-                "email": "test@example.com"
-            }
+            raise HTTPException(status_code=500, detail=f"Error getting user quiz responses: {e}") 
+
+    def create_weekly_plan(self, weekly_plan: WeeklyPlan) -> int:
+        """Create a new weekly plan and return weekly_plan_id"""
+        try:
+            conn = self.get_connection()
+            cursor = conn.cursor()
+            
+            cursor.execute('''
+                INSERT INTO weekly_plans (
+                    user_id, week_start_date, week_end_date, plan_data, 
+                    ml_features, created_at, is_active
+                ) VALUES (%s, %s, %s, %s, %s, %s, %s) RETURNING weekly_plan_id
+            ''', (
+                weekly_plan.user_id, weekly_plan.week_start_date, 
+                weekly_plan.week_end_date, weekly_plan.plan_data,
+                weekly_plan.ml_features, weekly_plan.created_at, 
+                weekly_plan.is_active
+            ))
+            
+            weekly_plan_id = cursor.fetchone()[0]
+            conn.commit()
+            conn.close()
+            return weekly_plan_id
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Error creating weekly plan: {e}")
+    
+    def get_current_weekly_plan(self, user_id: int, current_date: str):
+        """Get current active weekly plan for user"""
+        try:
+            conn = self.get_connection()
+            cursor = conn.cursor()
+            
+            cursor.execute('''
+                SELECT * FROM weekly_plans 
+                WHERE user_id = %s 
+                AND is_active = true 
+                AND %s BETWEEN week_start_date AND week_end_date
+                ORDER BY created_at DESC LIMIT 1
+            ''', (user_id, current_date))
+            
+            row = cursor.fetchone()
+            conn.close()
+            
+            if row:
+                return WeeklyPlan(
+                    weekly_plan_id=row[0],
+                    user_id=row[1],
+                    week_start_date=str(row[2]),
+                    week_end_date=str(row[3]),
+                    plan_data=row[4],
+                    ml_features=row[5],
+                    created_at=str(row[6]),
+                    is_active=row[7]
+                )
+            return None
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Error getting current weekly plan: {e}")
+    
+    def get_weekly_plan_by_week(self, user_id: int, week_start: str):
+        """Get weekly plan by week start date"""
+        try:
+            conn = self.get_connection()
+            cursor = conn.cursor()
+            
+            cursor.execute('''
+                SELECT * FROM weekly_plans 
+                WHERE user_id = %s AND week_start_date = %s
+                ORDER BY created_at DESC LIMIT 1
+            ''', (user_id, week_start))
+            
+            row = cursor.fetchone()
+            conn.close()
+            
+            if row:
+                return WeeklyPlan(
+                    weekly_plan_id=row[0],
+                    user_id=row[1],
+                    week_start_date=str(row[2]),
+                    week_end_date=str(row[3]),
+                    plan_data=row[4],
+                    ml_features=row[5],
+                    created_at=str(row[6]),
+                    is_active=row[7]
+                )
+            return None
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Error getting weekly plan by week: {e}")
+    
+    def deactivate_old_weekly_plans(self, user_id: int, new_week_start: str):
+        """Deactivate old weekly plans for user"""
+        try:
+            conn = self.get_connection()
+            cursor = conn.cursor()
+            
+            cursor.execute('''
+                UPDATE weekly_plans 
+                SET is_active = false 
+                WHERE user_id = %s AND week_start_date != %s
+            ''', (user_id, new_week_start))
+            
+            conn.commit()
+            conn.close()
+            return True
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Error deactivating old plans: {e}")
 
 
 # FastAPI endpoints for anomaly detection
