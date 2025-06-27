@@ -1,5 +1,4 @@
 import { colors, typography } from '@/src/theme';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Checkbox from 'expo-checkbox';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
@@ -11,61 +10,43 @@ import {
   TextInput,
   TouchableOpacity,
   TouchableWithoutFeedback,
-  View
+  View,
 } from 'react-native';
 import EyeIcon from '../../assets/icons/eye.svg';
 import ProfileIcon from '../../assets/icons/profile.svg';
 import SmsIcon from '../../assets/icons/sms.svg';
 
-type RootStackParamList = {
-  SignUp: undefined;
-  Login: undefined;
-};
-
-type SignUpScreenProps = {
-  navigation: NativeStackNavigationProp<RootStackParamList, 'SignUp'>;
-};
-
-export default function SignUpScreen({ navigation }: SignUpScreenProps) {
+export default function SignUpScreen() {
   const [name, setName] = useState<string>('');
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
+  const [nameFocused, setNameFocused] = useState(false);
+  const [emailFocused, setEmailFocused] = useState(false);
+  const [passwordFocused, setPasswordFocused] = useState(false);
   const [agree, setAgree] = useState<boolean>(false);
-  const [showPassword, setShowPassword] = useState(false);
-  // TO DO: FIX KEYBOARD GLITCH
-  const [focusedField, setFocusedField] = useState<'name' | 'email' | 'password' | null>(null);
 
   const router = useRouter();
 
-  const isValid = name.length > 0 && email.length > 0 && password.length > 0 && agree;
+  const isValid = name && email && password;
   return (
-    <TouchableWithoutFeedback
-      onPress={() => {
-        Keyboard.dismiss();
-        setFocusedField(null);
-      }}
-    >
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <SafeAreaView style={styles.container}>
         <Text style={styles.logo}>Noumi</Text>
 
-        <Text style={styles.heading}>Let’s get started</Text>
+        <Text style={styles.heading}>Let's get started</Text>
         <Text style={styles.sub}>
           Your journey to smarter finances begins now.
         </Text>
-
-        <View
-          style={[
-            styles.inputGroup,
-            focusedField === 'name' && styles.inputFocused
-          ]}
-        >
+        <View style={[styles.inputGroup, nameFocused && styles.inputFocused]}>
           <TextInput
             placeholder="Full Name"
             style={styles.input}
-            placeholderTextColor={colors.muted}
+            placeholderTextColor={colors.lightGrayFont}
+            autoCapitalize="none"
             value={name}
             onChangeText={setName}
-            onFocus={() => setFocusedField('name')}
+            onFocus={() => setNameFocused(true)}
+            onBlur={() => setNameFocused(false)}
           />
           <ProfileIcon
             width={20}
@@ -76,21 +57,17 @@ export default function SignUpScreen({ navigation }: SignUpScreenProps) {
           />
         </View>
 
-        <View
-          style={[
-            styles.inputGroup,
-            focusedField === 'email' && styles.inputFocused
-          ]}
-        >
+        <View style={[styles.inputGroup, emailFocused && styles.inputFocused]}>
           <TextInput
             placeholder="Email"
             style={styles.input}
             keyboardType="email-address"
-            placeholderTextColor={colors.muted}
+            placeholderTextColor={colors.lightGrayFont}
             autoCapitalize="none"
             value={email}
             onChangeText={setEmail}
-            onFocus={() => setFocusedField('email')}
+            onFocus={() => setEmailFocused(true)}
+            onBlur={() => setEmailFocused(false)}
           />
           <SmsIcon
             width={20}
@@ -101,32 +78,25 @@ export default function SignUpScreen({ navigation }: SignUpScreenProps) {
           />
         </View>
 
-        <View
-          style={[
-            styles.inputGroup,
-            focusedField === 'password' && styles.inputFocused
-          ]}
-        >
+        <View style={[styles.inputGroup, passwordFocused && styles.inputFocused]}>
           <TextInput
             placeholder="Password"
             style={styles.input}
-            secureTextEntry={!showPassword}
+            secureTextEntry
             value={password}
-            placeholderTextColor={colors.muted}
+            placeholderTextColor={colors.lightGrayFont}
             onChangeText={setPassword}
-            onFocus={() => setFocusedField('password')}
+            onFocus={() => setPasswordFocused(true)}
+            onBlur={() => setPasswordFocused(false)}
           />
-          <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
-            <EyeIcon
-              width={20}
-              height={20}
-              fill="none"
-              stroke={colors.lightGrayFont}
-              strokeWidth={1.5}
-            />
-          </TouchableOpacity>
+          <EyeIcon
+            width={20}
+            height={20}
+            fill="none"
+            stroke={colors.lightGrayFont}
+            strokeWidth={1.5}
+          />
         </View>
-
         <View style={styles.checkboxRow}>
           <Checkbox
             value={agree}
@@ -143,20 +113,20 @@ export default function SignUpScreen({ navigation }: SignUpScreenProps) {
         <TouchableOpacity
           style={[
             styles.primaryBtn,
-            isValid ? styles.enabledBtn : styles.disabledBtn
+            isValid ? styles.enabledBtn : styles.disabledBtn,
           ]}
           disabled={!isValid}
-          onPress={() => router.push('/onboarding/quiz')}
+          onPress={()=> router.replace('/onboarding/quiz')}
         >
           <Text style={styles.primaryText}>Get Started</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
-          style={styles.loginContainer}
+          style={styles.signUpContainer}
           onPress={() => router.push('/login')}
         >
-          <Text style={styles.loginText}>
-            Already have an account? <Text style={styles.loginLink}>Log In</Text>
+          <Text style={styles.signUpText}>
+            Already have an account? <Text style={styles.signUpLink}>Log In</Text>
           </Text>
         </TouchableOpacity>
       </SafeAreaView>
@@ -169,7 +139,6 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     paddingHorizontal: 20,
-    backgroundColor: colors.lightBackground,
   },
   logo: {
     fontFamily: typography.fontFamily.madimi,
@@ -191,7 +160,7 @@ const styles = StyleSheet.create({
     fontFamily: typography.fontFamily.regular,
     fontSize: typography.fontSize.body,
     color: colors.black,
-    marginBottom: 40,
+    marginBottom: 64,
     textAlign: 'left',
     width: '100%',
     maxWidth: 370,
@@ -206,18 +175,8 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     marginBottom: 12,
     marginHorizontal: 20,
-    height: 56,
-    borderColor: colors.primaryGreen,
-    borderWidth: 0,
-    shadowColor: 'transparent',
-  },
-  inputFocused: {
-    borderColor: '#316E72',
-    borderWidth: 1,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
+    elevation: 2,
+    height: 56
   },
   input: {
     flex: 1,
@@ -226,6 +185,15 @@ const styles = StyleSheet.create({
     color: colors.black,
     marginRight: 12
   },
+  inputFocused: {
+    borderColor: colors.primaryGreen,
+    borderWidth: 1,
+    shadowColor: '#00014',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 4,
+  },
   checkboxRow: {
     flexDirection: 'row',
     alignItems: 'flex-start',
@@ -233,7 +201,6 @@ const styles = StyleSheet.create({
     marginHorizontal: 10,
     borderRadius: 40,
     paddingHorizontal: 12,
-    paddingBottom: 32
   },
   customCheckbox: {
     width: 16,
@@ -266,7 +233,8 @@ const styles = StyleSheet.create({
     height: 56,
     borderRadius: 25,
     marginVertical: 8,
-    alignSelf: 'center'
+    alignSelf: 'center',
+    marginTop: 60
   },
   enabledBtn: {
     backgroundColor: colors.primaryGreen,
@@ -279,16 +247,16 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600'
   },
-  loginContainer: {
+  signUpContainer: {
     marginTop: 10,
     alignSelf: 'center'
   },
-  loginText: {
+  signUpText: {
     fontFamily: typography.fontFamily.regular,
     fontSize: typography.fontSize.body,
     color: colors.black,
   },
-  loginLink: {
+  signUpLink: {
     fontFamily: typography.fontFamily.semiBold,
     fontSize: typography.fontSize.body,
     color: colors.primaryGreen,

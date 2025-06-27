@@ -1,6 +1,6 @@
-import React, { ReactElement } from 'react';
-import { View, StyleSheet } from 'react-native';
 import OptionCard from '@/components/OptionCard';
+import React, { ReactElement } from 'react';
+import { StyleSheet, View } from 'react-native';
 
 interface Option {
   id: string;
@@ -12,10 +12,9 @@ interface Props {
   options: Option[];
   selectedOption: string | null;
   onSelectOption: (label: string) => void;
-  itemsPerRow: number;
 }
 
-export default function OptionGrid({ options, selectedOption, onSelectOption, itemsPerRow }: Props) {
+export default function OptionGrid({ options, selectedOption, onSelectOption }: Props) {
 
   return (
     <View style={styles.grid}>
