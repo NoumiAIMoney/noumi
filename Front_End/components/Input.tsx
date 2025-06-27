@@ -1,12 +1,12 @@
-import React from 'react';
 import { colors, typography } from '@/src/theme';
+import React, { useState } from 'react';
 import {
-  View,
+  StyleSheet,
   Text,
   TextInput,
-  StyleSheet,
   TextInputProps,
   TouchableOpacity,
+  View,
 } from 'react-native';
 
 interface InputProps extends TextInputProps {
@@ -26,6 +26,7 @@ export default function Input({
   style,
   ...textInputProps
 }: InputProps) {
+  const [inputFocused, setInputFocused] = useState(false);
   const handleChangeText = (text: string) => {
     if (mode === 'number') {
       const numeric = text.replace(/[^0-9]/g, '');
@@ -41,7 +42,7 @@ export default function Input({
       <Text style={styles.label}>{label}</Text>
 
       <TouchableOpacity
-        style={styles.inputWrapper}
+        style={[styles.inputWrapper, inputFocused && styles.inputFocused]}
         activeOpacity={mode === 'date' ? 0.7 : 1}
         onPress={mode === 'date' ? onPressIconRight : undefined}
       >
@@ -61,6 +62,8 @@ export default function Input({
           keyboardType={mode === 'number' ? 'numeric' : 'default'}
           placeholderTextColor={colors.lightGrayFont}
           pointerEvents={mode === 'date' ? 'none' : 'auto'}
+          onFocus={() => setInputFocused(true)}
+          onBlur={() => setInputFocused(false)}
         />
         {iconRight && (
           <TouchableOpacity onPress={onPressIconRight} style={styles.iconRight}>
@@ -119,5 +122,14 @@ const styles = StyleSheet.create({
     height: 24,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  inputFocused: {
+    borderColor: colors.primaryGreen,
+    borderWidth: 1,
+    shadowColor: '#00014',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 4,
   },
 });

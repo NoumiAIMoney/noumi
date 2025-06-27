@@ -8,6 +8,7 @@ import { getWeeklySavings } from '@/src/api/savings';
 import { getSpendingCategories, getTotalSpending } from '@/src/api/spending';
 import { getLongestStreak } from '@/src/api/streak';
 import { colors, typography } from '@/src/theme';
+import { getCurrentWeekRange } from '@/src/utils/formatters';
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
@@ -99,7 +100,7 @@ export default function Step1() {
   return (
     <View style={styles.container}>
       <View style={styles.textGroup}>
-        <Text style={styles.date}>05/26 - 05/31</Text>
+        <Text style={styles.date}>{getCurrentWeekRange()}</Text>
         <Text style={styles.titleWeekly}>Weekly Recap</Text>
       </View>
       <View style={styles.cardWrapper}>
@@ -130,7 +131,7 @@ export default function Step1() {
               icon={<TrendUpIcon width={24} height={24} fill="none" />}
               label='Money Spent'
               iconBackground='#5390D3'
-              value={`$${totalSpending}`}
+              value={`$${Math.round(Number(totalSpending) || 0).toLocaleString()}`}
             />
           </View>
         </View>
@@ -186,12 +187,11 @@ const styles = StyleSheet.create({
   },
   card: {
     width: 353,
-    height: 543,
+    height: 520,
     borderRadius: 16,
     backgroundColor: colors.white,
-    paddingTop: 40,
+    paddingVertical: 40,
     paddingRight: 16,
-    paddingBottom: 40,
     paddingLeft: 16,
     shadowColor: '#191919',
     shadowOffset: { width: 0, height: 8 },

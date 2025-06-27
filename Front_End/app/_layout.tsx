@@ -1,18 +1,19 @@
-import React from 'react';
-import { ThemeProvider } from '@react-navigation/native';
-import { useFonts,
+import {
   Inter_300Light,
-  Inter_400Regular, 
-  Inter_500Medium, 
-  Inter_600SemiBold, 
-  Inter_700Bold 
+  Inter_400Regular,
+  Inter_500Medium,
+  Inter_600SemiBold,
+  Inter_700Bold,
+  useFonts
 } from '@expo-google-fonts/inter';
-import { useFonts as useMadimiOne, MadimiOne_400Regular } from '@expo-google-fonts/madimi-one';
+import { MadimiOne_400Regular, useFonts as useMadimiOne } from '@expo-google-fonts/madimi-one';
+import { ThemeProvider } from '@react-navigation/native';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
+import React from 'react';
 import 'react-native-reanimated';
 
-import { CustomLightTheme, CustomDarkTheme } from '../src/theme';
+import { CustomLightTheme } from '../src/theme';
 
 export default function RootLayout() {
 
@@ -35,7 +36,7 @@ export default function RootLayout() {
 
   return (
     <ThemeProvider value={theme}>
-      <Stack screenOptions={{ headerShown: false }} />
+      <Stack screenOptions={{ headerShown: false, gestureEnabled: true }}  />
       <StatusBar style="auto" />
     </ThemeProvider>
   );

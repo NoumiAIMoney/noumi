@@ -1,6 +1,6 @@
 import { colors, typography } from '@/src/theme';
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 
 interface CategoryVerticalCardProps {
   icon: React.ReactElement;
@@ -9,9 +9,10 @@ interface CategoryVerticalCardProps {
   value?: string | React.ReactElement;
   valueIcon?: React.ReactElement;
   cardMinHeight?: number;
+  labelHeight?: number
 }
 
-export default function CategoryVerticalCard({ icon, label, iconBackground='#B4698F', value, valueIcon, cardMinHeight=110 }: CategoryVerticalCardProps) {
+export default function CategoryVerticalCard({ icon, label, iconBackground='#B4698F', value, valueIcon, cardMinHeight=110, labelHeight=40 }: CategoryVerticalCardProps) {
   return (
     <View style={[styles.card, {minHeight: cardMinHeight}]}>
       <View style={[styles.iconWrapper, { backgroundColor: iconBackground}]}>
@@ -23,7 +24,7 @@ export default function CategoryVerticalCard({ icon, label, iconBackground='#B46
           <Text style={styles.valueText}>{value}</Text>
         </View>
       )}
-      <Text style={styles.label}>{label}</Text>
+      <Text style={[styles.label, {height: labelHeight}]}>{label}</Text>
     </View>
   );
 }
@@ -41,7 +42,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   iconWrapper: {
-    width: 39.09,
+    width: 40,
     height: 40,
     padding: 10,
     borderRadius: 100,

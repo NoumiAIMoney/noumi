@@ -1,17 +1,20 @@
 import React, { useRef, useState } from 'react';
-import { View, StyleSheet, ScrollView, Image } from 'react-native';
-import { colors } from '../src/theme';
+import { Image, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { colors, typography } from '../src/theme';
 
 type Slide = {
   key: string;
   image: any;
+  title?: string;
+  subtitle?: string;
 };
 
 type ImageSliderProps = {
   slides: Slide[];
 };
 
-const SNAP_INTERVAL = 320 + 24;
+const SLIDE_WIDTH = 370
+const SNAP_INTERVAL = SLIDE_WIDTH + 24;
 
 export default function ImageSlider({ slides }: ImageSliderProps) {
   const scrollRef = useRef<ScrollView>(null);
@@ -35,13 +38,19 @@ export default function ImageSlider({ slides }: ImageSliderProps) {
         scrollEventThrottle={16}
       >
         {slides.map((slide) => (
-          <View key={slide.key} style={styles.slide}>
-            <View style={styles.imageContainer}>
-              <Image
-                source={slide.image}
-                style={styles.image}
-                resizeMode="cover"
-              />
+          <View key={slide.key}>
+            <View style={styles.text}>
+                <Text style={styles.title}>{slide.title}</Text>
+                <Text style={styles.subtitle}>{slide.subtitle}</Text>
+            </View>
+            <View style={styles.slide}>
+              <View style={styles.imageContainer}>
+                <Image
+                  source={slide.image}
+                  style={styles.image}
+                  resizeMode="cover"
+                />
+              </View>
             </View>
           </View>
         ))}
@@ -62,20 +71,41 @@ export default function ImageSlider({ slides }: ImageSliderProps) {
 
 const styles = StyleSheet.create({
   slide: {
-    width: 320,
+    width: SLIDE_WIDTH,
     height: 306,
     marginRight: 24,
   },
   imageContainer: {
-    width: 320,
-    // not 308 because the first picture does not fit it perfectly
-    // can ask for the asset to have the exact size
+    width: SLIDE_WIDTH,
     height: 306,
     borderRadius: 20,
     overflow: 'hidden',
     backgroundColor: '#fff',
     borderColor: colors.lightPurple,
     borderWidth: 1
+  },
+  text: {
+    paddingBottom: 20,
+    width: SLIDE_WIDTH,
+  },
+  title: {
+    fontFamily: typography.fontFamily.semiBold,
+    marginTop: 10,
+    fontSize: typography.fontSize.XXLarge,
+    textAlign: 'left',
+    lineHeight: 42,
+    letterSpacing: typography.letterSpacing.normal,
+    color: colors.black,
+    width: '100%'
+  },
+  subtitle: {
+    fontSize: typography.fontSize.body,
+    color: colors.black,
+    marginBottom: 20,
+    textAlign: 'left',
+    lineHeight: typography.lineHeight.body,
+    fontFamily: typography.fontFamily.medium,
+    marginTop: 10,
   },
   image: {
     width: '100%',

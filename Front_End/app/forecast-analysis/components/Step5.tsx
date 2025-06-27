@@ -1,4 +1,4 @@
-import CarIcon from '@/assets/icons/car.svg';
+import UncategorizedIcon from '@/assets/icons/goals.svg';
 import HorizontalCard from '@/components/HorizontalCard';
 import { getHabits } from '@/src/api/habits';
 import { colors, typography } from '@/src/theme';
@@ -9,6 +9,8 @@ interface Habit {
   description: string;
   weekly_occurrences: number;
 }
+
+const COLORS = ['#B4698F', '#608762', '#5390D3']
 
 export default function Step5() {
   const [habits, setHabits] = useState<Habit[]>([]);
@@ -36,8 +38,8 @@ export default function Step5() {
             title={habit.description || 'N/A'}
             white={true}
             icon={
-              <View style={styles.iconWrapper}>
-                <CarIcon width={24} height={24} fill="none" stroke={colors.white} />
+              <View style={[styles.iconWrapper, {backgroundColor: COLORS[index]}]}>
+                <UncategorizedIcon width={24} height={24} fill="none" stroke={colors.white} />
               </View>
             }
             onlyLabel
@@ -68,11 +70,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   iconWrapper: {
-    width: 39.09,
+    width: 40,
     height: 40,
     padding: 10,
     borderRadius: 100,
-    backgroundColor: '#B4698F',
     alignItems: 'center',
     justifyContent: 'center',
   },

@@ -72,7 +72,7 @@ export default function Step2() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.text}>Great job! You decreased your Coffee Shops spending by 28%.</Text>
+      <Text style={styles.text}>Great job! You decreased your {category.category} spending by {Math.round(category.percentageDrop)}%.</Text>
       <Text style={styles.subtitle}>This week</Text>
       <View style={styles.cardsWrapper}>
         <HorizontalCard
@@ -83,9 +83,10 @@ export default function Step2() {
               {categoryIcons[category.category || 'Uncategorized'] || categoryIcons['Uncategorized']}
             </View>
           }
-          amount={`-${String(category.decreaseAmount)}`}
+          amount={`-${category.decreaseAmount.toLocaleString()}`}
           amountColor='#1BB16A'
           onlyLabel
+          withShadow
         />
       </View>
       <Text style={styles.subtitle}>Last week</Text>
@@ -98,8 +99,9 @@ export default function Step2() {
               {categoryIcons[category.category || 'Uncategorized'] || categoryIcons['Uncategorized']}
             </View>
           }
-          amount={String(category.previousAmount)}
+          amount={category.previousAmount.toLocaleString()}
           onlyLabel
+          withShadow
         />
       </View>
     </View>
@@ -118,9 +120,10 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.XXLarge,
     color: colors.darkFont,
     letterSpacing: 0,
-    marginBottom: 16,
+    marginBottom: 48,
     marginLeft: 8,
-    marginRight: 24
+    marginRight: 10,
+    width: 300
   },
   subtitle: {
     fontFamily: typography.fontFamily.medium,

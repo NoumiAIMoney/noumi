@@ -1,13 +1,17 @@
-import SpikeBar from '@/components/SpikeBar';
-import { colors, typography } from '@/src/theme';
-import React, { useEffect, useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import TrendUpIcon from '@/assets/icons/progress.svg';
+import { categoryIcons } from '@/components/CategoryIcons';
+import CategoryVerticalCard from '@/components/CategoryVerticalCard';
 import HorizontalCard from '@/components/HorizontalCard';
-import TrendUpIcon from '@/assets/icons/progress.svg'
+import SpikeBar from '@/components/SpikeBar';
 import { getYearlyAnomalies } from '@/src/api/anomalies';
 import { getSpendingCategories } from '@/src/api/spending';
 import { getSpendingTrends } from '@/src/api/trends';
-import CategoryVerticalCard from '@/components/CategoryVerticalCard';
+import { colors, typography } from '@/src/theme';
+import { formatDollarAmountsInText } from '@/src/utils/formatters';
+import React, { useEffect, useState } from 'react';
+import { StyleSheet, Text, View } from 'react-native';
+
+const COLORS = ['#B4698F', '#E97272', '#FFCE51']
 
 export default function Step1() {
   const [anomalies, setAnomalies] = useState<number[] | null>(null);
@@ -35,7 +39,6 @@ export default function Step1() {
   }, []);
 
   if (!anomalies) return null;
-
   return (
     <View style={styles.container}>
       <View style={styles.textGroup}>
@@ -52,7 +55,7 @@ export default function Step1() {
           {trends.slice(0, 2).map((trend, index) => (
             <HorizontalCard
               key={index}
-              title={trend.trend || 'N/A'}
+              title={formatDollarAmountsInText(trend.trend) || 'N/A'}
               white={false}
               icon={<TrendUpIcon width={24} height={24} fill="none" />}
               width={330}
@@ -63,8 +66,9 @@ export default function Step1() {
             {categories.slice(0, 3).map((category, index) => (
               <CategoryVerticalCard
                 key={index}
-                icon={<TrendUpIcon width={24} height={24} fill="none" />}
+                icon={categoryIcons[category || 'Uncategorized'] || categoryIcons['Uncategorized']}
                 label={category.category_name}
+                iconBackground={COLORS[index]}
               />
             ))}
           </View>

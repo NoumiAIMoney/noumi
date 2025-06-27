@@ -1,4 +1,4 @@
-import { colors, typography } from '@/src/theme';
+import { colors, shadows, typography } from '@/src/theme';
 import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
@@ -85,6 +85,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 12,
     elevation: 1,
+    ...shadows.input
   },
   content: {
     flex: 1,

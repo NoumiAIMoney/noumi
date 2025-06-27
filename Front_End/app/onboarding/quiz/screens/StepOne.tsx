@@ -1,8 +1,8 @@
-import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-import { goalOptions } from '../../../../lib/goalOptions';
-import { colors, typography } from '@/src/theme';
 import OptionGrid from '@/components/OptionGrid';
+import { colors, typography } from '@/src/theme';
+import React from 'react';
+import { StyleSheet, Text, View } from 'react-native';
+import { goalOptions } from '../../../../lib/goalOptions';
 
 interface StepOneProps {
   selectedOption: string | null;
@@ -20,7 +20,6 @@ export default function StepOne({ selectedOption, onSelectOption }: StepOneProps
         options={goalOptions}
         selectedOption={selectedOption}
         onSelectOption={onSelectOption}
-        itemsPerRow={3}
       />
     </View>
   );

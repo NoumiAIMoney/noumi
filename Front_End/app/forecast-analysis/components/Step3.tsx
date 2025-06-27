@@ -1,11 +1,12 @@
+import TrendUpIcon from '@/assets/icons/progress.svg';
+import HorizontalCard from '@/components/HorizontalCard';
+import SpikeBar from '@/components/SpikeBar';
+import { getYearlyAnomalies } from '@/src/api/anomalies';
+import { getSpendingTrends } from '@/src/api/trends';
 import { colors, typography } from '@/src/theme';
+import { formatDollarAmountsInText } from '@/src/utils/formatters';
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import { getYearlyAnomalies } from '@/src/api/anomalies';
-import SpikeBar from '@/components/SpikeBar';
-import { getSpendingTrends } from '@/src/api/trends';
-import HorizontalCard from '@/components/HorizontalCard';
-import TrendUpIcon from '@/assets/icons/progress.svg'
 
 export default function Step3() {
   const [anomalies, setAnomalies] = useState<number[] | null>(null);
@@ -41,7 +42,7 @@ export default function Step3() {
         {trends.slice(0, 4).map((trend, index) => (
           <HorizontalCard
             key={index}
-            title={trend.trend || 'N/A'}
+            title={formatDollarAmountsInText(trend.trend) || 'N/A'}
             white={true}
             icon={<TrendUpIcon width={24} height={24} fill="none" />}
             width={330}
@@ -65,7 +66,8 @@ const styles = StyleSheet.create({
     color: colors.darkFont,
     letterSpacing: 0,
     marginLeft: 8,
-    marginBottom: 24
+    marginBottom: 32,
+    width: 302
   },
   section: {
     alignItems: 'center',

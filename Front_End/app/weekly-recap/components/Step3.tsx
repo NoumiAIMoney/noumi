@@ -1,9 +1,10 @@
+import TrendUpIcon from '@/assets/icons/progress.svg';
+import HorizontalCard from '@/components/HorizontalCard';
+import { getAccomplishedHabits } from '@/src/api/habits';
 import { colors, typography } from '@/src/theme';
+import { formatDollarAmountsInText } from '@/src/utils/formatters';
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import HorizontalCard from '@/components/HorizontalCard';
-import TrendUpIcon from '@/assets/icons/progress.svg'
-import { getAccomplishedHabits } from '@/src/api/habits';
 
 type Habit = {
   habit_description: string;
@@ -39,7 +40,7 @@ export default function Step3() {
           return (
             <HorizontalCard
               key={index}
-              title={habit.habit_description || 'N/A'}
+              title={formatDollarAmountsInText(habit.habit_description) || 'N/A'}
               white={true}
               width={330}
               iconRight={isNoumi}
@@ -48,6 +49,7 @@ export default function Step3() {
                   ? { icon: <TrendUpIcon width={24} height={24} fill="none" /> }
                   : { amount: habit.value, amountColor: '#1BB16A' }
               )}
+              withShadow
             />
           );
         })}
@@ -69,8 +71,9 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.XXLarge,
     color: colors.darkFont,
     letterSpacing: 0,
-    marginLeft: 16,
-    marginBottom: 24
+    marginLeft: 20,
+    marginBottom: 24,
+    marginRight: 50
   },
   section: {
     alignItems: 'center',
@@ -81,6 +84,6 @@ const styles = StyleSheet.create({
     color: colors.darkFont,
     fontSize: typography.fontSize.body,
     marginVertical: 12,
-    marginLeft: 16,
+    marginLeft: 24,
   },
 });

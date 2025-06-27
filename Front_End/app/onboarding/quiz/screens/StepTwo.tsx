@@ -7,7 +7,7 @@ import {
   StyleSheet,
   Text,
   TouchableWithoutFeedback,
-  View,
+  View
 } from 'react-native';
 
 import Input from '@/components/Input';
@@ -72,7 +72,6 @@ export default function StepTwo({ selectedOption, onStepCompleted, onSelectOptio
               onSelectOption={onSelectOption}
             />
           </View>
-
           <Input
             label="Name your goal"
             mode="text"
@@ -80,7 +79,6 @@ export default function StepTwo({ selectedOption, onStepCompleted, onSelectOptio
             value={goalDescription || ''}
             onChangeText={setGoalDescription}
           />
-
           <Input
             label="Set the amount"
             keyboardType="numeric"
@@ -124,7 +122,8 @@ export default function StepTwo({ selectedOption, onStepCompleted, onSelectOptio
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 16,
+    paddingVertical: 16,
+    paddingHorizontal: 20,
     width: '100%',
   },
   text: {
@@ -156,10 +155,10 @@ const styles = StyleSheet.create({
     bottom: 72,
     left: 0,
     right: 0,
-    backgroundColor: '#fff',
+    backgroundColor: colors.white,
     borderRadius: 8,
     zIndex: 10,
-    shadowColor: '#000',
+    shadowColor: colors.black,
     shadowOpacity: 0.15,
     shadowRadius: 10,
     shadowOffset: { width: 0, height: 4 },

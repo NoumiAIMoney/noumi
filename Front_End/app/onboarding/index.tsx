@@ -2,7 +2,7 @@ import ImageSlider from '@/components/ImageSlider';
 import onboardingSlides from '@/lib/onboardingSlides';
 import { colors, typography } from '@/src/theme';
 import { useRouter } from 'expo-router';
-import React, { useState } from 'react';
+import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 export default function OnboardingScreen() {
@@ -19,11 +19,7 @@ export default function OnboardingScreen() {
   return (
     <View style={styles.container}>
       <View>
-        <View style={styles.text}>
-          <Text style={styles.logo}>Noumi</Text>
-          <Text style={styles.title}>Smarter Money Moves Start Here</Text>
-          <Text style={styles.subtitle}>Track, plan and grow your money</Text>
-        </View>
+        <Text style={styles.logo}>Noumi</Text>
         <ImageSlider slides={onboardingSlides} />
       </View>
       <View style={styles.buttons}>
@@ -52,36 +48,14 @@ const styles = StyleSheet.create({
     paddingBottom: 40,
     paddingHorizontal: 20,
   },
-  text: {
-    paddingBottom: 20
+  buttons: {
+    gap: 12,
+    marginTop: 'auto',
   },
   logo: {
     fontFamily: typography.fontFamily.madimi,
     fontSize: typography.fontSize.XLarge,
     color: colors.primaryGreen,
-  },
-  title: {
-    fontFamily: typography.fontFamily.semiBold,
-    marginTop: 10,
-    fontSize: typography.fontSize.XXLarge,
-    textAlign: 'left',
-    lineHeight: 42,
-    letterSpacing: typography.letterSpacing.normal,
-    color: colors.black,
-    width: '80%'
-  },
-  subtitle: {
-    fontSize: typography.fontSize.body,
-    color: colors.black,
-    marginBottom: 20,
-    textAlign: 'left',
-    lineHeight: typography.lineHeight.body,
-    fontFamily: typography.fontFamily.medium,
-    marginTop: 10,
-  },
-  buttons: {
-    gap: 12,
-    marginTop: 'auto',
   },
   primaryBtn: {
     width: '80%',

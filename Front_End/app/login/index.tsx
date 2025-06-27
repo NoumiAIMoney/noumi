@@ -1,6 +1,4 @@
 import { colors, typography } from '@/src/theme';
-import { RouteProp } from '@react-navigation/native';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import {
@@ -16,22 +14,7 @@ import {
 import EyeIcon from '../../assets/icons/eye.svg';
 import SmsIcon from '../../assets/icons/sms.svg';
 
-type RootStackParamList = {
-  SignUp: undefined;
-  Login: undefined;
-};
-
-type SignUpScreenNavigationProp = NativeStackNavigationProp<
-  RootStackParamList,
-  'SignUp'
->;
-
-type SignUpScreenProps = {
-  navigation: SignUpScreenNavigationProp;
-  route: RouteProp<RootStackParamList, 'SignUp'>;
-};
-
-export default function SignUpScreen({ navigation }: SignUpScreenProps) {
+export default function SignUpScreen() {
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const [emailFocused, setEmailFocused] = useState(false);
@@ -50,7 +33,6 @@ export default function SignUpScreen({ navigation }: SignUpScreenProps) {
           Your journey to smarter finances begins now.
         </Text>
         <View style={[styles.inputGroup, emailFocused && styles.inputFocused]}>
-          {/* TO DO: ADD INPUT ON FOCUS */}
           <TextInput
             placeholder="Email"
             style={styles.input}
@@ -92,7 +74,7 @@ export default function SignUpScreen({ navigation }: SignUpScreenProps) {
         </View>
 
         <TouchableOpacity
-          // TODO: UPDATE
+          // TODO: UPDATE WITH FORGOT PASSWORD
           onPress={() => {}}
           style={{ alignSelf: 'flex-start' }}
         >
@@ -111,11 +93,11 @@ export default function SignUpScreen({ navigation }: SignUpScreenProps) {
         </TouchableOpacity>
 
         <TouchableOpacity
-          style={styles.signUpContainer}
+          style={styles.loginContainer}
           onPress={() => router.push('/sign-up')}
         >
-          <Text style={styles.signUpText}>
-            New to Noumi? <Text style={styles.signUpLink}>Create Account</Text>
+          <Text style={styles.loginText}>
+            New to Noumi? <Text style={styles.loginLink}>Create Account</Text>
           </Text>
         </TouchableOpacity>
       </SafeAreaView>
@@ -175,6 +157,8 @@ const styles = StyleSheet.create({
     marginRight: 12
   },
   inputFocused: {
+    borderColor: colors.primaryGreen,
+    borderWidth: 1,
     shadowColor: '#00014',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.08,
@@ -211,16 +195,16 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600'
   },
-  signUpContainer: {
+  loginContainer: {
     marginTop: 10,
     alignSelf: 'center'
   },
-  signUpText: {
+  loginText: {
     fontFamily: typography.fontFamily.regular,
     fontSize: typography.fontSize.body,
     color: colors.black,
   },
-  signUpLink: {
+  loginLink: {
     fontFamily: typography.fontFamily.semiBold,
     fontSize: typography.fontSize.body,
     color: colors.primaryGreen,

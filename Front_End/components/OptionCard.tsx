@@ -23,8 +23,8 @@ const styles = StyleSheet.create({
     width: 108,
     height: 115,
     borderRadius: 15,
-    backgroundColor: '#FFFFFF',
-    padding: 10,
+    backgroundColor: colors.white,
+    padding: 8,
     justifyContent: 'center',
     alignItems: 'center',
     gap: 8,
@@ -38,5 +38,6 @@ const styles = StyleSheet.create({
     fontFamily: typography.fontFamily.medium,
     fontSize: typography.fontSize.body,
     color: colors.darkFont,
+    maxWidth: 88,
   },
 });

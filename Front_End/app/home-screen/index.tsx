@@ -1,6 +1,4 @@
-import WalletIcon from '@/assets/icons/empty-wallet-remove.svg';
-import RestaurantIcon from '@/assets/icons/Fork-Knife.svg';
-import GoalsIcon from '@/assets/icons/goals.svg';
+import { default as GoalsIcon, default as UncategorizedIcon } from '@/assets/icons/goals.svg';
 import HomeIcon from '@/assets/icons/home.svg';
 import IncomeIcon from '@/assets/icons/money-receive.svg';
 import ExpenseIcon from '@/assets/icons/money-send.svg';
@@ -10,6 +8,7 @@ import { getComputedGoal } from '@/src/api/goal';
 import { getHabits } from '@/src/api/habits';
 import { getSpendingStatus } from '@/src/api/spending';
 import { colors, typography } from '@/src/theme';
+import { getCurrentWeekRange } from '@/src/utils/formatters';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
@@ -22,10 +21,6 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-
-interface HomeScreenProps {
-  navigation: any;
-}
 
 interface GoalData {
   goal_name: string;
@@ -45,11 +40,13 @@ interface HabitData {
   weekly_occurrences: number;
 }
 
-export default function HomeScreen({ navigation }: HomeScreenProps) {
+export default function HomeScreen() {
   const [goal, setGoal] = useState<GoalData | null>(null);
   const [spendingStatus, setSpendingStatus] = useState<SpendingData | null>(null);
   const [habits, setHabits] = useState<HabitData[]>([]);
+  const [showAllHabits, setShowAllHabits] = useState(false);
 
+  const habitsToDisplay = showAllHabits ? habits : habits.slice(0, 2);
   useEffect(() => {
     async function fetchGoal() {
       try {
@@ -89,7 +86,6 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
       style={styles.container}
     >
       <SafeAreaView style={styles.safeArea}>
-        <ScrollView showsVerticalScrollIndicator={false}>
         {/* Header */}
         <View style={styles.header}>
           <View style={styles.headerLeft}>
@@ -127,7 +123,7 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
               <MaterialIcons name="emoji-events" size={24} color={colors.white} />
             </View>
             <View style={styles.recapText}>
-              <Text style={styles.recapDate}>05/26 - 05/31</Text>
+              <Text style={styles.recapDate}>{getCurrentWeekRange()}</Text>
               <Text style={styles.recapTitle}>Your Weekly Recap</Text>
             </View>
           </View>
@@ -152,7 +148,7 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
                   maximumFractionDigits: 1,
                 })}`}
               </Text>
-              <Text style={styles.updateDate}>Updated: 05/26/2025</Text>
+              <Text style={styles.updateDate}>Updated: {new Date().toLocaleDateString('en-US')}</Text>
             </View>
             
             <View style={styles.summaryCards}>
@@ -193,21 +189,49 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>My Habits</Text>
-            <TouchableOpacity>
-              <Text style={styles.seeAllBtn}>See All</Text>
+            <TouchableOpacity onPress={() => setShowAllHabits(prev => !prev)}>
+              <Text style={styles.seeAllBtn}>
+                {showAllHabits ? 'See Less' : 'See All'}
+              </Text>
             </TouchableOpacity>
           </View>
-
-          {habits.map((habit, index) => (
-            <View key={index} style={styles.habitCard}>
-              <View style={[styles.habitIcon, { backgroundColor: index % 2 === 0 ? '#608762' : '#B4698F' }]}>
-                {(index % 2 === 0) ? <WalletIcon style={styles.habitIconImage} /> : <RestaurantIcon style={styles.habitIconImage} />}
+          {showAllHabits ? (
+            <ScrollView
+              style={{ maxHeight: 200 }}
+              contentContainerStyle={{ paddingBottom: 32 }}
+              showsVerticalScrollIndicator={false}
+            >
+              {habitsToDisplay.map((habit, index) => (
+                <View key={index} style={styles.habitCard}>
+                  <View
+                    style={[
+                      styles.habitIcon,
+                      { backgroundColor: index % 2 === 0 ? '#608762' : '#B4698F' },
+                    ]}
+                  >
+                    <UncategorizedIcon style={styles.habitIconImage} />
+                  </View>
+                  <Text style={styles.habitText}>{habit.description}</Text>
+                </View>
+              ))}
+            </ScrollView>
+          ) : (
+            habitsToDisplay.map((habit, index) => (
+              <View key={index} style={styles.habitCard}>
+                <View
+                  style={[
+                    styles.habitIcon,
+                    { backgroundColor: index % 2 === 0 ? '#608762' : '#B4698F' },
+                  ]}
+                >
+                  <UncategorizedIcon style={styles.habitIconImage} />
+                </View>
+                <Text style={styles.habitText}>{habit.description}</Text>
               </View>
-              <Text style={styles.habitText}>{habit.description}</Text>
-            </View>
-          ))}
+            ))
+          )}
         </View>
-        </ScrollView>
+
         
         {/* Bottom Navigation */}
         <View style={styles.bottomNav}>
