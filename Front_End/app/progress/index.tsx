@@ -1,12 +1,13 @@
-import Image2 from '@/assets/icons/goals.svg';
-import Image1 from '@/assets/icons/home.svg';
-import Image3 from '@/assets/icons/progress.svg';
+import GoalsIcon from '@/assets/icons/goals.svg';
+import HomeIcon from '@/assets/icons/home.svg';
+import ProgressIcon from '@/assets/icons/progress.svg';
 import HabitCard, { HydratedHabit, hydrateHabits } from '@/components/HabitCard';
 import RecapCard from '@/components/RecapCard';
 import SpikeBar from '@/components/SpikeBar';
 import { getYearlyAnomalies } from '@/src/api/anomalies';
 import { getHabits } from '@/src/api/habits';
 import { colors, typography } from '@/src/theme';
+import { getPastFiveWeekRanges } from '@/src/utils/formatters';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import React, { JSX, useEffect, useState } from 'react';
@@ -19,16 +20,9 @@ import {
   View
 } from 'react-native';
 
-interface ProgressScreenProps {
-  navigation: {
-    goBack: () => void;
-    navigate: (screen: string) => void;
-  };
-}
-
 type TabType = 'Active Habits' | 'Weekly Recaps';
 
-const ProgressScreen: React.FC<ProgressScreenProps> = ({ navigation }) => {
+const ProgressScreen: React.FC = () => {
   const [activeTab, setActiveTab] = useState<TabType>('Active Habits');
   const [habits, setHabits] = useState<HydratedHabit[]>([]);
   const [anomalies, setAnomalies] = useState<number[]>([]);
@@ -38,10 +32,11 @@ const ProgressScreen: React.FC<ProgressScreenProps> = ({ navigation }) => {
       try {
         const [rawHabits, anomalyData] = await Promise.all([
           getHabits(),
-          getYearlyAnomalies()]);
+          getYearlyAnomalies()
+        ]);
         const hydrated = hydrateHabits(rawHabits);
         setHabits(hydrated);
-        setAnomalies(anomalyData.anomalies)
+        setAnomalies(anomalyData.anomalies);
       } catch (err) {
         console.error('Failed to fetch habits:', err);
       }
@@ -51,139 +46,110 @@ const ProgressScreen: React.FC<ProgressScreenProps> = ({ navigation }) => {
   }, []);
 
   const toggleHabit = (habitName: string) => {
-    const updatedHabits = habits.map(habit =>
-      habit.name === habitName && !habit.isCompleted
-        ? {
-            ...habit,
-            completed: habit.completed + 1,
-            isCompleted: habit.completed + 1 >= habit.total,
-          }
-        : habit
-    );
+    const updatedHabits = habits.map(habit => {
+      if (habit.name === habitName && habit.completed < habit.total) {
+        const newCompleted = habit.completed + 1;
+        return {
+          ...habit,
+          completed: newCompleted,
+          isCompleted: newCompleted === habit.total,
+        };
+      }
+      return habit;
+    });
 
     const sorted = sortHabits(updatedHabits);
     setHabits(sorted);
   };
 
   const sortHabits = (list: HydratedHabit[]): HydratedHabit[] => {
-    const incomplete = list.filter(h => !h.isCompleted);
-    const complete = list.filter(h => h.isCompleted);
-
-    incomplete.sort(
-      (a, b) => (a.completed / a.total) - (b.completed / b.total)
-    );
-
+    const incomplete = list.filter(h => h.completed < h.total);
+    const complete = list.filter(h => h.completed >= h.total);
     return [...incomplete, ...complete];
   };
 
-  const renderActiveHabits = (): JSX.Element => {
-
-    return (
-      <View style={styles.content}>
-        <Text style={styles.statsTitle}>Habit Stats</Text>
-        {/* Habit Stats */}
-        <View style={styles.spikeCard}>
-          {/* HARD CODED HABIT COUNT FOR NOW */}
-          <SpikeBar progress={anomalies} habitCount={3} width={373} />
-        </View>
-
-        {/* Habits for the week */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Habits for the week</Text>
-          <Text style={styles.sectionSubtitle}>When you complete a habit, mark it as done!</Text>
-
-          <View style={styles.habitsList}>
-            {habits.map((habit: any, index: any) => (
-              <HabitCard 
-                key={index} 
-                habit={habit} 
-                onToggle={() => toggleHabit(habit.name)} 
-              />
-            ))}
-          </View>
-        </View>
+  const renderActiveHabits = (): JSX.Element => (
+    <View style={styles.content}>
+      <Text style={styles.statsTitle}>Habit Stats</Text>
+      <View style={styles.spikeCard}>
+        <SpikeBar progress={anomalies} habitCount={3} width={373} />
       </View>
-    );
-  };
+
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Habits for the week</Text>
+        <Text style={styles.sectionSubtitle}>When you complete a habit, mark it as done!</Text>
+        <ScrollView
+          style={styles.habitsList}
+          showsVerticalScrollIndicator={false}
+        >
+          {habits.map((habit, index) => (
+            <HabitCard key={index} habit={habit} onToggle={() => toggleHabit(habit.name)} />
+          ))}
+        </ScrollView>
+      </View>
+    </View>
+  );
 
   const renderWeeklyRecaps = (): JSX.Element => (
     <View style={styles.content}>
       <Text style={styles.recapTitle}>Check your weekly progress</Text>
       <Text style={styles.recapSubtitle}>You can find all your weekly recaps here</Text>
-      {[
-        '05/26 - 05/31',
-        '05/19 - 05/26', 
-        '05/12 - 05/19',
-        '05/05 - 05/12',
-        '04/29 - 05/05'
-      ].map((dateRange, index) => (
-        <RecapCard 
-          key={index} 
-          dateRange={dateRange} 
-          onPress={() => router.replace('/weekly-recap')} 
-        />
-      ))}
+      <ScrollView style={[{height: 700}]}>
+        {getPastFiveWeekRanges().map((dateRange, index) => (
+          <RecapCard key={index} dateRange={dateRange} onPress={() => router.replace('/weekly-recap')} />
+        ))}
+      </ScrollView>
     </View>
   );
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity 
-          style={styles.backButton}
-          onPress={() => router.replace('/home-screen')}
+      <View style={{ flex: 1 }}>
+        <View
+          style={{ flex: 1 }}
         >
-          <Ionicons name="chevron-back" size={24} color={colors.gray} />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Progress</Text>
-        <View style={styles.headerRight} />
-      </View>
+          <View style={styles.header}>
+            <TouchableOpacity style={styles.backButton} onPress={() => router.replace('/home-screen')}>
+              <Ionicons name="chevron-back" size={24} color={colors.gray} />
+            </TouchableOpacity>
+            <Text style={styles.headerTitle}>Progress</Text>
+            <View style={styles.headerRight} />
+          </View>
 
-      {/* Tab Navigation */}
-      <View style={styles.tabContainer}>
-        <TouchableOpacity 
-          style={[styles.tab, activeTab === 'Active Habits' && styles.activeTab]}
-          onPress={() => setActiveTab('Active Habits')}
-        >
-          <Text style={[styles.tabText, activeTab === 'Active Habits' && styles.activeTabText]}>
-            Active Habits
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity 
-          style={[styles.tab, activeTab === 'Weekly Recaps' && styles.activeTab]}
-          onPress={() => setActiveTab('Weekly Recaps')}
-        >
-          <Text style={[styles.tabText, activeTab === 'Weekly Recaps' && styles.activeTabText]}>
-            Weekly Recaps
-          </Text>
-        </TouchableOpacity>
-      </View>
+          <View style={styles.tabContainer}>
+            {['Active Habits', 'Weekly Recaps'].map((tab) => {
+              const isActive = activeTab === tab;
+              return (
+                <TouchableOpacity key={tab} style={styles.tab} onPress={() => setActiveTab(tab as TabType)}>
+                  <View style={{ alignItems: 'center' }}>
+                    <Text style={[styles.tabText, isActive && styles.activeTabText]}>{tab}</Text>
+                    {isActive && <View style={styles.tabUnderline} />}
+                  </View>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
 
-      {/* Content */}
-      <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
-        {activeTab === 'Active Habits' ? renderActiveHabits() : renderWeeklyRecaps()}
-      </ScrollView>
+          {activeTab === 'Active Habits' ? renderActiveHabits() : renderWeeklyRecaps()}
+        </View>
 
-      {/* Bottom Navigation */}
-      <View style={styles.bottomNav}>
-        <TouchableOpacity 
-          style={styles.navItem}
-          onPress={() => router.replace('/home-screen')}
-        >
-          <Image1 />
-          <Text style={styles.navText} onPress={() => router.replace('/home-screen')}>Home</Text>
-        </TouchableOpacity>
+        {/* Fixed Bottom Navigation */}
+        <View style={styles.bottomNav}>
+          <TouchableOpacity style={styles.navItem} onPress={() => router.replace('/home-screen')}>
+            <HomeIcon />
+            <Text style={styles.navText}>Home</Text>
+          </TouchableOpacity>
 
-        <TouchableOpacity style={styles.navItem}>
-          <Image2 />
-          <Text style={styles.navText}>Goals</Text>
-        </TouchableOpacity>
+          <TouchableOpacity style={styles.navItem}>
+            <GoalsIcon />
+            <Text style={styles.navText}>Goals</Text>
+          </TouchableOpacity>
 
-        <TouchableOpacity style={styles.navItem}>
-          <Image3/>
-          <Text style={styles.navTextActive} onPress={() => router.replace('/progress')}>Progress</Text>
-        </TouchableOpacity>
+          <TouchableOpacity style={styles.navItem} onPress={() => router.replace('/progress')}>
+            <ProgressIcon />
+            <Text style={styles.navTextActive}>Progress</Text>
+          </TouchableOpacity>
+        </View>
       </View>
     </SafeAreaView>
   );
@@ -200,7 +166,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: 20,
     paddingTop: 10,
-    paddingBottom: 20,
+    paddingBottom: 16,
     backgroundColor: colors.lightBackground,
   },
   backButton: {
@@ -216,20 +182,13 @@ const styles = StyleSheet.create({
   },
   tabContainer: {
     flexDirection: 'row',
-    backgroundColor: colors.lightBackground,
     paddingHorizontal: 20,
-    marginBottom: 40,
-    alignContent: 'center',
+    marginBottom: 16,
     justifyContent: 'center',
   },
   tab: {
     paddingVertical: 12,
-    paddingHorizontal: 0,
     marginRight: 30,
-  },
-  activeTab: {
-    borderBottomWidth: 2,
-    borderBottomColor: colors.primaryGreen,
   },
   tabText: {
     fontSize: typography.fontSize.body,
@@ -240,8 +199,12 @@ const styles = StyleSheet.create({
     color: colors.primaryGreen,
     fontWeight: '500',
   },
-  scrollView: {
-    flex: 1,
+  tabUnderline: {
+    marginTop: 4,
+    width: 40,
+    borderBottomWidth: 2,
+    borderBottomColor: colors.primaryGreen,
+    alignSelf: 'center',
   },
   content: {
     paddingHorizontal: 20,
@@ -250,13 +213,13 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.large,
     fontWeight: '600',
     color: colors.darkFont,
-    marginBottom: 20,
+    marginBottom: 8,
   },
   spikeCard: {
-    marginBottom: 20
+    marginBottom: 16,
   },
   section: {
-    marginBottom: 30,
+    marginBottom: 8,
   },
   sectionTitle: {
     fontSize: typography.fontSize.large,
@@ -267,11 +230,11 @@ const styles = StyleSheet.create({
   sectionSubtitle: {
     fontSize: typography.fontSize.small,
     color: colors.darkFont,
-    marginBottom: 20,
+    marginBottom: 16,
     fontWeight: '400',
   },
   habitsList: {
-    gap: 12,
+    height: 432
   },
   recapTitle: {
     fontSize: typography.fontSize.large,
@@ -285,14 +248,16 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   bottomNav: {
+    position: 'absolute',
+    bottom: -30,
+    left: 0,
+    right: 0,
+    height: 72,
+    backgroundColor: colors.white,
     flexDirection: 'row',
     justifyContent: 'space-around',
     alignItems: 'center',
-    backgroundColor: colors.white,
-    paddingTop: 15,
-    paddingBottom: 15,
-    paddingHorizontal: 20,
-    bottom: -30,
+    zIndex: 100,
   },
   navItem: {
     alignItems: 'center',

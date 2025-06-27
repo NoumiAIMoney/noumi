@@ -108,7 +108,7 @@ const styles = StyleSheet.create({
   },
   month: {
     fontSize: typography.fontSize.mini,
-    marginTop: 4,
+    marginTop: 16,
     fontFamily: typography.fontFamily.bold,
     color: colors.grayFont,
   },
