@@ -12,7 +12,7 @@ export default function SplashScreen() {
       // router.replace('/onboarding');
 
       // TESTING SCREENS FAST
-    router.replace('/home-screen');
+    router.replace('/weekly-recap');
     }, 2000);
     return () => clearTimeout(timer);
   }, []);

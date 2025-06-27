@@ -1,6 +1,6 @@
+import { colors, shadows, typography } from '@/src/theme';
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-import { colors, typography } from '@/src/theme';
+import { StyleSheet, Text, View } from 'react-native';
 
 interface HorizontalCardProps {
   title: string;
@@ -11,6 +11,7 @@ interface HorizontalCardProps {
   width?: number;
   onlyLabel?: boolean,
   amountColor?: string;
+  withShadow?: boolean
 }
 
 export default function HorizontalCard({
@@ -21,12 +22,21 @@ export default function HorizontalCard({
   iconRight,
   width = 362,
   onlyLabel = false,
-  amountColor = colors.blueFont
+  amountColor = colors.blueFont,
+  withShadow = false
 }: HorizontalCardProps) {
   const cardBackground = white ? colors.white : colors.lightGrayBackground;
 
   return (
-    <View style={[styles.card, { backgroundColor: cardBackground, width }]}>
+    <View
+     style={[
+        styles.card,
+        {
+          backgroundColor: cardBackground,
+          width,
+          ...(withShadow ? shadows.input : {}),
+        },
+      ]}>
       <View style={styles.leftContent}>
         {!iconRight && icon && (
           <View style={[{ marginRight: 12 }]}>{icon}</View>

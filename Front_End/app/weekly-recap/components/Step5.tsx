@@ -12,6 +12,8 @@ interface Habit {
   weekly_occurrences: number;
 }
 
+const COLORS = ['#B4698F', '#608762', '#FFCE51', '#E97272']
+
 export default function Step5() {
   const [habits, setHabits] = useState<Habit[]>([]);
   useEffect(() => {
@@ -34,7 +36,7 @@ export default function Step5() {
 
   return (
     <View style={styles.wrapper}>
-      <View style={styles.container}>
+      <View style={[styles.container, {marginBottom: 80}]}>
         <Text style={styles.text}>You did great this week. Try these habits next and watch your funds grow.</Text>
         <View style={styles.cardsWrapper}>
           {habits.map((habit, index) => (
@@ -43,11 +45,12 @@ export default function Step5() {
               title={habit.description || 'N/A'}
               white={true}
               icon={
-                <View style={styles.iconWrapper}>
+                <View style={[styles.iconWrapper, {backgroundColor: COLORS[index]}]}>
                   <UncategorizedIcon width={24} height={24} fill="none" stroke={colors.white} />
                 </View>
               }
               onlyLabel
+              withShadow
             />
           ))}
         </View>
@@ -64,14 +67,11 @@ export default function Step5() {
 
 const styles = StyleSheet.create({
   wrapper: {
-    flex: 1,
-    justifyContent: 'space-between',
     alignItems: 'center',
     backgroundColor: colors.greenBackground,
     paddingVertical: 32,
   },
   container: {
-    flex: 1,
     backgroundColor: colors.greenBackground,
     paddingHorizontal: 20,
     paddingTop: 32,
@@ -89,11 +89,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   iconWrapper: {
-    width: 39.09,
+    width: 40,
     height: 40,
     padding: 10,
     borderRadius: 100,
-    backgroundColor: '#B4698F',
     alignItems: 'center',
     justifyContent: 'center',
   },
