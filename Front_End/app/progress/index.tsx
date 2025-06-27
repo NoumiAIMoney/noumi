@@ -19,12 +19,6 @@ import {
   View
 } from 'react-native';
 
-interface Habit {
-  completed: number;
-  total: number;
-  isCompleted: boolean;
-}
-
 interface ProgressScreenProps {
   navigation: {
     goBack: () => void;
@@ -175,7 +169,7 @@ const ProgressScreen: React.FC<ProgressScreenProps> = ({ navigation }) => {
       <View style={styles.bottomNav}>
         <TouchableOpacity 
           style={styles.navItem}
-          onPress={() => navigation.navigate('Home')}
+          onPress={() => router.replace('/home-screen')}
         >
           <Image1 />
           <Text style={styles.navText} onPress={() => router.replace('/home-screen')}>Home</Text>

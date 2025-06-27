@@ -4,9 +4,8 @@ import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 export type HabitData = {
-  habit_description: string;
-  habit_full_prompt?: string;
-  occurrences: number;
+  description: string;
+  weekly_occurrences: number;
   completed?: number;
 };
 
@@ -20,13 +19,13 @@ export type HydratedHabit = {
 
 export function hydrateHabits(habits: HabitData[]): HydratedHabit[] {
   return habits.map(habit => {
-    const isNoumiHabit = habit.habit_description.toLowerCase().includes('noumi');
-    const total = habit.occurrences;
+    const isNoumiHabit = habit.description.toLowerCase().includes('noumi');
+    const total = habit.weekly_occurrences;
     const completed = isNoumiHabit ? total : habit.completed ?? 0;
 
     return {
-      name: habit.habit_description,
-      prompt: habit.habit_full_prompt ?? habit.habit_description,
+      name: habit.description,
+      prompt: habit.description,
       total,
       completed,
       isCompleted: completed >= total,

@@ -6,8 +6,8 @@ import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
 interface Habit {
-  habit_description: string;
-  occurrences: number;
+  description: string;
+  weekly_occurrences: number;
 }
 
 export default function Step5() {
@@ -33,7 +33,7 @@ export default function Step5() {
         {habits.slice(0, 3).map((habit, index) => (
           <HorizontalCard
             key={index}
-            title={habit.habit_description || 'N/A'}
+            title={habit.description || 'N/A'}
             white={true}
             icon={
               <View style={styles.iconWrapper}>
