@@ -141,23 +141,32 @@ class TransactionAnalyzer:
         Get spending by category with month-over-month comparison
         """
         try:
-            current_month = datetime.now().strftime("%Y-%m")
+            # Get spending for current month and previous 2 months
+            categories = []
             
             # Use correct user_id for database queries
             db_user_id = 5  # Updated to match existing data in database
             
-            # Get current month spending
-            current_spending = self.db.get_spending_by_category(
-                db_user_id, f"{current_month}-01"
-            )
+            # Get current month and previous 2 months
+            current_date = datetime.now()
             
-            categories = []
-            for category, amount in current_spending.items():
-                categories.append({
-                    "category_name": category,
-                    "amount": amount,
-                    "month": current_month
-                })
+            for month_offset in range(3):  # Current month + 2 previous months
+                target_date = current_date - timedelta(days=month_offset * 30)
+                month_str = target_date.strftime("%Y-%m")
+                month_start = f"{month_str}-01"
+                
+                # Get spending for this month
+                month_spending = self.db.get_spending_by_category(
+                    db_user_id, month_start
+                )
+                
+                # Add each category for this month
+                for category, amount in month_spending.items():
+                    categories.append({
+                        "category_name": category,
+                        "amount": amount,
+                        "month": month_str
+                    })
             
             return categories
             

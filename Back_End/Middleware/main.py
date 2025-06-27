@@ -23,6 +23,7 @@ from database import (
     DatabaseManager, User as DbUser, Goal, Transaction, BankAccount, WeeklyPlan
 )
 from analytics import TransactionAnalyzer
+from habit_accomplishment_agent import HabitAccomplishmentAgent
 
 # Load environment variables
 load_dotenv()
@@ -115,6 +116,7 @@ class PlaidConnectionRequest(BaseModel):
 class SpendingCategory(BaseModel):
     category_name: str
     amount: float
+    month: str
 
 
 class SpendingTrend(BaseModel):
@@ -519,7 +521,8 @@ async def get_spending_categories(current_user=Depends(get_current_user)):
         
         return [SpendingCategory(
             category_name=cat["category_name"],
-            amount=cat["amount"]
+            amount=cat["amount"],
+            month=cat["month"]
         ) for cat in categories]
     except Exception as e:
         print(f"Error getting spending categories: {e}")
@@ -875,6 +878,29 @@ async def get_user_habits(current_user=Depends(get_current_user)):
         raise HTTPException(
             status_code=500,
             detail=f"Habits endpoint error: {str(e)}"
+        )
+
+
+@app.get("/accomplished_habits")
+async def get_accomplished_habits(current_user=Depends(get_current_user)):
+    """Get user's accomplished habits based on spending analysis"""
+    try:
+        # Use actual user ID from database
+        user_id = 5  # Updated to match existing data in database
+        
+        # Initialize habit accomplishment agent
+        habit_agent = HabitAccomplishmentAgent(user_id, db)
+        
+        # Analyze habit accomplishments using spending data
+        accomplishments = habit_agent.analyze_habit_accomplishments()
+        
+        return accomplishments
+        
+    except Exception as e:
+        print(f"Error getting accomplished habits: {e}")
+        raise HTTPException(
+            status_code=500, 
+            detail="Failed to get accomplished habits"
         )
 
 

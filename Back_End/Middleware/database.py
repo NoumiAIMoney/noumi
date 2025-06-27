@@ -609,8 +609,7 @@ class DatabaseManager:
             query = '''
                 SELECT t.category, SUM(ABS(t.amount)) as total
                 FROM transactions t
-                JOIN bank_accounts ba ON t.account_id = ba.account_id
-                WHERE ba.user_id = %s AND t.amount < 0
+                WHERE t.user_id = %s AND t.amount < 0
             '''
             params = [user_id]
             
