@@ -33,7 +33,7 @@ export const typography = {
     body: 16,
     large: 20,
     XLarge: 24,
-    XXLarge: 32,
+    XXLarge: 30,
     XXXLarge: 36,
     XXXXLarge: 40
   },
