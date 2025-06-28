@@ -99,7 +99,7 @@ export default function HomeScreen() {
           </TouchableOpacity>
         </View>
 
-        {/* Trip Goal Card */}
+        {/* Goal Card */}
         <View style={styles.goalCard}>
           <GoalProgressCard
             title={goal.goal_name}

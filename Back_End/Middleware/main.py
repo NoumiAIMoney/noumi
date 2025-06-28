@@ -545,28 +545,25 @@ async def get_computed_goal_data(current_user=Depends(get_current_user)):
         
         # Use the most recent goal
         goal = goals[-1]  # Get the latest goal
-        
-        # Get year-to-date transaction data for amount saved calculation
+
         current_year = datetime.now().year
         start_date = f"{current_year}-01-01"
-        end_date = datetime.now().strftime("%Y-%m-%d")
-        
-        transactions = db.get_user_transactions(user_id, start_date, end_date)
-        if not transactions:
-            raise HTTPException(status_code=404, detail="No transaction history found for goal calculation")
-        
-        # Calculate total income and expenses for the year
-        total_income = 0
-        total_expenses = 0
-        
-        for txn in transactions:
-            if txn.amount > 0:
-                total_income += txn.amount
-            else:
-                total_expenses += abs(txn.amount)
-        
-        # Calculate amount saved (can be negative if spending exceeds income)
-        amount_saved = total_income - total_expenses
+        today = datetime.now().strftime("%Y-%m-%d")
+        end_date = today
+
+        # If end_date is today (we created the account today, so no savings), we return amount_saved = 0
+        if end_date == today:
+            amount_saved = 0
+        else:
+            transactions = db.get_user_transactions(user_id, start_date, end_date)
+            if not transactions:
+                raise HTTPException(status_code=404, detail="No transaction history found for goal calculation")
+
+            # Compute income and expenses
+            total_income = sum(txn.amount for txn in transactions if txn.amount > 0)
+            total_expenses = sum(abs(txn.amount) for txn in transactions if txn.amount < 0)
+
+            amount_saved = total_income - total_expenses
         
         # Parse target date
         try:
