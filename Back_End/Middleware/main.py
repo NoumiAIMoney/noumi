@@ -398,9 +398,9 @@ async def detect_single_transaction_anomaly(
         
         return TransactionAnomalyResponse(
             transaction_id=transaction_id,
-            anomaly_score=anomaly_result.get('anomaly_score', 0.0),
-            is_anomaly=anomaly_result.get('is_anomaly', False),
-            features=anomaly_result.get('features', {})
+            anomaly_score=anomaly_result['anomaly_score'],
+            is_anomaly=anomaly_result['is_anomaly'],
+            features=anomaly_result['features']
         )
         
     except HTTPException:
@@ -818,7 +818,9 @@ def _save_weekly_plan_to_db(user_id: int, week_start: str, week_end: str,
         db.deactivate_old_weekly_plans(user_id, week_start)
         
         # Extract ML features
-        ml_features = plan_data.get("ml_features", {})
+        if "ml_features" not in plan_data:
+            raise ValueError("Weekly plan missing ML features")
+        ml_features = plan_data["ml_features"]
         
         # Create WeeklyPlan object
         weekly_plan = WeeklyPlan(
@@ -873,10 +875,16 @@ async def get_user_habits(current_user=Depends(get_current_user)):
             if not habit.get("description"):
                 continue  # Skip habits without descriptions
             
+            if "weekly_occurrences" not in habit:
+                raise HTTPException(
+                    status_code=500,
+                    detail=f"Habit missing weekly_occurrences: {habit}"
+                )
+            
             habits.append(UserHabit(
                 habit_id=i + 1,
                 description=habit["description"],
-                weekly_occurrences=habit.get("weekly_occurrences", 1),
+                weekly_occurrences=habit["weekly_occurrences"],
                 streak_count=0,
                 is_completed=False
             ))
@@ -1085,7 +1093,14 @@ async def get_longest_no_anomaly_streak(
                     anomaly_result = detect_transaction_anomaly(
                         transaction, user_context
                     )
-                    if anomaly_result.get('is_anomaly', False):
+                    if not anomaly_result.get('is_anomaly'):
+                        continue
+                    if 'is_anomaly' not in anomaly_result:
+                        raise HTTPException(
+                            status_code=500,
+                            detail="Anomaly detection missing is_anomaly field"
+                        )
+                    if anomaly_result['is_anomaly']:
                         has_anomaly = True
                         break
             
@@ -1266,7 +1281,16 @@ def get_transaction_features(transaction: Transaction,
         }
         category = (transaction.category.lower()
                    if transaction.category else 'other')
-        features['merchant_category'] = category_map.get(category, 0)
+        
+        if category not in category_map:
+            if category != 'other':
+                raise HTTPException(
+                    status_code=500,
+                    detail=f"Unknown merchant category: {category}"
+                )
+            features['merchant_category'] = 0  # Only 'other' gets 0
+        else:
+            features['merchant_category'] = category_map[category]
         
         # User context features (all from database - NO DEFAULTS)
         features['monthly_income'] = float(user_context['monthly_income'])
@@ -1472,9 +1496,12 @@ def features_to_array(features: dict) -> np.ndarray:
         'savings_delta'
     ]
     
-    return np.array([features.get(key, 0.0) for key in feature_order]).reshape(
-        1, -1
-    )
+    # Validate all required features are present
+    for key in feature_order:
+        if key not in features:
+            raise ValueError(f"Missing required feature: {key}")
+    
+    return np.array([features[key] for key in feature_order]).reshape(1, -1)
 
 
 def get_user_financial_context(user_id: int) -> dict:
