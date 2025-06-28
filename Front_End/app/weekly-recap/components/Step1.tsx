@@ -108,7 +108,7 @@ export default function Step1() {
         <View style={styles.card}>
           <Text style={styles.mainTitle}>You are on a roll, Maya!</Text>
           <Text style={styles.subtitle}>This week's savings</Text>
-          <Text style={styles.amount}>${Math.floor(suggestedSavingsAmount || 0)}</Text>
+          <Text style={styles.amount}>${Math.floor(goal.amount_saved || 0)}</Text>
           <Text style={styles.subtitle}>Goal progress</Text>
           <Text style={styles.percentage}>{percentage}%</Text>
           <ProgressBar currentStep={goal.amount_saved} totalSteps={goal.goal_amount} width={202} />
