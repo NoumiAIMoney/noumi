@@ -22,7 +22,7 @@ node_modules/
 venv
 
 # Pickled files
-*.pkl
+# *.pkl
 
 # Vscode
 .vscode/
