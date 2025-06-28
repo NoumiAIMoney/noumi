@@ -652,7 +652,7 @@ class DatabaseManager:
         try:
             goals = self.get_user_goals(5)  # Updated to match existing data
             if goals:
-                goal = goals[0]
+                goal = goals[-1]
                 from types import SimpleNamespace
                 return SimpleNamespace(
                     goal_name=goal.goal_name,

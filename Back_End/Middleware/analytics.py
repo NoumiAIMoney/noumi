@@ -232,25 +232,22 @@ class TransactionAnalyzer:
             
             db_user_id = 5  # Updated to match existing data in database
             transactions = self.db.get_user_transactions(db_user_id, start_date, end_date)
-            
+            quiz_income = self.db.get_user_goal(db_user_id).net_monthly_income
             if not transactions:
                 raise Exception("No transaction data for spending status")
-            
-            total_income = 0
+
             total_expenses = 0
             
             for txn in transactions:
-                if txn.amount > 0:
-                    total_income += txn.amount
-                else:
+                if txn.amount < 0:
                     total_expenses += abs(txn.amount)
             
             # Calculate safe spending amount (80% of remaining income)
-            remaining_income = total_income - total_expenses
+            remaining_income = quiz_income - total_expenses
             safe_to_spend = max(0, remaining_income * 0.8)
             
             return {
-                "income": total_income,
+                "income": quiz_income,
                 "expenses": total_expenses,
                 "amount_safe_to_spend": safe_to_spend
             }
