@@ -41,7 +41,7 @@ class AnomalyResponse(BaseModel):
 
 
 # Configuration for model
-MODEL_PATH = "model.pkl"  # Update this path as needed
+MODEL_PATH = "../Models/isolation_forest_model.pkl"  # Updated path to correct location
 
 
 @dataclass
@@ -520,20 +520,19 @@ class DatabaseManager:
             
             cursor.execute('''
                 INSERT INTO transactions (
-                    account_id, amount, date, merchant_name, category, 
-                    description, mcc, local_time_bucket, rolling_spend_window, 
-                    day_of_week, is_weekend, rolling_spend_7d, 
-                    category_frequency, category_variance
-                ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, 
-                         %s, %s) RETURNING transaction_id
+                    transaction_id, account_id, user_id, amount, date, 
+                    merchant_name, category, mcc
+                ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s) 
+                RETURNING transaction_id
             ''', (
-                transaction.account_id, transaction.amount, transaction.date,
-                transaction.merchant_name, transaction.category, 
-                transaction.description, transaction.mcc, 
-                transaction.local_time_bucket, transaction.rolling_spend_window,
-                transaction.day_of_week, transaction.is_weekend, 
-                transaction.rolling_spend_7d, transaction.category_frequency, 
-                transaction.category_variance
+                transaction.transaction_id,  # Use the provided transaction_id
+                transaction.account_id, 
+                transaction.user_id, 
+                transaction.amount, 
+                transaction.date, 
+                transaction.merchant_name, 
+                transaction.category, 
+                transaction.mcc
             ))
             
             transaction_id = cursor.fetchone()[0]

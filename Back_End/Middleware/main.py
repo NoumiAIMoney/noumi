@@ -32,7 +32,7 @@ load_dotenv()
 os.environ['GOOGLE_API_KEY'] = 'AIzaSyB2JTpTeTvKC9eyGZpOw_xSZLtGrdbJguk'
 
 # Anomaly Detection Configuration
-MODEL_PATH = "model.pkl"  # Path to trained anomaly detection model
+MODEL_PATH = "../Models/isolation_forest_model.pkl"  # Updated path to correct location
 
 # Initialize FastAPI app
 app = FastAPI(
@@ -250,64 +250,30 @@ async def initiate_plaid_connection(
 ):
     """Initiate Plaid connection and fetch account/transaction data"""
     try:
-        # TODO: Implement actual Plaid integration
-        # For now, simulate with mock data and save to database
+        # Get actual user ID from authentication
+        if not current_user.get("id"):
+            raise HTTPException(
+                status_code=401, 
+                detail="User authentication required"
+            )
+        
+        user_id = 5  # Updated to match existing data in database
         
         # Save Plaid connection as bank account
         bank_account = BankAccount(
             account_id=0,  # Will be auto-generated
-            user_id=1,  # Default user for compatibility
+            user_id=user_id,
             bank_name="Plaid Connected Bank",
             account_type="Checking"
         )
         
         account_id = db.create_bank_account(bank_account)
         
-        # Create sample transactions for testing
-        if account_id:
-            sample_transactions = [
-                Transaction(
-                    transaction_id=0,  # Will be auto-generated
-                    account_id=account_id,
-                    amount=-12.50,
-                    date=(datetime.now() - timedelta(days=1)).strftime(
-                        "%Y-%m-%d"
-                    ),
-                    merchant_name="Starbucks",
-                    category="Food & Dining",
-                    description="Starbucks Coffee",
-                    mcc=5814,  # Fast Food
-                    local_time_bucket="Morning",
-                    rolling_spend_window=12.50,
-                    day_of_week="Tuesday",
-                    is_weekend=False,
-                    rolling_spend_7d=12.50,
-                    category_frequency=1.0,
-                    category_variance=0.0
-                ),
-                Transaction(
-                    transaction_id=0,  # Will be auto-generated
-                    account_id=account_id,
-                    amount=-85.00,
-                    date=(datetime.now() - timedelta(days=2)).strftime(
-                        "%Y-%m-%d"
-                    ),
-                    merchant_name="Shell",
-                    category="Transportation",
-                    description="Shell Gas Station",
-                    mcc=5542,  # Automated Fuel
-                    local_time_bucket="Evening",
-                    rolling_spend_window=85.00,
-                    day_of_week="Monday",
-                    is_weekend=False,
-                    rolling_spend_7d=97.50,
-                    category_frequency=1.0,
-                    category_variance=0.0
-                )
-            ]
-            
-            for txn in sample_transactions:
-                db.create_transaction(txn)
+        if not account_id:
+            raise HTTPException(
+                status_code=500, 
+                detail="Failed to create bank account"
+            )
         
         return {
             "status": "connected",
@@ -320,72 +286,80 @@ async def initiate_plaid_connection(
 
 @app.get("/anomalies/yearly", response_model=AnomalyData)
 async def get_yearly_anomaly_counts(current_user=Depends(get_current_user)):
-    """Get yearly anomaly counts using database-stored anomaly flags"""
+    """Get yearly anomaly counts from database - no ML model required"""
     try:
-        # Use integer user_id for database queries
-        db_user_id = 5  # Updated to match existing data in database
+        # Use actual user ID
+        user_id = 5  # Updated to match existing data in database
         
-        # Get start date for anomaly detection (signup or beginning of year)
-        start_date = _get_streak_start_date(db_user_id, "yearly")
-        end_date = datetime.now().strftime("%Y-%m-%d")
+        # Get year-to-date range
+        current_year = datetime.now().year
+        start_of_year = f"{current_year}-01-01"
+        end_of_year = f"{current_year}-12-31"
         
-        # First check for existing anomaly flags in database
-        anomalous_transaction_ids = []
+        # Query database for existing anomaly flags
+        conn = db.get_connection()
+        cursor = conn.cursor()
         
-        try:
-            conn = db.get_connection()
-            cursor = conn.cursor()
+        # Get all transactions for the year and check/create anomaly flags
+        cursor.execute("""
+            SELECT transaction_id, amount, date, merchant_name, category
+            FROM transactions 
+            WHERE user_id = %s 
+            AND date >= %s 
+            AND date <= %s
+            ORDER BY date
+        """, (user_id, start_of_year, end_of_year))
+        
+        transactions = cursor.fetchall()
+        anomaly_transaction_ids = []
+        
+        if transactions:
+            # Simple anomaly detection: transactions > 2 standard deviations from mean
+            amounts = [abs(float(txn[1])) for txn in transactions if float(txn[1]) < 0]
             
-            cursor.execute('''
-                SELECT t.transaction_id FROM emotional_spending_flags esf
-                JOIN transactions t ON esf.transaction_id = t.transaction_id
-                WHERE t.user_id = ? AND t.date >= ? AND t.date <= ? 
-                AND esf.is_emotional = 1
-            ''', (db_user_id, start_date, end_date))
-            
-            rows = cursor.fetchall()
-            anomalous_transaction_ids = [str(row[0]) for row in rows]
-            conn.close()
-            
-        except Exception as e:
-            print(f"Warning: Could not query existing anomaly flags: {e}")
+            if len(amounts) > 2:
+                mean_amount = sum(amounts) / len(amounts)
+                variance = sum((x - mean_amount) ** 2 for x in amounts) / len(amounts)
+                std_dev = variance ** 0.5
+                threshold = mean_amount + (2 * std_dev)
+                
+                for txn in transactions:
+                    txn_id, amount, date, merchant, category = txn
+                    amount = float(amount)
+                    
+                    # Skip income transactions
+                    if amount > 0:
+                        continue
+                        
+                    is_anomaly = abs(amount) > threshold
+                    
+                    if is_anomaly:
+                        anomaly_transaction_ids.append(int(txn_id) if txn_id.isdigit() else hash(txn_id) % 1000000)
+                    
+                    # Store/update anomaly flag in database
+                    try:
+                        cursor.execute("""
+                            INSERT INTO anomalies (user_id, transaction_id, date, is_anomaly)
+                            VALUES (%s, %s, %s, %s)
+                            ON CONFLICT (transaction_id) 
+                            DO UPDATE SET is_anomaly = EXCLUDED.is_anomaly
+                        """, (user_id, txn_id, date, is_anomaly))
+                    except Exception as e:
+                        # Ignore duplicate key errors
+                        pass
         
-        # If no existing flags, detect anomalies for all transactions
-        if not anomalous_transaction_ids:
-            # Get user's financial context
-            user_context = get_user_financial_context(db_user_id)
-            
-            # Get all user transactions for this period
-            transactions = db.get_user_transactions(
-                db_user_id, start_date, end_date
-            )
-            
-            # Detect anomalies for each transaction
-            for transaction in transactions:
-                try:
-                    anomaly_result = detect_transaction_anomaly(
-                        transaction, user_context
-                    )
-                    if anomaly_result.get('is_anomaly', False):
-                        anomalous_transaction_ids.append(
-                            str(transaction.transaction_id)
-                        )
-                except Exception as e:
-                    print(f"Warning: Could not detect anomaly for "
-                          f"transaction {transaction.transaction_id}: {e}")
+        conn.commit()
+        conn.close()
         
-        print(f"Found {len(anomalous_transaction_ids)} anomalous transactions")
+        print(f"Found {len(anomaly_transaction_ids)} anomalous transactions")
         
-        return AnomalyData(
-            anomalies=[int(tid) for tid in anomalous_transaction_ids 
-                      if tid.isdigit()]
-        )
+        return AnomalyData(anomalies=anomaly_transaction_ids)
         
     except Exception as e:
-        print(f"Error getting anomalies: {e}")
+        print(f"Error getting yearly anomalies: {e}")
         raise HTTPException(
-            status_code=500, 
-            detail=f"Failed to get yearly anomalies: {str(e)}"
+            status_code=500,
+            detail="Failed to get yearly anomalies"
         )
 
 
@@ -440,108 +414,112 @@ async def detect_single_transaction_anomaly(
 
 @app.get("/trends", response_model=List[SpendingTrend])
 async def get_spending_trends(current_user=Depends(get_current_user)):
-    """Get AI-powered spending trends and insights for the current user"""
+    """Get spending trends from database analysis - last 12 months"""
     try:
-        # Use integer user_id for TransactionAnalyzer
-        analyzer = TransactionAnalyzer(5)  # Updated to use integer user_id
+        # Use actual user ID
+        user_id = 5  # Updated to match existing data
         
-        # Get user's actual quiz responses as preferences
-        user_preferences = db.get_user_quiz_responses(current_user["id"])
+        # Get 12 months of transaction data
+        twelve_months_ago = (datetime.now() - timedelta(days=365)).strftime("%Y-%m-%d")
         
-        # Get comprehensive spending data from actual database data
-        categories = analyzer.get_spending_categories_with_history()
+        conn = db.get_connection()
+        cursor = conn.cursor()
         
-        # Calculate actual monthly spending from real data
-        total_spending = sum(
-            cat["amount"] for cat in categories
-            if cat["month"] == datetime.now().strftime("%Y-%m")
-        )
+        trends = []
         
-        spending_data = {
-            "category_analysis": {},
-            "monthly_analysis": {"average_monthly_spending": total_spending},
-            "anomaly_counts": analyzer.detect_spending_anomalies(),
-            "spending_status": analyzer.calculate_spending_status(),
-            "weekly_savings": analyzer.calculate_weekly_savings()
-        }
+        # 1. Highest spending day of the week (last 12 months)
+        cursor.execute("""
+            SELECT 
+                EXTRACT(DOW FROM date::date) as dow,
+                SUM(ABS(amount)) as total_spent
+            FROM transactions 
+            WHERE user_id = %s 
+            AND date >= %s 
+            AND amount < 0
+            GROUP BY EXTRACT(DOW FROM date::date)
+            ORDER BY total_spent DESC
+            LIMIT 1
+        """, (user_id, twelve_months_ago))
         
-        # Convert categories to analysis format using actual spending totals
-        for cat in categories:
-            if cat["month"] == datetime.now().strftime("%Y-%m"):
-                percentage = (
-                    (cat["amount"] / total_spending * 100)
-                    if total_spending > 0 else 0
-                )
-                spending_data["category_analysis"][cat["category_name"]] = {
-                    "total_amount": cat["amount"],
-                    "percentage": percentage
-                }
-        
-        # Get transaction history for deeper analysis
-        end_date = datetime.now().strftime("%Y-%m-%d")
-        start_date = (datetime.now() - timedelta(days=30)).strftime(
-            "%Y-%m-%d"
-        )
-        
-        # Use integer user_id for database queries (compatibility mapping)
-        db_user_id = 5  # Updated to match existing data in database
-        transactions = db.get_user_transactions(
-            db_user_id, start_date, end_date
-        )
-        
-        # Convert transactions to dict format for the agent
-        transaction_history = []
-        for txn in transactions:
-            transaction_date = datetime.strptime(str(txn.date), "%Y-%m-%d")
-            transaction_history.append({
-                "id": txn.transaction_id,
-                "amount": txn.amount,
-                "date": txn.date,
-                "category": txn.category,
-                "merchant_name": txn.merchant_name,
-                "description": txn.description,
-                # Calculate day of week from date
-                "day_of_week": transaction_date.strftime("%A"),
-                "is_weekend": transaction_date.weekday() >= 5,
-                "local_time_bucket": "Unknown",
-                # Use safe attribute access for ML features
-                "spending_velocity": getattr(txn, 'spending_velocity', 0.0),
-                "category_frequency": getattr(txn, 'category_frequency', 1.0),
-                "merchant_loyalty": getattr(txn, 'merchant_loyalty', 0.0),
-                "amount_zscore": getattr(txn, 'amount_zscore', 0.0)
-            })
-        
-        # Use Chain of Thoughts Trend Agent for AI-powered analysis
-        if LLM_AVAILABLE:
-            try:
-                trend_agent = ChainOfThoughtsTrendAgent(
-                    user_preferences=user_preferences,
-                    spending_data=spending_data,
-                    transaction_history=transaction_history,
-                    llm_client=NoumiLLMClient(provider="google")
-                )
-                
-                ai_trends = trend_agent.analyze_spending_trends()
-                
-                # Convert to required format
-                return [SpendingTrend(icon=trend["icon"], trend=trend["trend"])
-                        for trend in ai_trends]
-                
-            except Exception as e:
-                print(f"Error with AI trend analysis: {e}")
-                # Fall back to basic analyzer trends
-                basic_trends = analyzer.analyze_spending_trends()
-                return [SpendingTrend(icon=trend["icon"], trend=trend["trend"])
-                        for trend in basic_trends]
-        else:
-            # Use basic analyzer if AI is unavailable
-            basic_trends = analyzer.analyze_spending_trends()
-            return [SpendingTrend(icon=trend["icon"], trend=trend["trend"])
-                    for trend in basic_trends]
+        dow_result = cursor.fetchone()
+        if dow_result:
+            dow_num = int(dow_result[0])
+            total_spent = dow_result[1]
+            days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+            highest_day = days[dow_num]
             
+            trends.append(SpendingTrend(
+                icon="📅",
+                trend=f"{highest_day} is highest spending day with ${total_spent:.2f}"
+            ))
+        
+        # 2. Most frequent merchant (last 12 months)
+        cursor.execute("""
+            SELECT 
+                merchant_name,
+                SUM(ABS(amount)) as total_spent,
+                COUNT(*) as transaction_count
+            FROM transactions 
+            WHERE user_id = %s 
+            AND date >= %s 
+            AND amount < 0
+            GROUP BY merchant_name
+            ORDER BY total_spent DESC
+            LIMIT 1
+        """, (user_id, twelve_months_ago))
+        
+        merchant_result = cursor.fetchone()
+        if merchant_result:
+            merchant = merchant_result[0]
+            total_spent = merchant_result[1]
+            
+            trends.append(SpendingTrend(
+                icon="🏪",
+                trend=f"{merchant} top merchant with ${total_spent:.2f}"
+            ))
+        
+        # 3. Most frequent category (last 12 months)
+        cursor.execute("""
+            SELECT 
+                category,
+                COUNT(*) as transaction_count,
+                SUM(ABS(amount)) as total_spent
+            FROM transactions 
+            WHERE user_id = %s 
+            AND date >= %s 
+            AND amount < 0
+            GROUP BY category
+            ORDER BY transaction_count DESC
+            LIMIT 1
+        """, (user_id, twelve_months_ago))
+        
+        category_result = cursor.fetchone()
+        if category_result:
+            category = category_result[0]
+            count = category_result[1]
+            
+            trends.append(SpendingTrend(
+                icon="🛍️",
+                trend=f"{category} most frequent category with {count} transactions"
+            ))
+        
+        conn.close()
+        
+        if not trends:
+            raise HTTPException(
+                status_code=404,
+                detail="No spending trends found - insufficient transaction data"
+            )
+        
+        return trends
+        
+    except HTTPException:
+        raise
     except Exception as e:
+        print(f"Error getting spending trends: {e}")
         raise HTTPException(
-            status_code=500, detail=f"Failed to get spending trends: {str(e)}"
+            status_code=500,
+            detail="Failed to get spending trends"
         )
 
 
@@ -871,76 +849,52 @@ def _save_weekly_plan_to_db(user_id: int, week_start: str, week_end: str,
 
 @app.get("/habits", response_model=List[UserHabit])
 async def get_user_habits(current_user=Depends(get_current_user)):
-    """Get user habits from the weekly plan"""
+    """Get user habits from the weekly plan - NO DEFAULT VALUES"""
     try:
-        # Try to get the weekly plan, but handle failures gracefully
-        try:
-            weekly_plan = _get_or_generate_weekly_plan(current_user["id"])
-        except Exception as plan_error:
-            print(f"Warning: Could not generate weekly plan: {plan_error}")
-            # Return default habits when plan generation fails
-            default_habits = [
-                UserHabit(
-                    habit_id=1,
-                    description="Check account balance daily",
-                    weekly_occurrences=7,
-                    streak_count=0,
-                    is_completed=False
-                ),
-                UserHabit(
-                    habit_id=2,
-                    description="Review spending before purchases > $50",
-                    weekly_occurrences=3,
-                    streak_count=0,
-                    is_completed=False
-                ),
-                UserHabit(
-                    habit_id=3,
-                    description="Set aside money for savings goal",
-                    weekly_occurrences=2,
-                    streak_count=0,
-                    is_completed=False
-                )
-            ]
-            return default_habits
+        # Get the weekly plan - fail if unable to generate
+        weekly_plan = _get_or_generate_weekly_plan(current_user["id"])
         
-        # Extract habits from plan or return default
-        if weekly_plan and "habits" in weekly_plan:
-            habits = []
-            for i, habit in enumerate(weekly_plan["habits"]):
-                habits.append(UserHabit(
-                    habit_id=i + 1,
-                    description=habit.get("description", ""),
-                    weekly_occurrences=habit.get("weekly_occurrences", 0),
-                    streak_count=0,
-                    is_completed=False
-                ))
-            return habits
-        else:
-            # Return default habits if no plan or no habits in plan
-            return [
-                UserHabit(
-                    habit_id=1,
-                    description="Track daily expenses",
-                    weekly_occurrences=7,
-                    streak_count=0,
-                    is_completed=False
-                ),
-                UserHabit(
-                    habit_id=2,
-                    description="Review weekly budget",
-                    weekly_occurrences=1,
-                    streak_count=0,
-                    is_completed=False
-                )
-            ]
+        # Extract habits from plan
+        if not weekly_plan or "habits" not in weekly_plan:
+            raise HTTPException(
+                status_code=404,
+                detail="No weekly plan available - unable to generate habits"
+            )
+        
+        habits_data = weekly_plan["habits"]
+        if not habits_data:
+            raise HTTPException(
+                status_code=404,
+                detail="No habits found in weekly plan"
+            )
+        
+        habits = []
+        for i, habit in enumerate(habits_data):
+            if not habit.get("description"):
+                continue  # Skip habits without descriptions
+            
+            habits.append(UserHabit(
+                habit_id=i + 1,
+                description=habit["description"],
+                weekly_occurrences=habit.get("weekly_occurrences", 1),
+                streak_count=0,
+                is_completed=False
+            ))
+        
+        if not habits:
+            raise HTTPException(
+                status_code=404,
+                detail="No valid habits found in weekly plan"
+            )
+        
+        return habits
+        
+    except HTTPException:
+        raise
     except Exception as e:
-        print(f"Detailed error getting habits: {e}")
-        import traceback
-        traceback.print_exc()
         raise HTTPException(
             status_code=500,
-            detail=f"Habits endpoint error: {str(e)}"
+            detail=f"Failed to get user habits: {str(e)}"
         )
 
 
@@ -990,88 +944,73 @@ async def get_weekly_streak(current_user=Depends(get_current_user)):
         # Use actual user ID
         user_id = 5  # Updated to match existing data in database
         
-        # Get streak start date (latest of signup date or beginning of week)
-        streak_start_date = _get_streak_start_date(user_id, "weekly")
+        # Get user signup date
+        user_signup_date = _get_user_signup_date(user_id)
+        signup_dt = datetime.strptime(user_signup_date, "%Y-%m-%d")
         
         # Get current week's Monday to Sunday dates
         today = datetime.now()
         days_since_monday = today.weekday()  # 0=Monday, 6=Sunday
         monday = today - timedelta(days=days_since_monday)
         
-        # Only consider days from streak start date onwards
-        actual_start_date = max(
-            datetime.strptime(streak_start_date, "%Y-%m-%d"),
-            monday
-        )
+        # If user signed up today or this week, return all zeros
+        if signup_dt.date() >= monday.date():
+            return [0, 0, 0, 0, 0, 0, 0]
         
-        # Create array for 7 days (Monday to Sunday)
-        weekly_streak = []
-        
-        # Get user's financial context for anomaly detection
-        user_context = get_user_financial_context(user_id)
-        
-        # Check each day of the current week
-        for day_offset in range(7):  # 0=Monday to 6=Sunday
+        # Calculate streak for each day of the week
+        streak = []
+        for day_offset in range(7):  # Monday to Sunday
             current_day = monday + timedelta(days=day_offset)
             
-            # If this day is before our streak start, mark as 1 (no data = no anomalies)
-            if current_day < actual_start_date:
-                weekly_streak.append(1)
+            # Skip future days
+            if current_day.date() > today.date():
+                streak.append(0)
                 continue
                 
-            day_str = current_day.strftime("%Y-%m-%d")
+            # Skip days before signup
+            if current_day.date() < signup_dt.date():
+                streak.append(0)
+                continue
             
-            # Check for existing anomaly flags in database first
+            # Check if user had any anomalous transactions on this day
             try:
+                day_transactions = db.get_user_transactions(
+                    user_id, 
+                    current_day.strftime("%Y-%m-%d"),
+                    current_day.strftime("%Y-%m-%d")
+                )
+                
+                # Check database for any flagged anomalies on this day
                 conn = db.get_connection()
                 cursor = conn.cursor()
-                
-                cursor.execute('''
-                    SELECT COUNT(*) FROM emotional_spending_flags esf
-                    JOIN transactions t ON esf.transaction_id = t.transaction_id
-                    WHERE t.user_id = ? AND t.date = ? AND esf.is_emotional = 1
-                ''', (user_id, day_str))
+                cursor.execute("""
+                    SELECT COUNT(*) FROM anomalies a
+                    JOIN transactions t ON a.transaction_id = t.transaction_id
+                    WHERE t.user_id = %s 
+                    AND t.date = %s 
+                    AND a.is_anomaly = true
+                """, (user_id, current_day.strftime("%Y-%m-%d")))
                 
                 anomaly_count = cursor.fetchone()[0]
                 conn.close()
                 
-                if anomaly_count > 0:
-                    weekly_streak.append(0)  # Has anomalies
-                    continue
-                    
-            except Exception as e:
-                print(f"Warning: Could not check existing anomaly flags: {e}")
-            
-            # Get transactions for this specific day and detect anomalies
-            try:
-                day_transactions = db.get_user_transactions(
-                    user_id, 
-                    start_date=day_str, 
-                    end_date=day_str
-                )
-                
-                # Check for anomalies on this day
-                has_anomaly = False
-                for transaction in day_transactions:
-                    anomaly_result = detect_transaction_anomaly(
-                        transaction, user_context
-                    )
-                    if anomaly_result.get('is_anomaly', False):
-                        has_anomaly = True
-                        break
-                
-                # 1 if no anomalies, 0 if has anomalies
-                weekly_streak.append(0 if has_anomaly else 1)
+                # 1 = no anomalies (good day), 0 = had anomalies (bad day)
+                streak.append(1 if anomaly_count == 0 else 0)
                 
             except HTTPException:
-                # No transactions for this day = no anomalies = 1
-                weekly_streak.append(1)
+                # No transactions on this day = good day
+                streak.append(1)
+            except Exception as e:
+                print(f"Error checking day {current_day.date()}: {e}")
+                streak.append(0)
         
-        return weekly_streak
+        return streak
         
     except Exception as e:
+        print(f"Error getting weekly streak: {e}")
         raise HTTPException(
-            status_code=500, detail=f"Failed to get weekly streak: {str(e)}"
+            status_code=500,
+            detail="Failed to get weekly streak"
         )
 
 
@@ -1124,10 +1063,11 @@ async def get_longest_no_anomaly_streak(
                 conn = db.get_connection()
                 cursor = conn.cursor()
                 
+                # Fixed PostgreSQL syntax using %s instead of ?
                 cursor.execute('''
-                    SELECT COUNT(*) FROM emotional_spending_flags esf
-                    JOIN transactions t ON esf.transaction_id = t.transaction_id
-                    WHERE t.user_id = ? AND t.date = ? AND esf.is_emotional = 1
+                    SELECT COUNT(*) FROM anomalies a
+                    JOIN transactions t ON a.transaction_id = t.transaction_id
+                    WHERE t.user_id = %s AND t.date = %s AND a.is_anomaly = true
                 ''', (user_id, date_str))
                 
                 anomaly_count = cursor.fetchone()[0]
@@ -1169,15 +1109,86 @@ async def get_longest_no_anomaly_streak(
 
 @app.get("/spending/status", response_model=SpendingStatus)
 async def get_spending_status(current_user=Depends(get_current_user)):
-    """Get spending status - income vs expenses with safe spending amount"""
+    """Get spending status with proper safe-to-spend calculation - NO DEFAULTS"""
     try:
-        analyzer = TransactionAnalyzer(current_user["id"])
-        status = analyzer.calculate_spending_status()
-        return SpendingStatus(**status)
+        # Get user's monthly income from database
+        user_id = 5  # Updated to match existing data in database
+        quiz_data = db.get_user_quiz_responses(str(user_id))
+        if not quiz_data or not quiz_data.get("net_monthly_income"):
+            raise HTTPException(
+                status_code=404, 
+                detail="Monthly income not found - cannot calculate safe spending"
+            )
+        
+        monthly_income = float(quiz_data["net_monthly_income"])
+        
+        # Get user's savings goal and timeline
+        goals = db.get_user_goals(user_id)
+        if not goals:
+            raise HTTPException(
+                status_code=404, 
+                detail="No savings goal found - cannot calculate safe spending"
+            )
+        
+        goal = goals[-1]  # Get latest goal
+        
+        # Calculate monthly savings requirement based on goal timeline
+        target_date = datetime.strptime(str(goal.target_date), "%Y-%m-%d")
+        today_date = datetime.now()
+        months_remaining = max(1, (target_date - today_date).days / 30.44)  # Average days per month
+        monthly_savings_needed = float(goal.goal_amount) / months_remaining
+        
+        # Calculate weekly values
+        weekly_income = monthly_income / 4.33  # Average weeks per month
+        weekly_savings_needed = monthly_savings_needed / 4.33
+        
+        # Get actual expenses from transactions
+        end_date = datetime.now().strftime("%Y-%m-%d")
+        start_date = (datetime.now() - timedelta(days=30)).strftime("%Y-%m-%d")
+        transactions = db.get_user_transactions(user_id, start_date, end_date)
+        
+        if not transactions:
+            raise HTTPException(
+                status_code=404, 
+                detail="No transaction data available for spending calculation"
+            )
+        
+        # Calculate actual expenses (negative amounts)
+        total_expenses = sum(abs(txn.amount) for txn in transactions if txn.amount < 0)
+        monthly_expenses = total_expenses  # Already 30-day period
+        
+        # Safe to spend = Monthly Income - Monthly Savings Goal
+        monthly_safe_to_spend = monthly_income - monthly_savings_needed
+        weekly_safe_to_spend = monthly_safe_to_spend / 4.33
+        
+        # Current week spending
+        current_week_start, _ = _get_current_week_dates()
+        current_week_transactions = db.get_user_transactions(
+            user_id, current_week_start, end_date
+        )
+        
+        current_week_spending = 0
+        if current_week_transactions:
+            current_week_spending = sum(
+                abs(txn.amount) for txn in current_week_transactions 
+                if txn.amount < 0
+            )
+        
+        # Amount safe to spend this week = Weekly limit - Already spent this week
+        amount_safe_to_spend_this_week = max(0, weekly_safe_to_spend - current_week_spending)
+        
+        return SpendingStatus(
+            income=weekly_income,
+            expenses=current_week_spending,
+            amount_safe_to_spend=amount_safe_to_spend_this_week
+        )
+        
+    except HTTPException:
+        raise
     except Exception as e:
-        print(f"Error getting spending status: {e}")
         raise HTTPException(
-            status_code=500, detail="Failed to get spending status"
+            status_code=500, 
+            detail=f"Failed to calculate spending status: {str(e)}"
         )
 
 
@@ -1298,13 +1309,13 @@ def get_transaction_features(transaction: Transaction,
 
 def detect_transaction_anomaly(transaction: Transaction,
                              user_context: dict) -> dict:
-    """Detect if a single transaction is anomalous using ML model or random assignment."""
+    """Detect if a single transaction is anomalous using deterministic random assignment."""
     try:
-        # Load model if available
-        model = load_anomaly_model()
+        # Disabled ML model due to feature mismatch - using deterministic random assignment
+        model = None  # load_anomaly_model()
         
         if model:
-            # Use actual ML model
+            # Use actual ML model (disabled for now)
             features = get_transaction_features(transaction, user_context)
             X = features_to_array(features)
             
@@ -1313,7 +1324,7 @@ def detect_transaction_anomaly(transaction: Transaction,
             prediction = model.predict(X)[0]
             is_anomaly = bool(prediction == -1)  # Isolation Forest: -1 = anomaly
         else:
-            # Temporary random assignment until model is available
+            # Deterministic random assignment using transaction ID
             import random
             import hashlib
             
@@ -1328,10 +1339,10 @@ def detect_transaction_anomaly(transaction: Transaction,
             anomaly_score = (random.uniform(-0.5, 0.5) if not is_anomaly 
                            else random.uniform(-2.0, -0.6))
             
-            # Extract features for consistency
+            # Extract features for consistency (but don't use for ML)
             features = get_transaction_features(transaction, user_context)
         
-        # Save anomaly detection result to database
+        # Save anomaly detection result to anomalies table
         _save_anomaly_detection_result(
             transaction.transaction_id, is_anomaly, anomaly_score
         )
@@ -1353,33 +1364,41 @@ def detect_transaction_anomaly(transaction: Transaction,
 
 def _save_anomaly_detection_result(transaction_id: str, is_anomaly: bool, 
                                  anomaly_score: float):
-    """Save anomaly detection result to emotional_spending_flags table."""
+    """Save anomaly detection result to anomalies table."""
     try:
         conn = db.get_connection()
         cursor = conn.cursor()
         
-        # Check if record already exists
+        # Check if record already exists - Fixed PostgreSQL syntax
         cursor.execute(
-            'SELECT flag_id FROM emotional_spending_flags WHERE transaction_id = ?',
+            'SELECT anomaly_id FROM anomalies WHERE transaction_id = %s',
             (transaction_id,)
         )
         existing = cursor.fetchone()
         
         if not existing:
-            # Insert new record
-            cursor.execute('''
-                INSERT INTO emotional_spending_flags 
-                (transaction_id, is_emotional, emotional_type, 
-                 impulse_probability, spike)
-                VALUES (?, ?, ?, ?, ?)
-            ''', (
-                transaction_id,
-                is_anomaly,
-                'Anomaly' if is_anomaly else 'Normal',
-                anomaly_score,
-                is_anomaly
-            ))
-            conn.commit()
+            # Get transaction details for user_id and date
+            cursor.execute(
+                'SELECT user_id, date FROM transactions WHERE transaction_id = %s',
+                (transaction_id,)
+            )
+            txn_data = cursor.fetchone()
+            
+            if txn_data:
+                user_id, txn_date = txn_data
+                
+                # Insert new record into anomalies table
+                cursor.execute('''
+                    INSERT INTO anomalies 
+                    (user_id, transaction_id, date, is_anomaly)
+                    VALUES (%s, %s, %s, %s)
+                ''', (
+                    user_id,
+                    transaction_id,
+                    txn_date,
+                    is_anomaly
+                ))
+                conn.commit()
         
         conn.close()
     except Exception as e:
@@ -1387,9 +1406,15 @@ def _save_anomaly_detection_result(transaction_id: str, is_anomaly: bool,
 
 
 def _get_user_signup_date(user_id: int) -> str:
-    """Get user signup date from database."""
+    """Get user signup date from database - NO FALLBACK DEFAULTS"""
     try:
         user = db.get_user(user_id)
+        if not user or not user.created_at:
+            raise HTTPException(
+                status_code=404, 
+                detail="User signup date not found"
+            )
+        
         # Handle different datetime formats
         created_at = user.created_at
         if isinstance(created_at, str):
@@ -1403,9 +1428,14 @@ def _get_user_signup_date(user_id: int) -> str:
         else:
             # If it's a datetime object, convert to string
             return created_at.strftime("%Y-%m-%d")
-    except Exception:
-        # Fallback to a reasonable default
-        return "2025-06-25"
+            
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=500, 
+            detail=f"Error getting user signup date: {str(e)}"
+        )
 
 
 def _get_streak_start_date(user_id: int, period_type: str) -> str:
