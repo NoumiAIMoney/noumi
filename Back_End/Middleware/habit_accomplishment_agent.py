@@ -8,6 +8,7 @@ from typing import List, Dict, Any
 from datetime import datetime, timedelta
 from database import DatabaseManager
 from analytics import TransactionAnalyzer
+from fastapi import HTTPException
 
 
 class HabitAccomplishmentAgent:
@@ -23,79 +24,84 @@ class HabitAccomplishmentAgent:
     
     def analyze_habit_accomplishments(self) -> List[Dict[str, str]]:
         """
-        Analyze user's spending patterns and generate accomplished habits
-        using LLM-powered insights based on actual data.
+        Analyze user's spending patterns to identify accomplished habits.
+        Uses actual transaction data and raises errors when data unavailable.
         """
         try:
-            # Gather comprehensive spending analysis
+            # Gather all spending analysis data
             analysis_data = self._gather_spending_analysis()
             
-            # Generate LLM prompt with analysis data
-            self._create_habit_analysis_prompt(analysis_data)
-            
-            # For now, use rule-based analysis 
-            # (can be replaced with actual LLM call)
+            # Ensure we have sufficient data for analysis
+            if not analysis_data:
+                raise HTTPException(
+                    status_code=404, 
+                    detail="No spending data available for habit analysis"
+                )
+                
+            # Generate accomplishments based on real data
             accomplishments = self._generate_habit_accomplishments(analysis_data)
             
+            # Ensure we have valid accomplishments from data analysis
+            if not accomplishments:
+                raise HTTPException(
+                    status_code=404,
+                    detail="No habit accomplishments found based on current spending data"
+                )
+                
             return accomplishments
             
+        except HTTPException:
+            raise
         except Exception as e:
-            print(f"Error analyzing habit accomplishments: {e}")
-            return self._get_fallback_accomplishments()
+            raise HTTPException(
+                status_code=500, 
+                detail=f"Failed to analyze habit accomplishments: {str(e)}"
+            )
     
     def _gather_spending_analysis(self) -> Dict[str, Any]:
         """
-        Gather comprehensive spending analysis data for habit insights.
+        Gather comprehensive spending analysis for habit accomplishment detection.
+        Returns available data even if some components are missing.
         """
         try:
-            # Get current week and previous week data
-            current_week_start, current_week_end = (
-                self._get_current_week_dates()
-            )
-            prev_week_start, prev_week_end = self._get_previous_week_dates()
+            # Get current and previous week spending data
+            current_week_data = self._get_current_week_spending()
+            previous_week_data = self._get_previous_week_spending()
             
-            # Get transactions for both weeks
-            current_week_txns = self.db.get_user_transactions(
-                self.user_id, current_week_start, current_week_end
-            )
-            prev_week_txns = self.db.get_user_transactions(
-                self.user_id, prev_week_start, prev_week_end
+            # If no data at all, raise error
+            if not current_week_data and not previous_week_data:
+                raise HTTPException(
+                    status_code=404,
+                    detail="No spending data available for any recent weeks"
+                )
+            
+            # Compare weeks (returns empty dict if insufficient data)
+            week_comparison = self._compare_weeks(current_week_data, previous_week_data)
+            
+            # Get monthly comparison data (returns empty dict if no data)
+            month_comparison = self._compare_months(
+                current_week_data.get('monthly_context', {}),
+                previous_week_data.get('monthly_context', {})
             )
             
-            # Analyze spending patterns
-            current_analysis = self._analyze_week_transactions(current_week_txns)
-            previous_analysis = self._analyze_week_transactions(prev_week_txns)
-            
-            # Calculate month-to-date and previous month spending
-            current_month = datetime.now().strftime("%Y-%m")
-            prev_month = (
-                datetime.now().replace(day=1) - timedelta(days=1)
-            ).strftime("%Y-%m")
-            
-            current_month_spending = self.db.get_spending_by_category(
-                self.user_id, f"{current_month}-01"
-            )
-            prev_month_spending = self.db.get_spending_by_category(
-                self.user_id, f"{prev_month}-01"
-            )
+            # Get engagement metrics (always available)
+            engagement_metrics = self._calculate_engagement_metrics()
             
             return {
-                "current_week": current_analysis,
-                "previous_week": previous_analysis,
-                "current_month_spending": current_month_spending,
-                "previous_month_spending": prev_month_spending,
-                "week_comparison": self._compare_weeks(
-                    current_analysis, previous_analysis
-                ),
-                "month_comparison": self._compare_months(
-                    current_month_spending, prev_month_spending
-                ),
-                "engagement_metrics": self._calculate_engagement_metrics()
+                "current_week": current_week_data or {},
+                "previous_week": previous_week_data or {}, 
+                "week_comparison": week_comparison,
+                "month_comparison": month_comparison,
+                "engagement_metrics": engagement_metrics
             }
             
+        except HTTPException:
+            raise
         except Exception as e:
-            print(f"Error gathering spending analysis: {e}")
-            return {}
+            raise HTTPException(
+                status_code=500,
+                detail=f"Error gathering spending analysis: {str(e)}"
+            )
     
     def _analyze_week_transactions(self, transactions: List) -> Dict[str, Any]:
         """Analyze a week's worth of transactions."""
@@ -152,64 +158,79 @@ class HabitAccomplishmentAgent:
         }
     
     def _compare_weeks(self, current: Dict, previous: Dict) -> Dict[str, Any]:
-        """Compare current week vs previous week spending."""
+        """Compare current and previous week spending patterns."""
         if not current or not previous:
-            return {}
+            return {}  # Return empty dict, handled gracefully by caller
         
-        current_total = current.get("total_spent", 0)
-        previous_total = previous.get("total_spent", 0)
-        
-        spending_change = current_total - previous_total
-        spending_change_pct = (
-            (spending_change / previous_total * 100) 
-            if previous_total > 0 else 0
-        )
-        
-        # Category comparisons
-        category_changes = {}
-        current_cats = current.get("categories", {})
-        previous_cats = previous.get("categories", {})
-        
-        for category in set(list(current_cats.keys()) + list(previous_cats.keys())):
-            current_amount = current_cats.get(category, {}).get("amount", 0)
-            previous_amount = previous_cats.get(category, {}).get("amount", 0)
-            change = current_amount - previous_amount
-            category_changes[category] = {
-                "amount_change": change,
-                "current_amount": current_amount,
-                "previous_amount": previous_amount
-            }
-        
-        return {
-            "spending_change": spending_change,
-            "spending_change_percentage": spending_change_pct,
-            "category_changes": category_changes,
-            "transaction_count_change": (
-                current.get("transaction_count", 0) - 
-                previous.get("transaction_count", 0)
+        try:
+            current_total = current.get("total_spent", 0)
+            previous_total = previous.get("total_spent", 0)
+            
+            # Calculate spending change
+            spending_change = current_total - previous_total
+            spending_change_pct = (
+                (spending_change / previous_total * 100) 
+                if previous_total > 0 else 0
             )
-        }
+            
+            # Compare transaction counts
+            current_count = current.get("transaction_count", 0)
+            previous_count = previous.get("transaction_count", 0)
+            txn_count_change = current_count - previous_count
+            
+            # Compare categories
+            current_cats = current.get("categories", {})
+            previous_cats = previous.get("categories", {})
+            category_changes = {}
+            
+            all_categories = set(list(current_cats.keys()) + list(previous_cats.keys()))
+            for category in all_categories:
+                current_amount = current_cats.get(category, {}).get("amount", 0)
+                previous_amount = previous_cats.get(category, {}).get("amount", 0)
+                
+                category_changes[category] = {
+                    "current_amount": current_amount,
+                    "previous_amount": previous_amount,
+                    "amount_change": current_amount - previous_amount
+                }
+            
+            return {
+                "spending_change": spending_change,
+                "spending_change_percentage": spending_change_pct,
+                "transaction_count_change": txn_count_change,
+                "category_changes": category_changes,
+                "current_total": current_total,
+                "previous_total": previous_total
+            }
+            
+        except Exception as e:
+            print(f"Warning: Error comparing weeks: {e}")
+            return {}  # Return empty dict on error
     
     def _compare_months(self, current_month: Dict, previous_month: Dict) -> Dict[str, Any]:
-        """Compare current month vs previous month spending."""
-        if not current_month or not previous_month:
-            return {}
+        """Compare current and previous month spending totals."""
+        if not current_month and not previous_month:
+            return {}  # Return empty dict, handled gracefully by caller
         
-        current_total = sum(current_month.values())
-        previous_total = sum(previous_month.values())
-        
-        spending_change = current_total - previous_total
-        spending_change_pct = (
-            (spending_change / previous_total * 100) 
-            if previous_total > 0 else 0
-        )
-        
-        return {
-            "spending_change": spending_change,
-            "spending_change_percentage": spending_change_pct,
-            "current_total": current_total,
-            "previous_total": previous_total
-        }
+        try:
+            current_total = sum(current_month.values()) if current_month else 0
+            previous_total = sum(previous_month.values()) if previous_month else 0
+            
+            spending_change = current_total - previous_total
+            spending_change_pct = (
+                (spending_change / previous_total * 100) 
+                if previous_total > 0 else 0
+            )
+            
+            return {
+                "spending_change": spending_change,
+                "spending_change_percentage": spending_change_pct,
+                "current_total": current_total,
+                "previous_total": previous_total
+            }
+        except Exception as e:
+            print(f"Warning: Error comparing months: {e}")
+            return {}  # Return empty dict on error
     
     def _calculate_engagement_metrics(self) -> Dict[str, Any]:
         """Calculate user engagement metrics."""
@@ -309,39 +330,19 @@ Generate accomplishments now based solely on the provided data:
     def _generate_habit_accomplishments(self, analysis_data: Dict[str, Any]) -> List[Dict[str, str]]:
         """
         Generate habit accomplishments using rule-based analysis.
-        This can be replaced with actual LLM API calls.
+        Raises errors when insufficient data available.
         """
         accomplishments = []
         
         try:
-            # Analyze spending reduction accomplishments
-            week_comparison = analysis_data.get("week_comparison", {})
-            spending_change = week_comparison.get("spending_change", 0)
-            
-            if spending_change < -10:  # Spent at least $10 less
-                accomplishments.append({
-                    "habit_description": (
-                        f"You reduced spending by ${abs(spending_change):.2f} "
-                        f"this week compared to last week"
-                    ),
-                    "value": f"{abs(spending_change):.2f}"
-                })
-            
-            # Analyze category-specific improvements
-            category_changes = week_comparison.get("category_changes", {})
-            for category, change_data in category_changes.items():
-                change_amount = change_data.get("amount_change", 0)
-                if change_amount < -15:  # Reduced spending by $15+ in this category
-                    accomplishments.append({
-                        "habit_description": (
-                            f"You cut {category.lower()} spending by "
-                            f"${abs(change_amount):.2f} this week"
-                        ),
-                        "value": f"{abs(change_amount):.2f}"
-                    })
-            
-            # Analyze engagement accomplishments
+            # Get current week data for basic accomplishments
+            current_week = analysis_data.get("current_week", {})
             engagement = analysis_data.get("engagement_metrics", {})
+            
+            # Try to get week comparison data
+            week_comparison = analysis_data.get("week_comparison", {})
+            
+            # Basic engagement accomplishments (always available)
             daily_logins = engagement.get("daily_logins_this_week", 0)
             if daily_logins >= 5:
                 accomplishments.append({
@@ -352,37 +353,78 @@ Generate accomplishments now based solely on the provided data:
                     "value": "noumi"
                 })
             
-            # Analyze transaction frequency (fewer transactions can indicate better planning)
-            txn_change = week_comparison.get("transaction_count_change", 0)
-            if txn_change <= -3:  # 3+ fewer transactions
+            # Current week spending awareness
+            current_total = current_week.get("total_spent", 0)
+            if current_total > 0:
                 accomplishments.append({
                     "habit_description": (
-                        f"You made {abs(txn_change)} fewer impulse purchases "
-                        f"this week"
+                        f"You tracked ${current_total:.2f} in spending this week, "
+                        f"building financial awareness"
                     ),
-                    "value": f"{abs(txn_change)}"
+                    "value": "awareness"
                 })
             
-            # Limit to top 3 accomplishments
-            return (accomplishments[:3] if accomplishments 
-                   else self._get_fallback_accomplishments())
+            # Only add comparison-based accomplishments if we have valid comparison data
+            if week_comparison:
+                spending_change = week_comparison.get("spending_change", 0)
+                
+                if spending_change < -10:  # Spent at least $10 less
+                    accomplishments.append({
+                        "habit_description": (
+                            f"You reduced spending by ${abs(spending_change):.2f} "
+                            f"this week compared to last week"
+                        ),
+                        "value": f"{abs(spending_change):.2f}"
+                    })
+                
+                # Analyze category-specific improvements
+                category_changes = week_comparison.get("category_changes", {})
+                for category, change_data in category_changes.items():
+                    change_amount = change_data.get("amount_change", 0)
+                    if change_amount < -15:  # Reduced spending by $15+ in this category
+                        accomplishments.append({
+                            "habit_description": (
+                                f"You cut {category.lower()} spending by "
+                                f"${abs(change_amount):.2f} this week"
+                            ),
+                            "value": f"{abs(change_amount):.2f}"
+                        })
+                
+                # Analyze transaction frequency
+                txn_change = week_comparison.get("transaction_count_change", 0)
+                if txn_change <= -3:  # 3+ fewer transactions
+                    accomplishments.append({
+                        "habit_description": (
+                            f"You made {abs(txn_change)} fewer impulse purchases "
+                            f"this week"
+                        ),
+                        "value": f"{abs(txn_change)}"
+                    })
             
+            # If still no accomplishments and we have any current week data, provide basic one
+            if not accomplishments and current_week.get("transaction_count", 0) > 0:
+                accomplishments.append({
+                    "habit_description": "You actively monitored your spending patterns this week",
+                    "value": "monitoring"
+                })
+            
+            # If absolutely no accomplishments found, raise error
+            if not accomplishments:
+                raise HTTPException(
+                    status_code=404,
+                    detail="No habit accomplishments detected - insufficient spending data available"
+                )
+            
+            # Limit to top 3 accomplishments
+            return accomplishments[:3]
+            
+        except HTTPException:
+            raise
         except Exception as e:
-            print(f"Error generating accomplishments: {e}")
-            return self._get_fallback_accomplishments()
-    
-    def _get_fallback_accomplishments(self) -> List[Dict[str, str]]:
-        """Provide fallback accomplishments when analysis fails."""
-        return [
-            {
-                "habit_description": "You're tracking your spending consistently",
-                "value": "noumi"
-            },
-            {
-                "habit_description": "You're building awareness of your financial patterns",
-                "value": "awareness"
-            }
-        ]
+            raise HTTPException(
+                status_code=500,
+                detail=f"Error generating accomplishments: {str(e)}"
+            )
     
     def _get_current_week_dates(self) -> tuple[str, str]:
         """Get current week Monday to Sunday dates."""
@@ -398,4 +440,36 @@ Generate accomplishments now based solely on the provided data:
         days_since_monday = today.weekday()
         last_monday = today - timedelta(days=days_since_monday + 7)
         last_sunday = last_monday + timedelta(days=6)
-        return last_monday.strftime("%Y-%m-%d"), last_sunday.strftime("%Y-%m-%d") 
+        return last_monday.strftime("%Y-%m-%d"), last_sunday.strftime("%Y-%m-%d")
+    
+    def _get_current_week_spending(self) -> Dict[str, Any]:
+        """Get current week spending data."""
+        try:
+            start_date, end_date = self._get_current_week_dates()
+            transactions = self.db.get_user_transactions(
+                self.user_id, start_date, end_date
+            )
+            return self._analyze_week_transactions(transactions)
+        except HTTPException:
+            raise
+        except Exception as e:
+            raise HTTPException(
+                status_code=500,
+                detail=f"Error getting current week spending: {str(e)}"
+            )
+    
+    def _get_previous_week_spending(self) -> Dict[str, Any]:
+        """Get previous week spending data."""
+        try:
+            start_date, end_date = self._get_previous_week_dates()
+            transactions = self.db.get_user_transactions(
+                self.user_id, start_date, end_date
+            )
+            return self._analyze_week_transactions(transactions)
+        except HTTPException:
+            raise
+        except Exception as e:
+            raise HTTPException(
+                status_code=500,
+                detail=f"Error getting previous week spending: {str(e)}"
+            ) 

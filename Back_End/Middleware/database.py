@@ -509,7 +509,7 @@ class DatabaseManager:
             return accounts
         except Exception as e:
             print(f"Error getting bank accounts: {e}")
-            return []
+            raise HTTPException(status_code=500, detail=f"Error getting bank accounts: {e}")
     
     # Transaction operations
     def create_transaction(self, transaction: Transaction) -> int:
@@ -626,7 +626,7 @@ class DatabaseManager:
             return {row[0]: row[1] for row in rows}
         except Exception as e:
             print(f"Error getting spending by category: {e}")
-            return {}
+            raise HTTPException(status_code=500, detail=f"Error getting spending by category: {e}")
     
     # Legacy compatibility methods
     def save_user_goal(self, goal_data) -> bool:
@@ -673,43 +673,39 @@ class DatabaseManager:
             user_id = 5  # Updated to match existing data in database
             
             user = self.get_user(user_id)
-            if user:
-                quiz_responses = {
-                    "financial_goal": user.financial_goal,
-                    "impulse_triggers": user.impulse_triggers,
-                    "budgeting_score": user.budgeting_score,
-                    "name": user.name,
-                    "email": user.email
-                }
-                
-                goals = self.get_user_goals(user_id)
-                if goals:
-                    goal = goals[-1]
-                    quiz_responses.update({
-                        "goal_name": goal.goal_name,
-                        "goal_amount": goal.goal_amount,
-                        "target_date": goal.target_date,
-                        "goal_description": goal.goal_description,
-                        "net_monthly_income": goal.net_monthly_income or 6000.0
-                    })
-                
-                return quiz_responses
+            if not user:
+                raise HTTPException(status_code=404, detail="User not found")
             
-            return {
-                "financial_goal": "GOAL_SAVINGS",
-                "impulse_triggers": ["Stress", "FOMO"],
-                "budgeting_score": 2,
-                "goal_name": "Emergency Fund",
-                "goal_amount": 5000.0,
-                "target_date": "2025-12-31",
-                "goal_description": "Build emergency savings",
-                "name": "Test User",
-                "email": "test@example.com",
-                "net_monthly_income": 5000.0
+            quiz_responses = {
+                "financial_goal": user.financial_goal,
+                "impulse_triggers": user.impulse_triggers,
+                "budgeting_score": user.budgeting_score,
+                "name": user.name,
+                "email": user.email
             }
             
+            goals = self.get_user_goals(user_id)
+            if not goals:
+                raise HTTPException(status_code=404, detail="No goals found for user")
+            
+            goal = goals[-1]
+            quiz_responses.update({
+                "goal_name": goal.goal_name,
+                "goal_amount": goal.goal_amount,
+                "target_date": goal.target_date,
+                "goal_description": goal.goal_description,
+                "net_monthly_income": goal.net_monthly_income
+            })
+            
+            if not quiz_responses.get("net_monthly_income"):
+                raise HTTPException(status_code=404, detail="Monthly income not found")
+            
+            return quiz_responses
+            
+        except HTTPException:
+            raise
         except Exception as e:
-            raise HTTPException(status_code=500, detail=f"Error getting user quiz responses: {e}") 
+            raise HTTPException(status_code=500, detail=f"Error getting user quiz responses: {e}")
 
     def create_weekly_plan(self, weekly_plan: WeeklyPlan) -> int:
         """Create a new weekly plan and return weekly_plan_id"""
