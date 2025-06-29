@@ -52,7 +52,7 @@ const styles = StyleSheet.create({
   },
   label: {
     fontFamily: typography.fontFamily.medium,
-    fontSize: typography.fontSize.body,
+    fontSize: typography.fontSize.small,
     textAlign: 'center',
     color: colors.darkFont,
   },

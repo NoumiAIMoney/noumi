@@ -15,6 +15,7 @@ type SpendingCategory = {
 function getCategoryWithHighestDecrease(data: { category_name: string; amount: number; month: string; }[]) {
   const grouped: Record<string, { [month: string]: number }> = {};
 
+  // Group data by category and month
   data.forEach(({ category_name, amount, month }) => {
     if (!grouped[category_name]) grouped[category_name] = {};
     grouped[category_name][month] = amount;
@@ -32,19 +33,20 @@ function getCategoryWithHighestDecrease(data: { category_name: string; amount: n
     const monthEntries = Object.entries(months).sort(([a], [b]) => a.localeCompare(b));
     if (monthEntries.length < 2) continue;
 
-    const [prevMonth, prevAmount] = monthEntries[0];
-    const [currMonth, currAmount] = monthEntries[1];
+    const [secondLastMonth, secondLastAmount] = monthEntries[monthEntries.length - 2];
+    const [lastMonth, lastAmount] = monthEntries[monthEntries.length - 1];
 
-    const drop = prevAmount - currAmount;
+    const drop = secondLastAmount - lastAmount;
 
     if (drop > maxDrop) {
       maxDrop = drop;
-      const percentageDrop = (drop / prevAmount) * 100;
+      const percentageDrop = (drop / secondLastAmount) * 100;
       result = {
         category,
-        decreaseAmount: parseFloat(drop.toFixed(2)),
+        // TO DO: NEED TO CHANGE VAR NAMES
+        decreaseAmount: parseFloat(lastAmount.toFixed(2)) / 4,
         percentageDrop: parseFloat(percentageDrop.toFixed(2)),
-        previousAmount: prevAmount,
+        previousAmount: parseFloat(secondLastAmount.toFixed(2)) / 4,
       };
     }
   }
@@ -60,6 +62,7 @@ export default function Step2() {
       try {
         const data = await getSpendingCategories();
         setCategory(getCategoryWithHighestDecrease(data));
+        console.log(data)
       } catch (error) {
         console.error('Error fetching data:', error);
       }
@@ -83,8 +86,11 @@ export default function Step2() {
               {categoryIcons[category.category || 'Uncategorized'] || categoryIcons['Uncategorized']}
             </View>
           }
-          amount={`-${category.decreaseAmount.toLocaleString()}`}
-          amountColor='#1BB16A'
+          amount={`${category.decreaseAmount.toLocaleString(undefined, {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          })}`}
+          // amountColor='#1BB16A'
           onlyLabel
           withShadow
         />
@@ -99,7 +105,12 @@ export default function Step2() {
               {categoryIcons[category.category || 'Uncategorized'] || categoryIcons['Uncategorized']}
             </View>
           }
-          amount={category.previousAmount.toLocaleString()}
+          amount={
+            category.previousAmount.toLocaleString(undefined, {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          })
+          }
           onlyLabel
           withShadow
         />

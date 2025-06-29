@@ -7,7 +7,7 @@ import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
 type Habit = {
-  habit_description: string;
+  description: string;
   value?: string;
 }
 
@@ -40,7 +40,7 @@ export default function Step3() {
           return (
             <HorizontalCard
               key={index}
-              title={formatDollarAmountsInText(habit.habit_description) || 'N/A'}
+              title={formatDollarAmountsInText(habit.description) || 'N/A'}
               white={true}
               width={330}
               iconRight={isNoumi}
@@ -67,13 +67,14 @@ const styles = StyleSheet.create({
     paddingTop: 64
   },
   text: {
+    width: 350,
     fontFamily: typography.fontFamily.semiBold,
     fontSize: typography.fontSize.XXLarge,
     color: colors.darkFont,
     letterSpacing: 0,
-    marginLeft: 20,
+    marginLeft: 32,
     marginBottom: 24,
-    marginRight: 50
+    marginRight: 24
   },
   section: {
     alignItems: 'center',
@@ -84,6 +85,6 @@ const styles = StyleSheet.create({
     color: colors.darkFont,
     fontSize: typography.fontSize.body,
     marginVertical: 12,
-    marginLeft: 24,
+    marginLeft: 32,
   },
 });

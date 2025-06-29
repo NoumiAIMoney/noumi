@@ -48,7 +48,10 @@ export default function Step4() {
           daysLeft={`${daysLeft} days left`}
           // WHEN SIGNING UP NO SAVINGS TOWARDS THIS GOAL YET
           amountSaved={String(0)}
-          goalAmount={goal.goal_amount.toLocaleString()}
+          goalAmount={goal.goal_amount.toLocaleString(undefined, {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          })}
           percentage={String(percentage)}
           barWidth={299}
         />

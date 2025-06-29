@@ -45,7 +45,10 @@ export default function Step2() {
                 {categoryIcons[category.category_name || 'Uncategorized'] || categoryIcons['Uncategorized']}
               </View>
             }
-            amount={category.amount.toLocaleString()}
+            amount={category.amount.toLocaleString(undefined, {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2,
+            })}
             onlyLabel
           />
         ))}

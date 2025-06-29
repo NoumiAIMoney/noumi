@@ -444,15 +444,15 @@ class TransactionAnalyzer:
 
     def calculate_total_spent_ytd(self) -> float:
         """
-        Calculate total amount spent year-to-date - NO DEFAULT VALUES
+        Calculate total amount spent month-to-date - NO DEFAULT VALUES
         """
         try:
-            # Get user signup date for proper YTD calculation
+            # Get user signup date for proper MTD calculation
             user = self.db.get_user(5)  # Updated to match existing data
             if not user or not user.created_at:
-                raise Exception("User signup date not found for YTD calculation")
+                raise Exception("User signup date not found for MTD calculation")
             
-            # Calculate YTD from signup date or beginning of year (whichever is later)
+            # Parse the signup date
             signup_date = user.created_at
             if isinstance(signup_date, str):
                 if 'T' in signup_date:
@@ -462,19 +462,94 @@ class TransactionAnalyzer:
             else:
                 signup_date = signup_date.strftime("%Y-%m-%d")
             
-            current_year = datetime.now().year
-            year_start = f"{current_year}-01-01"
-            start_date = max(signup_date, year_start)
-            end_date = datetime.now().strftime("%Y-%m-%d")
+            # Calculate MTD range
+            now = datetime.now()
+            month_start = f"{now.year}-{now.month:02d}-01"
+            start_date = max(signup_date, month_start)
+            end_date = now.strftime("%Y-%m-%d")
             
             db_user_id = 5  # Updated to match existing data in database
             transactions = self.db.get_user_transactions(db_user_id, start_date, end_date)
             
             if not transactions:
-                raise Exception("No transaction data for YTD calculation")
+                raise Exception("No transaction data for MTD calculation")
             
             total_spent = sum(abs(txn.amount) for txn in transactions if txn.amount < 0)
             return total_spent
             
         except Exception as e:
-            raise Exception(f"Error calculating total spent YTD: {e}")
+            raise Exception(f"Error calculating total spent MTD: {e}")
+
+        # """
+        # Calculate total amount spent year-to-date - NO DEFAULT VALUES
+        # """
+        # try:
+        #     # Get user signup date for proper YTD calculation
+        #     user = self.db.get_user(5)  # Updated to match existing data
+        #     if not user or not user.created_at:
+        #         raise Exception("User signup date not found for YTD calculation")
+            
+        #     # Calculate YTD from signup date or beginning of year (whichever is later)
+        #     signup_date = user.created_at
+        #     if isinstance(signup_date, str):
+        #         if 'T' in signup_date:
+        #             signup_date = signup_date.split('T')[0]
+        #         elif ' ' in signup_date:
+        #             signup_date = signup_date.split(' ')[0]
+        #     else:
+        #         signup_date = signup_date.strftime("%Y-%m-%d")
+            
+        #     current_year = datetime.now().year
+        #     year_start = f"{current_year}-01-01"
+        #     start_date = max(signup_date, year_start)
+        #     end_date = datetime.now().strftime("%Y-%m-%d")
+            
+        #     db_user_id = 5  # Updated to match existing data in database
+        #     transactions = self.db.get_user_transactions(db_user_id, start_date, end_date)
+            
+        #     if not transactions:
+        #         raise Exception("No transaction data for YTD calculation")
+            
+        #     total_spent = sum(abs(txn.amount) for txn in transactions if txn.amount < 0)
+        #     return total_spent
+            
+        # except Exception as e:
+        #     raise Exception(f"Error calculating total spent YTD: {e}")
+
+def calculate_total_spent_mtd(self) -> float:
+    """
+    Calculate total amount spent month-to-date - NO DEFAULT VALUES
+    """
+    try:
+        # Get user signup date for proper MTD calculation
+        user = self.db.get_user(5)  # Updated to match existing data
+        if not user or not user.created_at:
+            raise Exception("User signup date not found for MTD calculation")
+        
+        # Parse the signup date
+        signup_date = user.created_at
+        if isinstance(signup_date, str):
+            if 'T' in signup_date:
+                signup_date = signup_date.split('T')[0]
+            elif ' ' in signup_date:
+                signup_date = signup_date.split(' ')[0]
+        else:
+            signup_date = signup_date.strftime("%Y-%m-%d")
+        
+        # Calculate MTD range
+        now = datetime.now()
+        month_start = f"{now.year}-{now.month:02d}-01"
+        start_date = max(signup_date, month_start)
+        end_date = now.strftime("%Y-%m-%d")
+        
+        db_user_id = 5  # Updated to match existing data in database
+        transactions = self.db.get_user_transactions(db_user_id, start_date, end_date)
+        
+        if not transactions:
+            raise Exception("No transaction data for MTD calculation")
+        
+        total_spent = sum(abs(txn.amount) for txn in transactions if txn.amount < 0)
+        return total_spent
+        
+    except Exception as e:
+        raise Exception(f"Error calculating total spent MTD: {e}")

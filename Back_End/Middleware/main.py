@@ -450,7 +450,7 @@ async def get_spending_trends(current_user=Depends(get_current_user)):
             
             trends.append(SpendingTrend(
                 icon="📅",
-                trend=f"{highest_day} is highest spending day with ${total_spent:.2f}"
+                trend=f"You tend to spend the most on {highest_day}s"
             ))
         
         # 2. Most frequent merchant (last 12 months)
@@ -475,7 +475,7 @@ async def get_spending_trends(current_user=Depends(get_current_user)):
             
             trends.append(SpendingTrend(
                 icon="🏪",
-                trend=f"{merchant} top merchant with ${total_spent:.2f}"
+                trend=f"{merchant} is your favorite merchant"
             ))
         
         # 3. Most frequent category (last 12 months)
@@ -500,7 +500,7 @@ async def get_spending_trends(current_user=Depends(get_current_user)):
             
             trends.append(SpendingTrend(
                 icon="🛍️",
-                trend=f"{category} most frequent category with {count} transactions"
+                trend=f"{category} most frequent category"
             ))
         
         conn.close()
@@ -566,7 +566,8 @@ async def get_computed_goal_data(current_user=Depends(get_current_user)):
         end_date = today
 
         # Get user signup date for proper calculation
-        user_signup_date = _get_user_signup_date(user_id)
+        # User sign up date should be today for demo
+        user_signup_date = datetime.now().strftime("%Y-%m-%d")
         actual_start_date = max(start_date, user_signup_date)
 
         # Calculate amount saved from actual transaction data
@@ -1146,7 +1147,7 @@ async def get_spending_status(current_user=Depends(get_current_user)):
             )
         
         goal = goals[-1]  # Get latest goal
-        
+        user_reported_monthly_income = goal.net_monthly_income
         # Calculate monthly savings requirement based on goal timeline
         target_date = datetime.strptime(str(goal.target_date), "%Y-%m-%d")
         today_date = datetime.now()
@@ -1193,9 +1194,9 @@ async def get_spending_status(current_user=Depends(get_current_user)):
         amount_safe_to_spend_this_week = max(0, weekly_safe_to_spend - current_week_spending)
         
         return SpendingStatus(
-            income=weekly_income,
-            expenses=current_week_spending,
-            amount_safe_to_spend=amount_safe_to_spend_this_week
+            income=user_reported_monthly_income,
+            expenses=monthly_expenses,
+            amount_safe_to_spend=user_reported_monthly_income - monthly_expenses
         )
         
     except HTTPException:

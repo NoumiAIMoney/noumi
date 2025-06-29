@@ -36,7 +36,10 @@ export default function GoalProgressCard({
 
       <Text style={styles.amount}>
         <Text style={styles.amountSaved}>
-          ${Math.round(Number(amountSaved) || 0).toLocaleString()}
+          ${Math.round(Number(amountSaved) || 0).toLocaleString(undefined, {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          })}
         </Text> of ${goalAmount}
       </Text>
 

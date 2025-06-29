@@ -36,7 +36,7 @@ export default function Step5() {
 
   return (
     <View style={styles.wrapper}>
-      <View style={[styles.container, {marginBottom: 80}]}>
+      <View style={[styles.container, {marginBottom: 164}]}>
         <Text style={styles.text}>You did great this week. Try these habits next and watch your funds grow.</Text>
         <View style={styles.cardsWrapper}>
           {habits.map((habit, index) => (

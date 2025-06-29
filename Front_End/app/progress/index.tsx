@@ -3,7 +3,6 @@ import HomeIcon from '@/assets/icons/home.svg';
 import ProgressIcon from '@/assets/icons/progress.svg';
 import HabitCard, { HydratedHabit, hydrateHabits } from '@/components/HabitCard';
 import RecapCard from '@/components/RecapCard';
-import SpikeBar from '@/components/SpikeBar';
 import { getYearlyAnomalies } from '@/src/api/anomalies';
 import { getHabits } from '@/src/api/habits';
 import { colors, typography } from '@/src/theme';
@@ -70,10 +69,10 @@ const ProgressScreen: React.FC = () => {
 
   const renderActiveHabits = (): JSX.Element => (
     <View style={styles.content}>
-      <Text style={styles.statsTitle}>Habit Stats</Text>
+      {/* <Text style={styles.statsTitle}>Habit Stats</Text>
       <View style={styles.spikeCard}>
         <SpikeBar progress={anomalies} habitCount={3} width={373} />
-      </View>
+      </View> */}
 
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Habits for the week</Text>

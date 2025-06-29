@@ -1,10 +1,11 @@
 export const mockHabits = [
-  { habit_description: 'Try a No-Spend-Day', occurrences: 1, habit_full_prompt: 'Try a No-Spend-Day this week.' },
-  { habit_description: 'Eat at home twice', occurrences: 2, habit_full_prompt: 'Try meal planning instead of eating out twice.' },
-  { habit_description: 'Log in to Noumi daily', occurrences: 7 },
+  { description: 'Check account balance daily', weekly_occurrences: 7 },
+  { description: 'Reduce your shopping by $54 daily', weekly_occurrences: 7 },
+  { description: 'Try to cook your own meals (you would save $36) per day', weekly_occurrences: 7 },
 ];
 
 export const mockAccomplishedHabits = [
-  { habit_description: 'You bought 2 coffees instead of 7, saving $36.24.', value: '36.24' },
-  { habit_description: 'You logged in to Noumi every day this week', value: 'noumi' },
+  { description: 'You reduced your shopping by $161.25', value: '-161.25' },
+  { description: 'You have cooked your own meals four days', value: '-144' },
+  { description: 'You checked your account everyday this week', value: 'noumi' },
 ];

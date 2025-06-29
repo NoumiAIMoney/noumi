@@ -6,6 +6,7 @@ import ProgressIcon from '@/assets/icons/progress.svg';
 import GoalProgressCard from '@/components/GoalProgressCard';
 import { getComputedGoal } from '@/src/api/goal';
 import { getHabits } from '@/src/api/habits';
+import { getWeeklySavings } from '@/src/api/savings';
 import { getSpendingStatus } from '@/src/api/spending';
 import { colors, typography } from '@/src/theme';
 import { getCurrentWeekRange } from '@/src/utils/formatters';
@@ -45,19 +46,22 @@ export default function HomeScreen() {
   const [spendingStatus, setSpendingStatus] = useState<SpendingData | null>(null);
   const [habits, setHabits] = useState<HabitData[]>([]);
   const [showAllHabits, setShowAllHabits] = useState(false);
+  const [suggestedSavingsAmount, setSuggestedSavingsAmount] = useState<number | null>(null);
 
   const habitsToDisplay = showAllHabits ? habits : habits.slice(0, 2);
   useEffect(() => {
     async function fetchGoal() {
       try {
-        const [goalData, spendingData, habitData] = await Promise.all([
+        const [goalData, spendingData, habitData, savingsData] = await Promise.all([
           getComputedGoal(),
           getSpendingStatus(),
-          getHabits()
+          getHabits(),
+          getWeeklySavings()
         ]);
         setGoal(goalData);
         setSpendingStatus(spendingData);
         setHabits(habitData.filter((h: { description: any; }) => h.description))
+        setSuggestedSavingsAmount(savingsData.suggested_savings_amount_weekly);
       } catch (error) {
         console.error('Failed to fetch goal:', error);
       }
@@ -72,7 +76,7 @@ export default function HomeScreen() {
   const timeDiff = targetDate.getTime() - today.getTime();
   const daysLeft = Math.max(Math.ceil(timeDiff / (1000 * 3600 * 24)), 0);
   const percentage = Math.min(
-    Math.round((goal.amount_saved / goal.goal_amount) * 100),
+    Math.round(((goal.amount_saved + (suggestedSavingsAmount ?? 0)) / goal.goal_amount) * 100),
     100
   );
   const userName: string = "Maya";
@@ -104,8 +108,11 @@ export default function HomeScreen() {
           <GoalProgressCard
             title={goal.goal_name}
             daysLeft={`${daysLeft} days left`}
-            amountSaved={String(goal.amount_saved)}
-            goalAmount={goal.goal_amount.toLocaleString()}
+            amountSaved={String(goal.amount_saved + (suggestedSavingsAmount ?? 0))}
+            goalAmount={goal.goal_amount.toLocaleString(undefined, {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2,
+            })}
             percentage={String(percentage)}
             streak
             height={191}
@@ -133,19 +140,16 @@ export default function HomeScreen() {
         {/* My Spending Section */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>My Spending</Text>
-            <TouchableOpacity>
-              <Text style={styles.seeAllBtn}>See All</Text>
-            </TouchableOpacity>
+            <Text style={styles.sectionTitle}>My Monthly Spending</Text>
           </View>
           
           <View style={styles.spendingRow}>
             <View style={styles.safeToSpendCard}>
               <Text style={styles.safeToSpendLabel}>Safe to Spend</Text>
               <Text style={styles.safeToSpendAmount}>
-                {`$ ${spendingStatus?.amount_safe_to_spend.toLocaleString(undefined, {
-                  minimumFractionDigits: 1,
-                  maximumFractionDigits: 1,
+                {`$ ${((spendingStatus?.amount_safe_to_spend ?? 0) - (suggestedSavingsAmount ?? 0)).toLocaleString(undefined, {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
                 })}`}
               </Text>
               <Text style={styles.updateDate}>Updated: {new Date().toLocaleDateString('en-US')}</Text>
@@ -160,8 +164,8 @@ export default function HomeScreen() {
                   <Text style={styles.summaryLabel}>Income</Text>
                   <Text style={styles.summaryAmount}>
                     {`$ ${spendingStatus?.income.toLocaleString(undefined, {
-                      minimumFractionDigits: 1,
-                      maximumFractionDigits: 1,
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
                     })}`}
                   </Text>
                 </View>
@@ -175,8 +179,8 @@ export default function HomeScreen() {
                   <Text style={styles.summaryLabel}>Expenses</Text>
                   <Text style={styles.summaryAmount}>
                     {`$ ${spendingStatus?.expenses.toLocaleString(undefined, {
-                      minimumFractionDigits: 1,
-                      maximumFractionDigits: 1,
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
                     })}`}
                   </Text>
                 </View>

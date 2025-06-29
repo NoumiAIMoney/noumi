@@ -41,7 +41,10 @@ export default function Step4() {
             <CategoryVerticalCard
               labelHeight={24}
               cardMinHeight={90}
-              label={`$${category.amount.toLocaleString()}` || 'N/A'}
+              label={`$${category.amount.toLocaleString(undefined, {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              })}` || 'N/A'}
               icon={
                 <View style={[styles.iconWrapper, {backgroundColor: COLORS[index]}]}>
                   {categoryIcons[category.category_name || 'Uncategorized'] || categoryIcons['Uncategorized']}

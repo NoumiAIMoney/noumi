@@ -22,29 +22,38 @@ interface GoalData {
 function getCategoryWithHighestDecrease(data: { category_name: string; amount: number; month: string; }[]) {
   const grouped: Record<string, { [month: string]: number }> = {};
 
+  // Group data by category and month
   data.forEach(({ category_name, amount, month }) => {
     if (!grouped[category_name]) grouped[category_name] = {};
     grouped[category_name][month] = amount;
   });
 
   let maxDrop = -Infinity;
-  let result: { category: string; decreaseAmount: number; percentageDrop: number } | null = null;
+  let result: {
+    category: string;
+    decreaseAmount: number;
+    percentageDrop: number;
+    previousAmount: number;
+  } | null = null;
 
   for (const [category, months] of Object.entries(grouped)) {
     const monthEntries = Object.entries(months).sort(([a], [b]) => a.localeCompare(b));
     if (monthEntries.length < 2) continue;
 
-    const [prevMonth, prevAmount] = monthEntries[0];
-    const [currMonth, currAmount] = monthEntries[1];
-    const drop = prevAmount - currAmount;
+    const [secondLastMonth, secondLastAmount] = monthEntries[monthEntries.length - 2];
+    const [lastMonth, lastAmount] = monthEntries[monthEntries.length - 1];
+
+    const drop = secondLastAmount - lastAmount;
 
     if (drop > maxDrop) {
       maxDrop = drop;
-      const percentageDrop = (drop / prevAmount) * 100;
+      const percentageDrop = (drop / secondLastAmount) * 100;
       result = {
         category,
-        decreaseAmount: parseFloat(drop.toFixed(2)),
+        // CHANGED NEED TO CHANGE VAR NAMES
+        decreaseAmount: lastAmount / 4,
         percentageDrop: parseFloat(percentageDrop.toFixed(2)),
+        previousAmount: parseFloat(secondLastAmount.toFixed(2)) / 4,
       };
     }
   }
@@ -76,7 +85,7 @@ export default function Step1() {
 
         setGoal(goalData);
         setSuggestedSavingsAmount(savingsData.suggested_savings_amount_weekly);
-
+        console.log("suggested savings amoung", suggestedSavingsAmount)
         const result = getCategoryWithHighestDecrease(spendingCategories);
         setBiggestDecrease(result);
         setStreak(streakData.longest_streak);
@@ -93,7 +102,7 @@ export default function Step1() {
   if (!goal) return null;
 
   const percentage = Math.min(
-    Math.round((goal.amount_saved / goal.goal_amount) * 100),
+    Math.round(((goal.amount_saved + Math.floor(suggestedSavingsAmount || 0)) / goal.goal_amount) * 100),
     100
   );
 
@@ -108,10 +117,10 @@ export default function Step1() {
         <View style={styles.card}>
           <Text style={styles.mainTitle}>You are on a roll, Maya!</Text>
           <Text style={styles.subtitle}>This week's savings</Text>
-          <Text style={styles.amount}>${Math.floor(goal.amount_saved || 0)}</Text>
+          <Text style={styles.amount}>${Math.floor(suggestedSavingsAmount || 0)}</Text>
           <Text style={styles.subtitle}>Goal progress</Text>
           <Text style={styles.percentage}>{percentage}%</Text>
-          <ProgressBar currentStep={goal.amount_saved} totalSteps={goal.goal_amount} width={202} />
+          <ProgressBar currentStep={(goal.amount_saved + Math.floor(suggestedSavingsAmount || 0))} totalSteps={goal.goal_amount} width={202} />
           <Text style={styles.subtitle}>Your Stats</Text>
           <View style={styles.horizontalCardContainer}>
             <CategoryVerticalCard
@@ -131,7 +140,10 @@ export default function Step1() {
               icon={<TrendUpIcon width={24} height={24} fill="none" />}
               label='Money Spent'
               iconBackground='#5390D3'
-              value={`$${Math.round(Number(totalSpending) || 0).toLocaleString()}`}
+              value={`$${Math.round(Number(totalSpending) || 0).toLocaleString(undefined, {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              })}`}
             />
           </View>
         </View>

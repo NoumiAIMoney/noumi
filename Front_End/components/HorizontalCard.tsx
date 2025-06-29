@@ -59,11 +59,15 @@ export default function HorizontalCard({
         )}
       </View>
 
-      {amount && (
-        <Text style={[styles.amount, { color: amountColor }]}>
-          ${amount}
+      {amount != null && (
+        <Text style={[styles.amount, { marginLeft: 8, color: amountColor }]}>
+          ${Number(amount).toLocaleString(undefined, {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          })}
         </Text>
       )}
+
     </View>
   );
 }

@@ -1,5 +1,6 @@
 export function formatDollarAmountsInText(text: string): string {
-  return text.replace(/\$\d+(?:\.\d{2})?/g, match => {
+  if (!text) return text;
+  return text?.replace(/\$\d+(?:\.\d{2})?/g, match => {
     const number = parseFloat(match.replace('$', ''));
     if (isNaN(number)) return match;
     return `$${number.toLocaleString(undefined, {
