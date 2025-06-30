@@ -13,6 +13,20 @@ type SpendingCategory = {
 
 const COLORS = ['#B4698F', '#E97272', '#FFCE51']
 
+function getTop3CategoriesForLatestMonth(data: SpendingCategory[]): SpendingCategory[] {
+  const months = [...new Set(data.map(item => item.month))];
+  const latestMonth = months.sort().pop();
+
+  if (!latestMonth) return [];
+
+  const filtered = data.filter(item => item.month === latestMonth);
+  console.log(filtered)
+
+  return filtered
+    .sort((a, b) => b.amount - a.amount)
+    .slice(0, 3);
+}
+
 export default function Step2() {
   const [categories, setCategories] = useState<SpendingCategory[]>([]);
 
@@ -21,7 +35,7 @@ export default function Step2() {
       try {
         const data = await getSpendingCategories();
 
-        setCategories(data);
+        setCategories(getTop3CategoriesForLatestMonth(data));
       } catch (error) {
         console.error('Error fetching data:', error);
       }
@@ -45,10 +59,7 @@ export default function Step2() {
                 {categoryIcons[category.category_name || 'Uncategorized'] || categoryIcons['Uncategorized']}
               </View>
             }
-            amount={category.amount.toLocaleString(undefined, {
-              minimumFractionDigits: 2,
-              maximumFractionDigits: 2,
-            })}
+            amount={category.amount.toString()}
             onlyLabel
           />
         ))}
