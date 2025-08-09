@@ -13,6 +13,7 @@ import (
 	"github.com/joho/godotenv"
 
 	"noumi-backend/internal/config"
+	"noumi-backend/internal/database"
 	"noumi-backend/internal/utils/logger"
 )
 
@@ -32,6 +33,27 @@ func main() {
 	logger := logger.New(cfg.Logging.Level, cfg.Logging.Format)
 	logger.Info("Starting Noumi Backend Server")
 
+	// Convert config to database config
+	dbConfig := &database.Config{
+		URL:             cfg.Database.URL,
+		MaxOpenConns:    cfg.Database.MaxOpenConns,
+		MaxIdleConns:    cfg.Database.MaxIdleConns,
+		ConnMaxLifetime: cfg.Database.ConnMaxLifetime,
+		ConnMaxIdleTime: cfg.Database.ConnMaxLifetime, // Use same value for idle time
+	}
+
+	// Initialize database manager
+	dbManager, err := database.NewManager(dbConfig, logger.Logger)
+	if err != nil {
+		logger.Fatalf("Failed to create database manager: %v", err)
+	}
+	defer dbManager.Close()
+
+	// Initialize database (run migrations)
+	if err := dbManager.Initialize(); err != nil {
+		logger.Fatalf("Failed to initialize database: %v", err)
+	}
+
 	// Set Gin mode based on log level
 	if cfg.Logging.Level == "debug" {
 		gin.SetMode(gin.DebugMode)
@@ -48,10 +70,22 @@ func main() {
 
 	// Health check endpoint
 	router.GET("/health", func(c *gin.Context) {
+		// Check database health
+		if err := dbManager.Health(c.Request.Context()); err != nil {
+			c.JSON(http.StatusServiceUnavailable, gin.H{
+				"status":    "unhealthy",
+				"timestamp": time.Now().UTC().Format(time.RFC3339),
+				"service":   "noumi-backend",
+				"error":     "database connection failed",
+			})
+			return
+		}
+
 		c.JSON(http.StatusOK, gin.H{
 			"status":    "healthy",
 			"timestamp": time.Now().UTC().Format(time.RFC3339),
 			"service":   "noumi-backend",
+			"database":  "connected",
 		})
 	})
 
@@ -59,9 +93,25 @@ func main() {
 	api := router.Group("/api/v1")
 	{
 		api.GET("/status", func(c *gin.Context) {
+			// Get database stats
+			dbStats := dbManager.Stats()
+
+			// Get current migration version
+			migrator := dbManager.GetMigrator()
+			version, dirty, err := migrator.GetCurrentVersion()
+			migrationInfo := gin.H{
+				"version": version,
+				"dirty":   dirty,
+			}
+			if err != nil {
+				migrationInfo["error"] = err.Error()
+			}
+
 			c.JSON(http.StatusOK, gin.H{
-				"message": "Noumi Backend API is running",
-				"version": "1.0.0",
+				"message":   "Noumi Backend API is running",
+				"version":   "1.0.0",
+				"database":  dbStats,
+				"migration": migrationInfo,
 			})
 		})
 	}

@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"path/filepath"
 	"time"
 
 	"noumi-backend/internal/database/repository"
@@ -15,6 +16,7 @@ import (
 type Manager struct {
 	db         *DB
 	repository *repository.Repository
+	migrator   *Migrator
 	logger     *logrus.Logger
 }
 
@@ -26,12 +28,17 @@ func NewManager(config *Config, logger *logrus.Logger) (*Manager, error) {
 		return nil, fmt.Errorf("failed to create database connection: %w", err)
 	}
 
+	// Create migrator with migrations directory
+	migrationsDir := filepath.Join("internal", "database", "migrations")
+	migrator := NewMigrator(db.DB, logger, migrationsDir)
+
 	// Create repository layer
 	repo := repository.NewRepository(db.DB)
 
 	return &Manager{
 		db:         db,
 		repository: repo,
+		migrator:   migrator,
 		logger:     logger,
 	}, nil
 }
@@ -44,6 +51,37 @@ func (m *Manager) GetRepository() *repository.Repository {
 // GetDB returns the database connection
 func (m *Manager) GetDB() *DB {
 	return m.db
+}
+
+// GetMigrator returns the migrator instance
+func (m *Manager) GetMigrator() *Migrator {
+	return m.migrator
+}
+
+// RunMigrations executes all pending database migrations
+func (m *Manager) RunMigrations() error {
+	if m.migrator == nil {
+		return fmt.Errorf("migrator is not initialized")
+	}
+	return m.migrator.RunMigrations()
+}
+
+// Initialize performs initial setup including running migrations
+func (m *Manager) Initialize() error {
+	m.logger.Info("Initializing database manager")
+
+	// Run migrations first
+	if err := m.RunMigrations(); err != nil {
+		return fmt.Errorf("failed to run migrations: %w", err)
+	}
+
+	// Verify database health after migrations
+	if err := m.Health(context.Background()); err != nil {
+		return fmt.Errorf("database health check failed after migrations: %w", err)
+	}
+
+	m.logger.Info("Database manager initialized successfully")
+	return nil
 }
 
 // Close closes the database connection

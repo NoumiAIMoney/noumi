@@ -12,6 +12,8 @@ import (
 
 // Config holds database configuration
 type Config struct {
+	// URL takes precedence over individual parameters
+	URL             string        `env:"DATABASE_URL"`
 	Host            string        `env:"DB_HOST" envDefault:"localhost"`
 	Port            int           `env:"DB_PORT" envDefault:"5432"`
 	User            string        `env:"DB_USER" envDefault:"postgres"`
@@ -33,16 +35,22 @@ type DB struct {
 
 // NewConnection creates a new database connection with connection pooling
 func NewConnection(config *Config, logger *logrus.Logger) (*DB, error) {
-	// Build connection string
-	dsn := fmt.Sprintf(
-		"host=%s port=%d user=%s password=%s dbname=%s sslmode=%s",
-		config.Host,
-		config.Port,
-		config.User,
-		config.Password,
-		config.Database,
-		config.SSLMode,
-	)
+	var dsn string
+
+	// Use URL if provided, otherwise build from individual parameters
+	if config.URL != "" {
+		dsn = config.URL
+	} else {
+		dsn = fmt.Sprintf(
+			"host=%s port=%d user=%s password=%s dbname=%s sslmode=%s",
+			config.Host,
+			config.Port,
+			config.User,
+			config.Password,
+			config.Database,
+			config.SSLMode,
+		)
+	}
 
 	// Open database connection
 	sqlDB, err := sql.Open("postgres", dsn)

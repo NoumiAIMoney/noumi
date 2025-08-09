@@ -33,6 +33,15 @@ func ExampleUsage() {
 	}
 	defer dbManager.Close()
 
+	// Initialize database (run migrations)
+	err = dbManager.Initialize()
+	if err != nil {
+		logger.WithError(err).Fatal("Failed to initialize database")
+		return
+	}
+
+	logger.Info("Database initialized successfully with migrations")
+
 	// Get repository
 	repo := dbManager.GetRepository()
 	ctx := context.Background()
@@ -195,4 +204,155 @@ func ExampleUsage() {
 	// Example: Get database stats
 	stats := dbManager.Stats()
 	logger.WithField("stats", stats).Info("Database connection statistics")
+}
+
+// ExampleMigrationUsage demonstrates how to use the migration system
+func ExampleMigrationUsage() {
+	// Initialize logger
+	logger := logrus.New()
+
+	// Database configuration
+	config := &Config{
+		Host:     "localhost",
+		Port:     5432,
+		User:     "postgres",
+		Password: "password",
+		Database: "noumidb",
+		SSLMode:  "disable",
+	}
+
+	// Create database connection
+	db, err := NewConnection(config, logger)
+	if err != nil {
+		logger.WithError(err).Fatal("Failed to create database connection")
+		return
+	}
+	defer db.Close()
+
+	// Create migrator
+	migrator := NewMigrator(db.DB, logger, "internal/database/migrations")
+
+	// Example: Get current migration version
+	version, dirty, err := migrator.GetCurrentVersion()
+	if err != nil {
+		logger.WithError(err).Info("No migrations applied yet")
+	} else {
+		logger.WithFields(logrus.Fields{
+			"version": version,
+			"dirty":   dirty,
+		}).Info("Current migration status")
+	}
+
+	// Example: Run all pending migrations
+	err = migrator.RunMigrations()
+	if err != nil {
+		logger.WithError(err).Error("Failed to run migrations")
+		return
+	}
+
+	logger.Info("Migrations completed successfully")
+
+	// Example: Get version after migration
+	version, dirty, err = migrator.GetCurrentVersion()
+	if err != nil {
+		logger.WithError(err).Error("Failed to get version after migration")
+		return
+	}
+
+	logger.WithFields(logrus.Fields{
+		"version": version,
+		"dirty":   dirty,
+	}).Info("Migration status after running migrations")
+
+	// Example: Migrate to a specific version (rollback)
+	if version > 0 {
+		logger.Info("Demonstrating rollback to previous version")
+		err = migrator.MigrateToVersion(version - 1)
+		if err != nil {
+			logger.WithError(err).Error("Failed to rollback migration")
+			return
+		}
+
+		// Get version after rollback
+		newVersion, _, err := migrator.GetCurrentVersion()
+		if err != nil {
+			logger.WithError(err).Error("Failed to get version after rollback")
+			return
+		}
+
+		logger.WithFields(logrus.Fields{
+			"from_version": version,
+			"to_version":   newVersion,
+		}).Info("Rollback completed")
+
+		// Migrate back up
+		err = migrator.RunMigrations()
+		if err != nil {
+			logger.WithError(err).Error("Failed to migrate back up")
+			return
+		}
+
+		logger.Info("Migrated back to latest version")
+	}
+}
+
+// ExampleDatabaseManagerWithMigrations demonstrates the full database manager usage with migrations
+func ExampleDatabaseManagerWithMigrations() {
+	// Initialize logger
+	logger := logrus.New()
+
+	// Database configuration
+	config := &Config{
+		Host:     "localhost",
+		Port:     5432,
+		User:     "postgres",
+		Password: "password",
+		Database: "noumidb",
+		SSLMode:  "disable",
+	}
+
+	// Create database manager
+	dbManager, err := NewManager(config, logger)
+	if err != nil {
+		logger.WithError(err).Fatal("Failed to create database manager")
+		return
+	}
+	defer dbManager.Close()
+
+	// Initialize database (this runs migrations automatically)
+	err = dbManager.Initialize()
+	if err != nil {
+		logger.WithError(err).Fatal("Failed to initialize database")
+		return
+	}
+
+	// Get migrator for additional migration operations
+	migrator := dbManager.GetMigrator()
+
+	// Check migration status
+	version, dirty, err := migrator.GetCurrentVersion()
+	if err != nil {
+		logger.WithError(err).Error("Failed to get migration version")
+		return
+	}
+
+	logger.WithFields(logrus.Fields{
+		"version": version,
+		"dirty":   dirty,
+	}).Info("Database is ready with migrations applied")
+
+	// Now you can use the repository layer
+	repo := dbManager.GetRepository()
+	ctx := context.Background()
+
+	// Example: Verify tables exist by trying to query
+	// This would fail if migrations didn't run properly
+	user, err := repo.User.GetByID(ctx, 1)
+	if err != nil {
+		logger.WithError(err).Info("No user with ID 1 found (expected for empty database)")
+	} else {
+		logger.WithField("user_id", user.UserID).Info("Found existing user")
+	}
+
+	logger.Info("Database manager with migrations working correctly")
 }
