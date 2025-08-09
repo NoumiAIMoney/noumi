@@ -1,6 +1,7 @@
 # Implementation Plan
 
-- [ ] 1. Set up Go project structure and core dependencies
+- [-] 1. Set up Go project structure and core dependencies
+  - Create a sub project folder noumi-backend for this project
   - Create Go module with proper directory structure following clean architecture
   - Install and configure Gin web framework, database drivers, and essential dependencies
   - Set up configuration management with environment variables and validation
