@@ -3,9 +3,10 @@ package main
 import (
 	"flag"
 	"fmt"
+	"os"
 	"strconv"
+	"time"
 
-	"noumi-backend/internal/config"
 	"noumi-backend/internal/database"
 
 	"github.com/sirupsen/logrus"
@@ -25,20 +26,26 @@ func main() {
 		FullTimestamp: true,
 	})
 
-	// Load configuration
-	cfg, err := config.Load()
-	if err != nil {
-		logger.WithError(err).Fatal("Failed to load configuration")
+	// Load minimal configuration for database only
+	dbConfig := &database.Config{}
+
+	// Try to get DATABASE_URL from environment first
+	if dbURL := os.Getenv("DATABASE_URL"); dbURL != "" {
+		dbConfig.URL = dbURL
+	} else {
+		// Fall back to individual parameters
+		dbConfig.Host = getEnvOrDefault("DB_HOST", "localhost")
+		dbConfig.Port = getEnvIntOrDefault("DB_PORT", 5432)
+		dbConfig.User = getEnvOrDefault("DB_USER", "postgres")
+		dbConfig.Password = getEnvOrDefault("DB_PASSWORD", "")
+		dbConfig.Database = getEnvOrDefault("DB_NAME", "noumidb")
+		dbConfig.SSLMode = getEnvOrDefault("DB_SSL_MODE", "disable")
 	}
 
-	// Convert config to database config
-	dbConfig := &database.Config{
-		URL:             cfg.Database.URL,
-		MaxOpenConns:    cfg.Database.MaxOpenConns,
-		MaxIdleConns:    cfg.Database.MaxIdleConns,
-		ConnMaxLifetime: cfg.Database.ConnMaxLifetime,
-		ConnMaxIdleTime: cfg.Database.ConnMaxLifetime,
-	}
+	dbConfig.MaxOpenConns = getEnvIntOrDefault("DB_MAX_OPEN_CONNS", 25)
+	dbConfig.MaxIdleConns = getEnvIntOrDefault("DB_MAX_IDLE_CONNS", 5)
+	dbConfig.ConnMaxLifetime = getEnvDurationOrDefault("DB_CONN_MAX_LIFETIME", 5*time.Minute)
+	dbConfig.ConnMaxIdleTime = getEnvDurationOrDefault("DB_CONN_MAX_IDLE_TIME", 5*time.Minute)
 
 	// Create database connection
 	db, err := database.NewConnection(dbConfig, logger)
@@ -118,4 +125,30 @@ func main() {
 	}
 
 	logger.Info("Migration operation completed successfully")
+}
+
+// Helper functions for environment variable parsing
+func getEnvOrDefault(key, defaultValue string) string {
+	if value := os.Getenv(key); value != "" {
+		return value
+	}
+	return defaultValue
+}
+
+func getEnvIntOrDefault(key string, defaultValue int) int {
+	if value := os.Getenv(key); value != "" {
+		if intValue, err := strconv.Atoi(value); err == nil {
+			return intValue
+		}
+	}
+	return defaultValue
+}
+
+func getEnvDurationOrDefault(key string, defaultValue time.Duration) time.Duration {
+	if value := os.Getenv(key); value != "" {
+		if duration, err := time.ParseDuration(value); err == nil {
+			return duration
+		}
+	}
+	return defaultValue
 }

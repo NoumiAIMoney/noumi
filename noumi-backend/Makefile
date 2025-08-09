@@ -60,6 +60,85 @@ migrate-drop: build-migrate ## Drop all tables (dangerous!)
 	@echo "Dropping all tables..."
 	./bin/$(MIGRATE_BINARY) -action=drop
 
+# Migration testing targets
+.PHONY: test-migrations
+test-migrations: db-setup build-migrate ## Test migrations with Docker database
+	@echo "Testing migrations with Docker database..."
+	@echo "Waiting for database to be ready..."
+	@for i in $$(seq 1 30); do \
+		if docker-compose exec postgres pg_isready -U postgres -d noumidb >/dev/null 2>&1; then \
+			echo "Database is ready!"; \
+			break; \
+		fi; \
+		echo "Waiting for database... ($$i/30)"; \
+		sleep 1; \
+	done
+	@echo "Running migration tests..."
+	@echo "1. Testing migration up..."
+	DATABASE_URL=postgres://postgres:password@localhost:5432/noumidb?sslmode=disable ./bin/$(MIGRATE_BINARY) -action=up
+	@echo "2. Checking migration version..."
+	DATABASE_URL=postgres://postgres:password@localhost:5432/noumidb?sslmode=disable ./bin/$(MIGRATE_BINARY) -action=version
+	@echo "3. Testing migration down..."
+	DATABASE_URL=postgres://postgres:password@localhost:5432/noumidb?sslmode=disable ./bin/$(MIGRATE_BINARY) -action=down
+	@echo "4. Testing migration up again..."
+	DATABASE_URL=postgres://postgres:password@localhost:5432/noumidb?sslmode=disable ./bin/$(MIGRATE_BINARY) -action=up
+	@echo "Migration tests completed successfully!"
+
+.PHONY: test-migrations-full
+test-migrations-full: db-reset build-migrate ## Full migration test cycle
+	@echo "Running full migration test cycle..."
+	@echo "Waiting for database to be ready..."
+	@for i in $$(seq 1 30); do \
+		if docker-compose exec postgres pg_isready -U postgres -d noumidb >/dev/null 2>&1; then \
+			echo "Database is ready!"; \
+			break; \
+		fi; \
+		echo "Waiting for database... ($$i/30)"; \
+		sleep 1; \
+	done
+	@echo "Testing complete migration cycle..."
+	@echo "1. Initial migration up..."
+	DATABASE_URL=postgres://postgres:password@localhost:5432/noumidb?sslmode=disable ./bin/$(MIGRATE_BINARY) -action=up
+	@echo "2. Verify tables exist..."
+	docker-compose exec postgres psql -U postgres -d noumidb -c "\dt"
+	@echo "3. Test rollback..."
+	DATABASE_URL=postgres://postgres:password@localhost:5432/noumidb?sslmode=disable ./bin/$(MIGRATE_BINARY) -action=down
+	@echo "4. Verify tables removed..."
+	docker-compose exec postgres psql -U postgres -d noumidb -c "\dt" || echo "No tables found (expected)"
+	@echo "5. Migrate up again..."
+	DATABASE_URL=postgres://postgres:password@localhost:5432/noumidb?sslmode=disable ./bin/$(MIGRATE_BINARY) -action=up
+	@echo "6. Final verification..."
+	docker-compose exec postgres psql -U postgres -d noumidb -c "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = 'public';"
+	@echo "Full migration test cycle completed successfully!"
+
+.PHONY: test-server-with-migrations
+test-server-with-migrations: db-setup build ## Test server startup with automatic migrations
+	@echo "Testing server startup with automatic migrations..."
+	@echo "Waiting for database to be ready..."
+	@for i in $$(seq 1 30); do \
+		if docker-compose exec postgres pg_isready -U postgres -d noumidb >/dev/null 2>&1; then \
+			echo "Database is ready!"; \
+			break; \
+		fi; \
+		echo "Waiting for database... ($$i/30)"; \
+		sleep 1; \
+	done
+	@echo "Starting server (will run migrations automatically)..."
+	@echo "Starting server in background for 5 seconds to test migrations..."
+	DATABASE_URL=postgres://postgres:password@localhost:5432/noumidb?sslmode=disable ./bin/$(BINARY_NAME) & \
+	SERVER_PID=$$!; \
+	sleep 5; \
+	kill $$SERVER_PID 2>/dev/null || true; \
+	echo "Server test completed"
+	@echo "Verifying migrations were applied..."
+	docker-compose exec postgres psql -U postgres -d noumidb -c "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = 'public';"
+	@echo "Server migration test completed!"
+
+.PHONY: test-migrations-comprehensive
+test-migrations-comprehensive: ## Run comprehensive migration tests with Docker
+	@echo "Running comprehensive migration tests..."
+	./scripts/test-migrations.sh
+
 # Testing targets
 .PHONY: test
 test: ## Run all tests
@@ -134,17 +213,57 @@ deps: ## Download dependencies
 	@echo "Downloading dependencies..."
 	go mod download
 
+# Docker and Database setup
+.PHONY: docker-up
+docker-up: ## Start PostgreSQL and services with Docker Compose
+	@echo "Starting services with Docker Compose..."
+	docker-compose up -d postgres postgres-test
+
+.PHONY: docker-up-all
+docker-up-all: ## Start all services including pgAdmin
+	@echo "Starting all services with Docker Compose..."
+	docker-compose --profile admin up -d
+
+.PHONY: docker-down
+docker-down: ## Stop all Docker Compose services
+	@echo "Stopping Docker Compose services..."
+	docker-compose down
+
+.PHONY: docker-logs
+docker-logs: ## Show logs from Docker services
+	@echo "Showing Docker Compose logs..."
+	docker-compose logs -f
+
+.PHONY: docker-clean
+docker-clean: ## Clean up Docker containers and volumes
+	@echo "Cleaning up Docker containers and volumes..."
+	docker-compose down -v
+	docker system prune -f
+
 # Database setup for development
 .PHONY: db-setup
-db-setup: ## Setup local PostgreSQL database (requires Docker)
-	@echo "Setting up local PostgreSQL database..."
-	docker run --name noumi-postgres -e POSTGRES_DB=noumidb -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=password -p 5432:5432 -d postgres:15-alpine
+db-setup: docker-up ## Setup local PostgreSQL database with Docker Compose
+	@echo "Waiting for database to be ready..."
+	@for i in $$(seq 1 30); do \
+		if docker-compose exec postgres pg_isready -U postgres -d noumidb >/dev/null 2>&1; then \
+			echo "Database is ready!"; \
+			break; \
+		fi; \
+		echo "Waiting for database... ($$i/30)"; \
+		sleep 1; \
+	done
 
 .PHONY: db-stop
-db-stop: ## Stop local PostgreSQL database
-	@echo "Stopping local PostgreSQL database..."
-	docker stop noumi-postgres || true
-	docker rm noumi-postgres || true
+db-stop: docker-down ## Stop local PostgreSQL database
+
+.PHONY: db-reset
+db-reset: ## Reset database (drop and recreate)
+	@echo "Resetting database..."
+	docker-compose down -v
+	docker-compose up -d postgres postgres-test
+	@echo "Waiting for database to be ready..."
+	@timeout 30 bash -c 'until docker-compose exec postgres pg_isready -U postgres -d noumidb; do sleep 1; done'
+	@echo "Database reset complete!"
 
 # All-in-one targets
 .PHONY: check

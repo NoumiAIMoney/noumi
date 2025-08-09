@@ -145,10 +145,8 @@ CREATE TRIGGER update_streak_data_updated_at
     FOR EACH ROW 
     EXECUTE FUNCTION update_updated_at_column();
 
--- Insert some default streak types
-INSERT INTO streak_data (user_id, streak_type, current_streak, longest_streak) 
-SELECT 1, 'anomaly_free', 0, 0 
-WHERE NOT EXISTS (SELECT 1 FROM streak_data WHERE user_id = 1 AND streak_type = 'anomaly_free');
+-- Note: Default streak types will be created when users are created
+-- No default data insertion in migration to avoid foreign key constraint issues
 
 -- Create views for common queries
 CREATE VIEW user_goals_summary AS
