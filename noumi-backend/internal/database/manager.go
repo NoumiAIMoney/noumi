@@ -76,7 +76,9 @@ func (m *Manager) Initialize() error {
 	}
 
 	// Verify database health after migrations
-	if err := m.Health(context.Background()); err != nil {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	if err := m.Health(ctx); err != nil {
 		return fmt.Errorf("database health check failed after migrations: %w", err)
 	}
 

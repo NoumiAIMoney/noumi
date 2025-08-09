@@ -1,124 +1,293 @@
-# Noumi Backend (Go)
+# Noumi Backend
 
-A high-performance Go backend for the Noumi financial planning application, built with Gin web framework and PostgreSQL.
+A Go-based backend service for the Noumi financial management application with PostgreSQL database and automated migrations.
 
-## Project Structure
+## Features
 
-```
-noumi-backend/
-├── cmd/
-│   └── server/
-│       └── main.go                 # Application entry point
-├── internal/
-│   ├── api/
-│   │   ├── handlers/              # HTTP handlers for each endpoint
-│   │   ├── middleware/            # Authentication, CORS, logging
-│   │   └── routes/                # Route definitions
-│   ├── config/
-│   │   └── config.go              # Configuration management
-│   ├── database/
-│   │   ├── migrations/            # SQL migration files
-│   │   ├── models/                # Database models
-│   │   └── repository/            # Data access layer
-│   ├── services/
-│   │   ├── analytics/             # Spending analysis logic
-│   │   ├── anomaly/               # Anomaly detection
-│   │   ├── llm/                   # OpenAI integration
-│   │   └── auth/                  # Authentication service
-│   └── utils/
-│       ├── logger/                # Structured logging
-│       └── validator/             # Request validation
-├── .env.example                   # Environment variables template
-├── go.mod                         # Go module definition
-└── README.md                      # This file
-```
+- **Database Migrations**: Automated schema management with golang-migrate
+- **Docker Support**: Containerized PostgreSQL for development and testing
+- **RESTful API**: Built with Gin framework
+- **Health Checks**: Database connectivity and migration status monitoring
+- **Comprehensive Testing**: Automated migration testing suite
 
-## Getting Started
+## Quick Start
 
 ### Prerequisites
 
-- Go 1.21 or higher
-- PostgreSQL 15 or higher
-- OpenAI API key (for LLM features)
+- Go 1.24.2 or later
+- Docker and Docker Compose
+- Make (optional, for convenience commands)
 
-### Installation
+### Setup
 
-1. Clone the repository and navigate to the backend directory:
+1. **Clone and navigate to the project:**
    ```bash
    cd noumi-backend
    ```
 
-2. Copy the environment variables template:
+2. **Start the database:**
    ```bash
-   cp .env.example .env
+   make db-setup
+   # or manually:
+   docker-compose up -d postgres
    ```
 
-3. Edit `.env` file with your configuration values, especially:
-   - `DATABASE_URL`: Your PostgreSQL connection string
-   - `OPENAI_API_KEY`: Your OpenAI API key
-   - `JWT_SECRET`: A secure secret for JWT token signing
-
-4. Install dependencies:
+3. **Set up environment variables:**
    ```bash
-   go mod tidy
+   cp .env.example .env.local
+   # Edit .env.local with your configuration
    ```
 
-### Running the Application
-
-1. Start the server:
+4. **Run migrations and start the server:**
    ```bash
-   go run cmd/server/main.go
+   make build
+   make run
    ```
 
-2. The server will start on `http://localhost:8080` by default.
+The server will automatically run database migrations on startup.
 
-3. Check the health endpoint:
-   ```bash
-   curl http://localhost:8080/health
-   ```
+## Database Management
 
-### API Endpoints
+### Using Make Commands
 
-- `GET /health` - Health check endpoint
-- `GET /api/v1/status` - API status endpoint
+```bash
+# Database setup
+make db-setup          # Start PostgreSQL with Docker
+make db-stop           # Stop PostgreSQL
+make db-reset          # Reset database (drop and recreate)
 
-More endpoints will be added as development progresses.
+# Migration management
+make migrate-up        # Run all pending migrations
+make migrate-down      # Rollback last migration
+make migrate-version   # Show current migration version
+make migrate-drop      # Drop all tables (dangerous!)
 
-## Configuration
+# Testing
+make test-migrations                # Basic migration tests
+make test-migrations-comprehensive # Full migration test suite
+make test-server-with-migrations   # Test server startup with migrations
+```
 
-The application uses environment variables for configuration. See `.env.example` for all available options.
+### Using Migration Tool Directly
 
-Key configuration sections:
-- **Server**: Port, host, timeouts
-- **Database**: PostgreSQL connection and pool settings
-- **OpenAI**: API key and model configuration
-- **Auth**: JWT secret and token expiry settings
-- **Logging**: Log level and format
+```bash
+# Build the migration tool
+go build -o bin/migrate-tool cmd/migrate/main.go
+
+# Run migrations
+DATABASE_URL=postgres://postgres:password@127.0.0.1:5432/noumidb?sslmode=disable ./bin/migrate-tool -action=up
+
+# Check version
+DATABASE_URL=postgres://postgres:password@127.0.0.1:5432/noumidb?sslmode=disable ./bin/migrate-tool -action=version
+
+# Rollback
+DATABASE_URL=postgres://postgres:password@127.0.0.1:5432/noumidb?sslmode=disable ./bin/migrate-tool -action=down
+```
+
+## Docker Services
+
+The `docker-compose.yml` includes:
+
+- **postgres**: Main PostgreSQL database (port 5432)
+- **postgres-test**: Test database (port 5433)
+- **pgadmin**: Database administration UI (port 8081, optional)
+
+### Starting Services
+
+```bash
+# Start main database only
+docker-compose up -d postgres
+
+# Start all services including pgAdmin
+docker-compose --profile admin up -d
+
+# View logs
+docker-compose logs -f postgres
+
+# Stop all services
+docker-compose down
+```
+
+## Environment Variables
+
+### Database Configuration
+
+```bash
+# Primary database connection (takes precedence)
+DATABASE_URL=postgres://postgres:password@127.0.0.1:5432/noumidb?sslmode=disable
+
+# Alternative: Individual parameters
+DB_HOST=127.0.0.1
+DB_PORT=5432
+DB_USER=postgres
+DB_PASSWORD=password
+DB_NAME=noumidb
+DB_SSL_MODE=disable
+
+# Connection pool settings
+DB_MAX_OPEN_CONNS=25
+DB_MAX_IDLE_CONNS=5
+DB_CONN_MAX_LIFETIME=5m
+```
+
+### Server Configuration
+
+```bash
+PORT=8080
+HOST=0.0.0.0
+JWT_SECRET=your-secret-key
+LOG_LEVEL=info
+LOG_FORMAT=json
+```
+
+## API Endpoints
+
+- `GET /health` - Health check with database status
+- `GET /api/v1/status` - API status with database and migration info
+
+## Database Schema
+
+The application uses the following main tables:
+
+- **users**: User accounts and profiles
+- **goals**: Financial goals set by users
+- **plaid_accounts**: Bank accounts connected via Plaid
+- **transactions**: Financial transactions from connected accounts
+- **anomalies**: Anomaly detection results for transactions
+- **weekly_plans**: AI-generated weekly financial plans
+- **streak_data**: User streak tracking for various activities
+
+See `internal/database/migrations/001_initial_schema.up.sql` for the complete schema.
 
 ## Development
 
 ### Building
 
 ```bash
-go build -o bin/server cmd/server/main.go
+# Build server
+make build
+
+# Build migration tool
+make build-migrate
+
+# Build all binaries
+make build-all
 ```
 
-### Running Tests
+### Testing
 
 ```bash
-go test ./...
+# Run all tests
+make test
+
+# Run tests with coverage
+make test-coverage
+
+# Run migration tests
+make test-migrations-comprehensive
 ```
 
-### Code Structure
+### Code Quality
 
-This project follows clean architecture principles:
-- **cmd/**: Application entry points
-- **internal/**: Private application code
-- **internal/api/**: HTTP layer (handlers, middleware, routes)
-- **internal/services/**: Business logic layer
-- **internal/database/**: Data access layer
-- **internal/utils/**: Shared utilities
+```bash
+# Format code
+make fmt
+
+# Run linter
+make lint
+
+# Run vet
+make vet
+
+# Run all checks
+make check
+```
+
+## Migration Testing
+
+The project includes comprehensive migration testing:
+
+### Automated Test Suite
+
+```bash
+# Run the full migration test suite
+./scripts/test-migrations.sh
+```
+
+This tests:
+1. Initial migration up
+2. Table creation verification
+3. Index and constraint verification
+4. Migration version tracking
+5. Migration rollback
+6. Table removal verification
+7. Re-migration
+8. Idempotency
+9. Server startup with automatic migrations
+
+### Manual Testing
+
+```bash
+# Test basic migration cycle
+make test-migrations
+
+# Test full migration cycle with verification
+make test-migrations-full
+
+# Test server startup with migrations
+make test-server-with-migrations
+```
+
+## Troubleshooting
+
+### Database Connection Issues
+
+1. **Check if PostgreSQL is running:**
+   ```bash
+   docker-compose ps postgres
+   ```
+
+2. **Check database logs:**
+   ```bash
+   docker-compose logs postgres
+   ```
+
+3. **Test connection manually:**
+   ```bash
+   PGPASSWORD=password psql -h 127.0.0.1 -p 5432 -U postgres -d noumidb -c "SELECT 1;"
+   ```
+
+### Migration Issues
+
+1. **Check migration status:**
+   ```bash
+   make migrate-version
+   ```
+
+2. **Reset database if needed:**
+   ```bash
+   make db-reset
+   ```
+
+3. **Run health check:**
+   ```bash
+   ./scripts/health-check.sh
+   ```
+
+### Common Issues
+
+- **Port conflicts**: Change ports in `docker-compose.yml` if 5432 is in use
+- **Permission issues**: Ensure Docker has proper permissions
+- **IPv6 issues**: Use `127.0.0.1` instead of `localhost` in connection strings
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Run tests: `make check`
+5. Submit a pull request
 
 ## License
 
-This project is part of the Noumi financial planning application.
+[Add your license information here]

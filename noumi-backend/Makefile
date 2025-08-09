@@ -75,13 +75,13 @@ test-migrations: db-setup build-migrate ## Test migrations with Docker database
 	done
 	@echo "Running migration tests..."
 	@echo "1. Testing migration up..."
-	DATABASE_URL=postgres://postgres:password@localhost:5432/noumidb?sslmode=disable ./bin/$(MIGRATE_BINARY) -action=up
+	DATABASE_URL=postgres://postgres:password@127.0.0.1:5432/noumidb?sslmode=disable ./bin/$(MIGRATE_BINARY) -action=up
 	@echo "2. Checking migration version..."
-	DATABASE_URL=postgres://postgres:password@localhost:5432/noumidb?sslmode=disable ./bin/$(MIGRATE_BINARY) -action=version
+	DATABASE_URL=postgres://postgres:password@127.0.0.1:5432/noumidb?sslmode=disable ./bin/$(MIGRATE_BINARY) -action=version
 	@echo "3. Testing migration down..."
-	DATABASE_URL=postgres://postgres:password@localhost:5432/noumidb?sslmode=disable ./bin/$(MIGRATE_BINARY) -action=down
+	DATABASE_URL=postgres://postgres:password@127.0.0.1:5432/noumidb?sslmode=disable ./bin/$(MIGRATE_BINARY) -action=down
 	@echo "4. Testing migration up again..."
-	DATABASE_URL=postgres://postgres:password@localhost:5432/noumidb?sslmode=disable ./bin/$(MIGRATE_BINARY) -action=up
+	DATABASE_URL=postgres://postgres:password@127.0.0.1:5432/noumidb?sslmode=disable ./bin/$(MIGRATE_BINARY) -action=up
 	@echo "Migration tests completed successfully!"
 
 .PHONY: test-migrations-full
@@ -98,17 +98,17 @@ test-migrations-full: db-reset build-migrate ## Full migration test cycle
 	done
 	@echo "Testing complete migration cycle..."
 	@echo "1. Initial migration up..."
-	DATABASE_URL=postgres://postgres:password@localhost:5432/noumidb?sslmode=disable ./bin/$(MIGRATE_BINARY) -action=up
+	DATABASE_URL=postgres://postgres:password@127.0.0.1:5432/noumidb?sslmode=disable ./bin/$(MIGRATE_BINARY) -action=up
 	@echo "2. Verify tables exist..."
-	docker-compose exec postgres psql -U postgres -d noumidb -c "\dt"
+	PGPASSWORD=password psql -h 127.0.0.1 -p 5432 -U postgres -d noumidb -c "\dt"
 	@echo "3. Test rollback..."
-	DATABASE_URL=postgres://postgres:password@localhost:5432/noumidb?sslmode=disable ./bin/$(MIGRATE_BINARY) -action=down
+	DATABASE_URL=postgres://postgres:password@127.0.0.1:5432/noumidb?sslmode=disable ./bin/$(MIGRATE_BINARY) -action=down
 	@echo "4. Verify tables removed..."
-	docker-compose exec postgres psql -U postgres -d noumidb -c "\dt" || echo "No tables found (expected)"
+	PGPASSWORD=password psql -h 127.0.0.1 -p 5432 -U postgres -d noumidb -c "\dt" || echo "No tables found (expected)"
 	@echo "5. Migrate up again..."
-	DATABASE_URL=postgres://postgres:password@localhost:5432/noumidb?sslmode=disable ./bin/$(MIGRATE_BINARY) -action=up
+	DATABASE_URL=postgres://postgres:password@127.0.0.1:5432/noumidb?sslmode=disable ./bin/$(MIGRATE_BINARY) -action=up
 	@echo "6. Final verification..."
-	docker-compose exec postgres psql -U postgres -d noumidb -c "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = 'public';"
+	PGPASSWORD=password psql -h 127.0.0.1 -p 5432 -U postgres -d noumidb -c "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = 'public';"
 	@echo "Full migration test cycle completed successfully!"
 
 .PHONY: test-server-with-migrations
@@ -125,13 +125,13 @@ test-server-with-migrations: db-setup build ## Test server startup with automati
 	done
 	@echo "Starting server (will run migrations automatically)..."
 	@echo "Starting server in background for 5 seconds to test migrations..."
-	DATABASE_URL=postgres://postgres:password@localhost:5432/noumidb?sslmode=disable ./bin/$(BINARY_NAME) & \
+	DATABASE_URL=postgres://postgres:password@127.0.0.1:5432/noumidb?sslmode=disable JWT_SECRET=test-secret ./bin/$(BINARY_NAME) & \
 	SERVER_PID=$$!; \
 	sleep 5; \
 	kill $$SERVER_PID 2>/dev/null || true; \
 	echo "Server test completed"
 	@echo "Verifying migrations were applied..."
-	docker-compose exec postgres psql -U postgres -d noumidb -c "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = 'public';"
+	PGPASSWORD=password psql -h 127.0.0.1 -p 5432 -U postgres -d noumidb -c "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = 'public';"
 	@echo "Server migration test completed!"
 
 .PHONY: test-migrations-comprehensive
