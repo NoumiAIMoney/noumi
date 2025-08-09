@@ -9,7 +9,7 @@
   - _Requirements: 1.1, 1.2, 1.3_
 
 - [ ] 2. Implement database layer and PostgreSQL integration
-  - [ ] 2.1 Create PostgreSQL database models and schema
+  - [x] 2.1 Create PostgreSQL database models and schema
     - Define Go structs for User, Goal, Transaction, Anomaly, and WeeklyPlan models
     - Implement database connection management with connection pooling
     - Create repository interfaces and PostgreSQL implementations
