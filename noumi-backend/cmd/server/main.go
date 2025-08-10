@@ -9,9 +9,9 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 
+	"noumi-backend/internal/api/routes"
 	"noumi-backend/internal/config"
 	"noumi-backend/internal/database"
 	"noumi-backend/internal/utils/logger"
@@ -54,67 +54,13 @@ func main() {
 		logger.Fatalf("Failed to initialize database: %v", err)
 	}
 
-	// Set Gin mode based on log level
-	if cfg.Logging.Level == "debug" {
-		gin.SetMode(gin.DebugMode)
-	} else {
-		gin.SetMode(gin.ReleaseMode)
+	// Setup router with all middleware and routes
+	routerConfig := &routes.RouterConfig{
+		Config:    cfg,
+		Logger:    logger.Logger,
+		DBManager: dbManager,
 	}
-
-	// Create Gin router
-	router := gin.New()
-
-	// Add basic middleware
-	router.Use(gin.Logger())
-	router.Use(gin.Recovery())
-
-	// Health check endpoint
-	router.GET("/health", func(c *gin.Context) {
-		// Check database health
-		if err := dbManager.Health(c.Request.Context()); err != nil {
-			c.JSON(http.StatusServiceUnavailable, gin.H{
-				"status":    "unhealthy",
-				"timestamp": time.Now().UTC().Format(time.RFC3339),
-				"service":   "noumi-backend",
-				"error":     "database connection failed",
-			})
-			return
-		}
-
-		c.JSON(http.StatusOK, gin.H{
-			"status":    "healthy",
-			"timestamp": time.Now().UTC().Format(time.RFC3339),
-			"service":   "noumi-backend",
-			"database":  "connected",
-		})
-	})
-
-	// Basic API route group
-	api := router.Group("/api/v1")
-	{
-		api.GET("/status", func(c *gin.Context) {
-			// Get database stats
-			dbStats := dbManager.Stats()
-
-			// Get current migration version
-			migrator := dbManager.GetMigrator()
-			version, dirty, err := migrator.GetCurrentVersion()
-			migrationInfo := gin.H{
-				"version": version,
-				"dirty":   dirty,
-			}
-			if err != nil {
-				migrationInfo["error"] = err.Error()
-			}
-
-			c.JSON(http.StatusOK, gin.H{
-				"message":   "Noumi Backend API is running",
-				"version":   "1.0.0",
-				"database":  dbStats,
-				"migration": migrationInfo,
-			})
-		})
-	}
+	router := routes.SetupRouter(routerConfig)
 
 	// Create HTTP server
 	server := &http.Server{
