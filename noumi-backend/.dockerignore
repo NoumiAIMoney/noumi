@@ -1,0 +1,55 @@
+# Git
+.git
+.gitignore
+
+# Documentation
+README.md
+*.md
+
+# Docker files
+Dockerfile*
+docker-compose*.yml
+.dockerignore
+
+# Development files
+.env*
+.air.toml
+
+# Build artifacts
+bin/
+coverage.out
+coverage.html
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Test files
+*_test.go
+test_*
+
+# Temporary files
+tmp/
+temp/
+
+# Node modules (if any)
+node_modules/
+
+# SSL certificates (should be mounted)
+ssl/
+
+# Scripts (not needed in container)
+scripts/
+
+# Nginx config (mounted separately)
+nginx/

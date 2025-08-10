@@ -1,6 +1,7 @@
 version: '3.8'
 
 services:
+  # PostgreSQL Database
   postgres:
     image: postgres:15-alpine
     container_name: noumi-postgres
@@ -9,8 +10,6 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password
       POSTGRES_HOST_AUTH_METHOD: trust
-    ports:
-      - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./scripts/init-db.sh:/docker-entrypoint-initdb.d/init-db.sh
@@ -21,6 +20,86 @@ services:
       retries: 5
     networks:
       - noumi-network
+    restart: unless-stopped
+
+  # Go Backend - Primary Instance
+  noumi-backend-1:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: noumi-backend-1
+    environment:
+      - DATABASE_URL=postgres://postgres:password@postgres:5432/noumidb?sslmode=disable
+      - PORT=8080
+      - HOST=0.0.0.0
+      - JWT_SECRET=your_jwt_secret_here_make_it_long_and_secure
+      - LOG_LEVEL=info
+      - LOG_FORMAT=json
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - OPENAI_MODEL=gpt-4
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - noumi-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Go Backend - Secondary Instance (for load balancing)
+  noumi-backend-2:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: noumi-backend-2
+    environment:
+      - DATABASE_URL=postgres://postgres:password@postgres:5432/noumidb?sslmode=disable
+      - PORT=8080
+      - HOST=0.0.0.0
+      - JWT_SECRET=your_jwt_secret_here_make_it_long_and_secure
+      - LOG_LEVEL=info
+      - LOG_FORMAT=json
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - OPENAI_MODEL=gpt-4
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - noumi-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    profiles:
+      - ha  # High availability profile
+
+  # Nginx Gateway
+  nginx:
+    image: nginx:alpine
+    container_name: noumi-nginx
+    ports:
+      - "80:80"
+      - "8081:8081"  # Health check port
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - nginx_logs:/var/log/nginx
+    depends_on:
+      - noumi-backend-1
+    networks:
+      - noumi-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8081/nginx-health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
 
   # Test database for running tests
   postgres-test:
@@ -42,6 +121,8 @@ services:
       retries: 5
     networks:
       - noumi-network
+    profiles:
+      - test
 
   # Optional: pgAdmin for database management
   pgadmin:
@@ -52,7 +133,7 @@ services:
       PGADMIN_DEFAULT_PASSWORD: admin
       PGADMIN_CONFIG_SERVER_MODE: 'False'
     ports:
-      - "8081:80"
+      - "8082:80"
     depends_on:
       - postgres
     networks:
@@ -60,10 +141,32 @@ services:
     profiles:
       - admin
 
+  # Optional: Redis for caching (future use)
+  redis:
+    image: redis:7-alpine
+    container_name: noumi-redis
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    networks:
+      - noumi-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    profiles:
+      - cache
+
 volumes:
   postgres_data:
     driver: local
   postgres_test_data:
+    driver: local
+  nginx_logs:
+    driver: local
+  redis_data:
     driver: local
 
 networks:
