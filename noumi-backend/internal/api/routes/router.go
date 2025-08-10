@@ -7,9 +7,11 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 
+	"noumi-backend/internal/api/handlers"
 	"noumi-backend/internal/api/middleware"
 	"noumi-backend/internal/config"
 	"noumi-backend/internal/database"
+	"noumi-backend/internal/database/repository"
 )
 
 // RouterConfig holds dependencies needed for router setup
@@ -114,12 +116,14 @@ func setupProtectedRoutes(rg *gin.RouterGroup, cfg *RouterConfig) {
 	protected := rg.Group("")
 	protected.Use(middleware.AuthMiddleware(cfg.Config.Auth.JWTSecret, cfg.Logger))
 
+	// Initialize repositories
+	repo := repository.NewRepository(cfg.DBManager.GetDB().DB)
+
+	// Initialize handlers
+	quizHandler := handlers.NewQuizHandler(repo.Goal, cfg.Logger)
+
 	// Quiz endpoint
-	protected.POST("/quiz", func(c *gin.Context) {
-		c.JSON(http.StatusNotImplemented, gin.H{
-			"message": "Quiz endpoint not yet implemented",
-		})
-	})
+	protected.POST("/quiz", quizHandler.SubmitQuiz)
 
 	// Plaid endpoints
 	plaid := protected.Group("/plaid")
