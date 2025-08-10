@@ -1,0 +1,203 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "Go backend API for Noumi financial management application",
+        "title": "Noumi Backend API",
+        "termsOfService": "http://swagger.io/terms/",
+        "contact": {
+            "name": "API Support",
+            "url": "http://www.swagger.io/support",
+            "email": "support@swagger.io"
+        },
+        "license": {
+            "name": "MIT",
+            "url": "https://opensource.org/licenses/MIT"
+        },
+        "version": "1.0"
+    },
+    "host": "localhost:8080",
+    "basePath": "/api/v1",
+    "paths": {
+        "/quiz": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Creates a new financial goal based on quiz submission data",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Quiz"
+                ],
+                "summary": "Submit quiz data to create a financial goal",
+                "parameters": [
+                    {
+                        "description": "Quiz submission data",
+                        "name": "quiz",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.QuizSubmission"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Goal created successfully",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.QuizSuccessResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Validation error",
+                        "schema": {
+                            "$ref": "#/definitions/middleware.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Authentication error",
+                        "schema": {
+                            "$ref": "#/definitions/middleware.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/middleware.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "handlers.QuizSuccessResponse": {
+            "type": "object",
+            "properties": {
+                "goal": {
+                    "$ref": "#/definitions/models.GoalResponse"
+                },
+                "message": {
+                    "type": "string",
+                    "example": "Quiz submitted successfully"
+                }
+            }
+        },
+        "middleware.APIError": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "string",
+                    "example": "VALIDATION_ERROR"
+                },
+                "details": {
+                    "type": "string",
+                    "example": "goal_name is required"
+                },
+                "message": {
+                    "type": "string",
+                    "example": "Validation failed"
+                }
+            }
+        },
+        "middleware.ErrorResponse": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "$ref": "#/definitions/middleware.APIError"
+                },
+                "request_id": {
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
+                },
+                "timestamp": {
+                    "type": "string",
+                    "example": "2025-08-10T16:00:00Z"
+                }
+            }
+        },
+        "models.GoalResponse": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string",
+                    "example": "2025-08-10T16:00:00Z"
+                },
+                "goal_amount": {
+                    "type": "number",
+                    "example": 10000
+                },
+                "goal_description": {
+                    "type": "string",
+                    "example": "Build an emergency fund for unexpected expenses"
+                },
+                "goal_id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "goal_name": {
+                    "type": "string",
+                    "example": "Emergency Fund"
+                },
+                "net_monthly_income": {
+                    "type": "number",
+                    "example": 5000
+                },
+                "target_date": {
+                    "type": "string",
+                    "example": "2025-12-31T00:00:00Z"
+                },
+                "user_id": {
+                    "type": "integer",
+                    "example": 123
+                }
+            }
+        },
+        "models.QuizSubmission": {
+            "type": "object",
+            "required": [
+                "goal_amount",
+                "goal_description",
+                "goal_name",
+                "net_monthly_income",
+                "target_date"
+            ],
+            "properties": {
+                "goal_amount": {
+                    "type": "number",
+                    "example": 10000
+                },
+                "goal_description": {
+                    "type": "string",
+                    "example": "Build an emergency fund for unexpected expenses"
+                },
+                "goal_name": {
+                    "type": "string",
+                    "example": "Emergency Fund"
+                },
+                "net_monthly_income": {
+                    "type": "number",
+                    "example": 5000
+                },
+                "target_date": {
+                    "type": "string",
+                    "example": "2025-12-31T00:00:00Z"
+                }
+            }
+        }
+    },
+    "securityDefinitions": {
+        "BearerAuth": {
+            "description": "Type \"Bearer\" followed by a space and JWT token.",
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
+        }
+    }
+}

@@ -10,7 +10,7 @@ import (
 // Config holds all configuration for the application
 type Config struct {
 	Server struct {
-		Port         string        `envconfig:"PORT" default:"8080"`
+		Port         int           `envconfig:"PORT" default:"8080"`
 		Host         string        `envconfig:"HOST" default:"0.0.0.0"`
 		ReadTimeout  time.Duration `envconfig:"READ_TIMEOUT" default:"30s"`
 		WriteTimeout time.Duration `envconfig:"WRITE_TIMEOUT" default:"30s"`

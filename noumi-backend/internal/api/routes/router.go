@@ -6,6 +6,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 
 	"noumi-backend/internal/api/handlers"
 	"noumi-backend/internal/api/middleware"
@@ -75,12 +77,13 @@ func setupRoutes(router *gin.Engine, cfg *RouterConfig) {
 		setupProtectedRoutes(v1, cfg)
 	}
 
-	// Documentation endpoint (no authentication required)
+	// Swagger documentation endpoints (no authentication required)
+	router.GET("/docs/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+
+	// Legacy docs endpoint for backward compatibility
 	router.GET("/docs", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{
-			"message": "API documentation will be available here",
-			"swagger": "Coming soon",
-		})
+		c.Redirect(http.StatusMovedPermanently, "/docs/index.html")
 	})
 }
 

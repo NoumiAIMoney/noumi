@@ -13,6 +13,12 @@ import (
 	"noumi-backend/internal/utils/validator"
 )
 
+// QuizSuccessResponse represents the successful quiz submission response
+type QuizSuccessResponse struct {
+	Message string               `json:"message" example:"Quiz submitted successfully"`
+	Goal    *models.GoalResponse `json:"goal"`
+}
+
 // QuizHandler handles quiz-related HTTP requests
 type QuizHandler struct {
 	goalRepo  repository.GoalRepository
@@ -32,11 +38,11 @@ func NewQuizHandler(goalRepo repository.GoalRepository, logger *logrus.Logger) *
 // SubmitQuiz handles POST /quiz endpoint
 // @Summary Submit quiz data to create a financial goal
 // @Description Creates a new financial goal based on quiz submission data
-// @Tags quiz
+// @Tags Quiz
 // @Accept json
 // @Produce json
 // @Param quiz body models.QuizSubmission true "Quiz submission data"
-// @Success 200 {object} models.GoalResponse "Goal created successfully"
+// @Success 200 {object} QuizSuccessResponse "Goal created successfully"
 // @Failure 400 {object} middleware.ErrorResponse "Validation error"
 // @Failure 401 {object} middleware.ErrorResponse "Authentication error"
 // @Failure 500 {object} middleware.ErrorResponse "Internal server error"
@@ -133,8 +139,9 @@ func (h *QuizHandler) SubmitQuiz(c *gin.Context) {
 	}).Info("Quiz submitted successfully, goal created")
 
 	// Return success response
-	c.JSON(http.StatusOK, gin.H{
-		"message": "Quiz submitted successfully",
-		"goal":    goal.ToResponse(),
-	})
+	response := QuizSuccessResponse{
+		Message: "Quiz submitted successfully",
+		Goal:    goal.ToResponse(),
+	}
+	c.JSON(http.StatusOK, response)
 }

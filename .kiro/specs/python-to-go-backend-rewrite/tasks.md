@@ -34,7 +34,7 @@
     - Set up authentication middleware for JWT token validation
     - _Requirements: 1.1, 1.2, 9.1, 9.2, 10.1_
 
-  - [x] 3.2 Implement quiz endpoint (/quiz POST)
+  - [-] 3.2 Implement quiz endpoint (/quiz POST)
     - Create handler for quiz data submission with request validation
     - Implement business logic to save goal data to PostgreSQL database
     - Add proper error handling and response formatting

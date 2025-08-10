@@ -32,23 +32,23 @@ type CreateGoalRequest struct {
 
 // QuizSubmission represents the quiz submission payload (legacy compatibility)
 type QuizSubmission struct {
-	GoalName         string    `json:"goal_name" validate:"required"`
-	GoalDescription  string    `json:"goal_description" validate:"required"`
-	GoalAmount       float64   `json:"goal_amount" validate:"required,gt=0"`
-	TargetDate       time.Time `json:"target_date" validate:"required"`
-	NetMonthlyIncome float64   `json:"net_monthly_income" validate:"required,gt=0"`
+	GoalName         string    `json:"goal_name" validate:"required" example:"Emergency Fund"`
+	GoalDescription  string    `json:"goal_description" validate:"required" example:"Build an emergency fund for unexpected expenses"`
+	GoalAmount       float64   `json:"goal_amount" validate:"required,gt=0" example:"10000.00"`
+	TargetDate       time.Time `json:"target_date" validate:"required" example:"2025-12-31T00:00:00Z"`
+	NetMonthlyIncome float64   `json:"net_monthly_income" validate:"required,gt=0" example:"5000.00"`
 }
 
 // GoalResponse represents the response payload for goal data
 type GoalResponse struct {
-	GoalID           int       `json:"goal_id"`
-	UserID           int       `json:"user_id"`
-	GoalName         string    `json:"goal_name"`
-	GoalDescription  string    `json:"goal_description"`
-	GoalAmount       float64   `json:"goal_amount"`
-	TargetDate       time.Time `json:"target_date"`
-	NetMonthlyIncome *float64  `json:"net_monthly_income"`
-	CreatedAt        time.Time `json:"created_at"`
+	GoalID           int       `json:"goal_id" example:"1"`
+	UserID           int       `json:"user_id" example:"123"`
+	GoalName         string    `json:"goal_name" example:"Emergency Fund"`
+	GoalDescription  string    `json:"goal_description" example:"Build an emergency fund for unexpected expenses"`
+	GoalAmount       float64   `json:"goal_amount" example:"10000.00"`
+	TargetDate       time.Time `json:"target_date" example:"2025-12-31T00:00:00Z"`
+	NetMonthlyIncome *float64  `json:"net_monthly_income" example:"5000.00"`
+	CreatedAt        time.Time `json:"created_at" example:"2025-08-10T16:00:00Z"`
 }
 
 // ComputedGoalResponse represents the computed goal data with progress

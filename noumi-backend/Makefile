@@ -265,6 +265,16 @@ db-reset: ## Reset database (drop and recreate)
 	@timeout 30 bash -c 'until docker-compose exec postgres pg_isready -U postgres -d noumidb; do sleep 1; done'
 	@echo "Database reset complete!"
 
+# Documentation targets
+.PHONY: docs
+docs: ## Generate Swagger documentation
+	@echo "Generating Swagger documentation..."
+	swag init -g cmd/server/main.go -o docs
+
+.PHONY: docs-serve
+docs-serve: docs ## Generate and serve Swagger documentation
+	@echo "Swagger documentation available at http://localhost:8080/docs/"
+
 # All-in-one targets
 .PHONY: check
 check: fmt vet test ## Run all checks (format, vet, test)

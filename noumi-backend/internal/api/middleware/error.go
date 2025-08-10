@@ -10,16 +10,16 @@ import (
 
 // APIError represents a structured API error
 type APIError struct {
-	Code    string `json:"code"`
-	Message string `json:"message"`
-	Details string `json:"details,omitempty"`
+	Code    string `json:"code" example:"VALIDATION_ERROR"`
+	Message string `json:"message" example:"Validation failed"`
+	Details string `json:"details,omitempty" example:"goal_name is required"`
 }
 
 // ErrorResponse represents the standard error response format
 type ErrorResponse struct {
 	Error     APIError `json:"error"`
-	RequestID string   `json:"request_id"`
-	Timestamp string   `json:"timestamp"`
+	RequestID string   `json:"request_id" example:"123e4567-e89b-12d3-a456-426614174000"`
+	Timestamp string   `json:"timestamp" example:"2025-08-10T16:00:00Z"`
 }
 
 // Custom error types

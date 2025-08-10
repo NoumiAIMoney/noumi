@@ -1,0 +1,141 @@
+basePath: /api/v1
+definitions:
+  handlers.QuizSuccessResponse:
+    properties:
+      goal:
+        $ref: '#/definitions/models.GoalResponse'
+      message:
+        example: Quiz submitted successfully
+        type: string
+    type: object
+  middleware.APIError:
+    properties:
+      code:
+        example: VALIDATION_ERROR
+        type: string
+      details:
+        example: goal_name is required
+        type: string
+      message:
+        example: Validation failed
+        type: string
+    type: object
+  middleware.ErrorResponse:
+    properties:
+      error:
+        $ref: '#/definitions/middleware.APIError'
+      request_id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      timestamp:
+        example: "2025-08-10T16:00:00Z"
+        type: string
+    type: object
+  models.GoalResponse:
+    properties:
+      created_at:
+        example: "2025-08-10T16:00:00Z"
+        type: string
+      goal_amount:
+        example: 10000
+        type: number
+      goal_description:
+        example: Build an emergency fund for unexpected expenses
+        type: string
+      goal_id:
+        example: 1
+        type: integer
+      goal_name:
+        example: Emergency Fund
+        type: string
+      net_monthly_income:
+        example: 5000
+        type: number
+      target_date:
+        example: "2025-12-31T00:00:00Z"
+        type: string
+      user_id:
+        example: 123
+        type: integer
+    type: object
+  models.QuizSubmission:
+    properties:
+      goal_amount:
+        example: 10000
+        type: number
+      goal_description:
+        example: Build an emergency fund for unexpected expenses
+        type: string
+      goal_name:
+        example: Emergency Fund
+        type: string
+      net_monthly_income:
+        example: 5000
+        type: number
+      target_date:
+        example: "2025-12-31T00:00:00Z"
+        type: string
+    required:
+    - goal_amount
+    - goal_description
+    - goal_name
+    - net_monthly_income
+    - target_date
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: support@swagger.io
+    name: API Support
+    url: http://www.swagger.io/support
+  description: Go backend API for Noumi financial management application
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+  termsOfService: http://swagger.io/terms/
+  title: Noumi Backend API
+  version: "1.0"
+paths:
+  /quiz:
+    post:
+      consumes:
+      - application/json
+      description: Creates a new financial goal based on quiz submission data
+      parameters:
+      - description: Quiz submission data
+        in: body
+        name: quiz
+        required: true
+        schema:
+          $ref: '#/definitions/models.QuizSubmission'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Goal created successfully
+          schema:
+            $ref: '#/definitions/handlers.QuizSuccessResponse'
+        "400":
+          description: Validation error
+          schema:
+            $ref: '#/definitions/middleware.ErrorResponse'
+        "401":
+          description: Authentication error
+          schema:
+            $ref: '#/definitions/middleware.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/middleware.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Submit quiz data to create a financial goal
+      tags:
+      - Quiz
+securityDefinitions:
+  BearerAuth:
+    description: Type "Bearer" followed by a space and JWT token.
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
