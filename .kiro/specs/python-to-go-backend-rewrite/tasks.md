@@ -21,13 +21,13 @@
     - Implement migration runner that executes on application startup
     - _Requirements: 3.1, 3.2, 7.1, 7.2_
 
-  - [ ] 2.3 Create SQLite to PostgreSQL migration tool
+  - [x] 2.3 Create SQLite to PostgreSQL migration tool
     - Build Go utility to read existing SQLite database schema and data
     - Implement data transformation logic to convert SQLite data to PostgreSQL format
     - Create validation scripts to ensure data integrity after migration
     - _Requirements: 7.1, 7.2, 7.3, 7.4_
 
-- [ ] 3. Implement core API handlers and routing
+- [-] 3. Implement core API handlers and routing
   - [ ] 3.1 Set up Gin router with middleware chain
     - Configure Gin router with CORS, logging, and error handling middleware
     - Implement request ID generation and structured logging middleware

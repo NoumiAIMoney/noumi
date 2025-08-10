@@ -1,0 +1,81 @@
+version: '3.8'
+
+services:
+  # PostgreSQL database for migration target
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: noumidb
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./internal/database/migrations:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d noumidb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - migration-network
+
+  # Migration tool
+  migration:
+    build:
+      context: .
+      dockerfile: Dockerfile.migration
+    environment:
+      - DATABASE_URL=postgres://user:password@postgres:5432/noumidb
+      - SQLITE_PATH=/data/noumi.db
+      - DRY_RUN=${DRY_RUN:-false}
+      - VALIDATE_ONLY=${VALIDATE_ONLY:-false}
+      - BATCH_SIZE=${BATCH_SIZE:-100}
+    volumes:
+      - ../Back_End/Middleware:/data:ro  # Mount SQLite database directory as read-only
+      - migration_logs:/app/logs
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - migration-network
+    command: >
+      sh -c "
+        echo 'Waiting for PostgreSQL to be ready...' &&
+        sleep 5 &&
+        echo 'Starting migration...' &&
+        ./migrate-sqlite --sqlite-path /data/noumi.db --postgres-url postgres://user:password@postgres:5432/noumidb --batch-size ${BATCH_SIZE:-100} ${DRY_RUN:+--dry-run} ${VALIDATE_ONLY:+--validate-only} &&
+        echo 'Migration completed. Running validation...' &&
+        ./scripts/validate-migration.sh
+      "
+
+  # Optional: pgAdmin for database inspection
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@noumi.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    ports:
+      - "8080:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    depends_on:
+      - postgres
+    networks:
+      - migration-network
+    profiles:
+      - tools  # Only start with --profile tools
+
+volumes:
+  postgres_data:
+    driver: local
+  migration_logs:
+    driver: local
+  pgadmin_data:
+    driver: local
+
+networks:
+  migration-network:
+    driver: bridge

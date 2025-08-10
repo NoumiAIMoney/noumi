@@ -1,0 +1,194 @@
+# Makefile for SQLite to PostgreSQL Migration
+
+# Configuration
+SQLITE_PATH ?= ../Back_End/Middleware/noumi.db
+DATABASE_URL ?= postgres://user:password@localhost:5432/noumidb
+BATCH_SIZE ?= 100
+
+# Docker configuration
+DOCKER_COMPOSE_FILE = docker-compose.migration.yml
+MIGRATION_IMAGE = noumi-migration
+
+.PHONY: help build clean migrate migrate-dry validate test-migration docker-migrate docker-clean
+
+# Default target
+help:
+	@echo "SQLite to PostgreSQL Migration Makefile"
+	@echo ""
+	@echo "Available targets:"
+	@echo "  build           Build the migration tool"
+	@echo "  migrate         Run the migration"
+	@echo "  migrate-dry     Run a dry migration (no changes)"
+	@echo "  validate        Validate migration results"
+	@echo "  test-migration  Run migration tests"
+	@echo "  docker-migrate  Run migration using Docker"
+	@echo "  docker-clean    Clean up Docker resources"
+	@echo "  clean           Clean build artifacts"
+	@echo "  help            Show this help message"
+	@echo ""
+	@echo "Environment Variables:"
+	@echo "  SQLITE_PATH     Path to SQLite database (default: ../Back_End/Middleware/noumi.db)"
+	@echo "  DATABASE_URL    PostgreSQL connection URL"
+	@echo "  BATCH_SIZE      Batch size for processing (default: 100)"
+	@echo ""
+	@echo "Examples:"
+	@echo "  make migrate DATABASE_URL='postgres://user:pass@localhost/db'"
+	@echo "  make migrate-dry"
+	@echo "  make docker-migrate"
+
+# Build the migration tool
+build:
+	@echo "Building migration tool..."
+	@mkdir -p bin
+	CGO_ENABLED=1 go build -o bin/migrate-sqlite ./cmd/migrate-sqlite
+	@echo "Migration tool built successfully"
+
+# Run the migration
+migrate: build
+	@echo "Running migration..."
+	@echo "SQLite Path: $(SQLITE_PATH)"
+	@echo "PostgreSQL URL: $(shell echo $(DATABASE_URL) | sed 's/:\/\/.*@/:\/\/***@/')"
+	./bin/migrate-sqlite \
+		--sqlite-path "$(SQLITE_PATH)" \
+		--postgres-url "$(DATABASE_URL)" \
+		--batch-size $(BATCH_SIZE)
+	@echo "Migration completed"
+
+# Run a dry migration
+migrate-dry: build
+	@echo "Running dry migration..."
+	./bin/migrate-sqlite \
+		--sqlite-path "$(SQLITE_PATH)" \
+		--postgres-url "$(DATABASE_URL)" \
+		--batch-size $(BATCH_SIZE) \
+		--dry-run
+	@echo "Dry migration completed"
+
+# Validate migration results
+validate:
+	@echo "Validating migration..."
+	@if [ ! -f "scripts/validate-migration.sh" ]; then \
+		echo "Validation script not found"; \
+		exit 1; \
+	fi
+	SQLITE_PATH="$(SQLITE_PATH)" DATABASE_URL="$(DATABASE_URL)" \
+		bash scripts/validate-migration.sh
+	@echo "Validation completed"
+
+# Run migration with validation
+migrate-with-validation: migrate validate
+
+# Test the migration process
+test-migration:
+	@echo "Testing migration process..."
+	@echo "1. Running schema validation..."
+	./bin/migrate-sqlite \
+		--sqlite-path "$(SQLITE_PATH)" \
+		--postgres-url "$(DATABASE_URL)" \
+		--validate-only
+	@echo "2. Running dry migration..."
+	$(MAKE) migrate-dry
+	@echo "Migration tests completed"
+
+# Docker-based migration
+docker-migrate:
+	@echo "Running migration using Docker..."
+	@if [ ! -f "$(SQLITE_PATH)" ]; then \
+		echo "SQLite database not found at: $(SQLITE_PATH)"; \
+		exit 1; \
+	fi
+	docker-compose -f $(DOCKER_COMPOSE_FILE) up --build migration
+	@echo "Docker migration completed"
+
+# Docker-based dry migration
+docker-migrate-dry:
+	@echo "Running dry migration using Docker..."
+	DRY_RUN=true docker-compose -f $(DOCKER_COMPOSE_FILE) up --build migration
+
+# Docker-based validation only
+docker-validate:
+	@echo "Running validation using Docker..."
+	VALIDATE_ONLY=true docker-compose -f $(DOCKER_COMPOSE_FILE) up --build migration
+
+# Start PostgreSQL and pgAdmin for inspection
+docker-tools:
+	@echo "Starting PostgreSQL and pgAdmin..."
+	docker-compose -f $(DOCKER_COMPOSE_FILE) --profile tools up -d postgres pgadmin
+	@echo "PostgreSQL: localhost:5432"
+	@echo "pgAdmin: http://localhost:8080 (admin@noumi.com / admin)"
+
+# Clean up Docker resources
+docker-clean:
+	@echo "Cleaning up Docker resources..."
+	docker-compose -f $(DOCKER_COMPOSE_FILE) down -v
+	docker system prune -f
+	@echo "Docker cleanup completed"
+
+# Clean build artifacts
+clean:
+	@echo "Cleaning build artifacts..."
+	rm -rf bin/
+	rm -f migration-*.txt
+	rm -f migration-*.log
+	@echo "Cleanup completed"
+
+# Install dependencies
+deps:
+	@echo "Installing Go dependencies..."
+	go mod download
+	go mod tidy
+	@echo "Dependencies installed"
+
+# Run all checks
+check: build test-migration
+	@echo "All checks passed"
+
+# Development workflow
+dev-migrate: clean build migrate-dry migrate validate
+	@echo "Development migration workflow completed"
+
+# Production workflow
+prod-migrate: clean build test-migration migrate validate
+	@echo "Production migration workflow completed"
+
+# Show migration status
+status:
+	@echo "Migration Status Check"
+	@echo "====================="
+	@echo "SQLite Path: $(SQLITE_PATH)"
+	@echo "SQLite exists: $(shell [ -f "$(SQLITE_PATH)" ] && echo "YES" || echo "NO")"
+	@if [ -f "$(SQLITE_PATH)" ]; then \
+		echo "SQLite records:"; \
+		echo "  Users: $$(sqlite3 "$(SQLITE_PATH)" "SELECT COUNT(*) FROM users;" 2>/dev/null || echo "N/A")"; \
+		echo "  Goals: $$(sqlite3 "$(SQLITE_PATH)" "SELECT COUNT(*) FROM user_goals;" 2>/dev/null || echo "N/A")"; \
+		echo "  Transactions: $$(sqlite3 "$(SQLITE_PATH)" "SELECT COUNT(*) FROM transactions;" 2>/dev/null || echo "N/A")"; \
+	fi
+	@echo ""
+	@echo "PostgreSQL URL: $(shell echo $(DATABASE_URL) | sed 's/:\/\/.*@/:\/\/***@/')"
+	@echo "PostgreSQL accessible: $(shell psql "$(DATABASE_URL)" -c "SELECT 1;" >/dev/null 2>&1 && echo "YES" || echo "NO")"
+	@if psql "$(DATABASE_URL)" -c "SELECT 1;" >/dev/null 2>&1; then \
+		echo "PostgreSQL records:"; \
+		echo "  Users: $$(psql "$(DATABASE_URL)" -t -c "SELECT COUNT(*) FROM users;" 2>/dev/null | tr -d ' ' || echo "N/A")"; \
+		echo "  Goals: $$(psql "$(DATABASE_URL)" -t -c "SELECT COUNT(*) FROM goals;" 2>/dev/null | tr -d ' ' || echo "N/A")"; \
+		echo "  Transactions: $$(psql "$(DATABASE_URL)" -t -c "SELECT COUNT(*) FROM transactions;" 2>/dev/null | tr -d ' ' || echo "N/A")"; \
+	fi
+
+# Backup SQLite database
+backup-sqlite:
+	@echo "Backing up SQLite database..."
+	@if [ -f "$(SQLITE_PATH)" ]; then \
+		cp "$(SQLITE_PATH)" "$(SQLITE_PATH).backup-$(shell date +%Y%m%d-%H%M%S)"; \
+		echo "Backup created: $(SQLITE_PATH).backup-$(shell date +%Y%m%d-%H%M%S)"; \
+	else \
+		echo "SQLite database not found at: $(SQLITE_PATH)"; \
+		exit 1; \
+	fi
+
+# Show logs
+logs:
+	@echo "Showing recent migration logs..."
+	@if [ -d "logs" ]; then \
+		find logs -name "*.log" -type f -exec tail -n 20 {} \; 2>/dev/null || echo "No log files found"; \
+	else \
+		echo "No logs directory found"; \
+	fi
