@@ -26,8 +26,8 @@ RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o main cmd/server/m
 # Final stage
 FROM alpine:latest
 
-# Install ca-certificates for HTTPS requests
-RUN apk --no-cache add ca-certificates tzdata
+# Install ca-certificates and wget for HTTPS requests and health checks
+RUN apk --no-cache add ca-certificates tzdata wget
 
 # Create non-root user
 RUN addgroup -g 1001 -S appgroup && \
@@ -47,9 +47,6 @@ USER appuser
 
 # Expose port
 EXPOSE 8080
-
-# Install wget for health check
-RUN apk --no-cache add wget
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
