@@ -52,7 +52,7 @@ func (m *Migrator) RunMigrations() error {
 	if err != nil {
 		return fmt.Errorf("failed to create migrator: %w", err)
 	}
-	defer migrator.Close()
+	// Note: We don't close the migrator here because it would close the shared database connection
 
 	// Get current version
 	currentVersion, dirty, err := migrator.Version()
