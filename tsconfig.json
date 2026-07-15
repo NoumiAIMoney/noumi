@@ -1,13 +1,19 @@
 {
   "compilerOptions": {
     "target": "es2015",
-    "lib": ["dom", "dom.iterable", "esnext"],
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
     "jsx": "react-native",
     "module": "esnext",
     "moduleResolution": "node",
     "baseUrl": ".",
     "paths": {
-      "@/*": ["Front_End/*"]
+      "@/*": [
+        "Front_End/*"
+      ]
     },
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
@@ -18,6 +24,11 @@
     "isolatedModules": true,
     "skipLibCheck": true
   },
-  "include": ["Front_End/**/*"],
-  "exclude": ["node_modules"]
+  "include": [
+    "Front_End/**/*"
+  ],
+  "exclude": [
+    "node_modules"
+  ],
+  "extends": "expo/tsconfig.base"
 }

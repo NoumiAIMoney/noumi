@@ -1,5 +1,5 @@
 import { colors, typography } from '@/src/theme';
-import Checkbox from 'expo-checkbox';
+import { Checkbox } from 'expo-checkbox';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import {
@@ -33,7 +33,7 @@ export default function SignUpScreen() {
       <SafeAreaView style={styles.container}>
         <Text style={styles.logo}>Noumi</Text>
 
-        <Text style={styles.heading}>Let's get started</Text>
+        <Text style={styles.heading}>Let&apos;s get started</Text>
         <Text style={styles.sub}>
           Your journey to smarter finances begins now.
         </Text>
